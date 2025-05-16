@@ -1,97 +1,6 @@
-// admin.js - Funções para administração e gerenciamento de usuários
-import { 
-    db, 
-    doc, 
-    setDoc, 
-    updateDoc, 
-    deleteDoc, 
-    collection, 
-    getDocs 
-} from './config.js';
+// Funções para o gerenciamento de usuários (admin)
 
-import { showToast } from './utilities.js';
-import { ADMIN_EMAIL } from './config.js';
-
-// Inicialização da administração
-export function initAdmin() {
-    setupAdminEvents();
-}
-
-function setupAdminEvents() {
-    // Guias do painel de usuários
-    const approvedTabBtn = document.getElementById('approvedUsersTabBtn');
-    const pendingTabBtn = document.getElementById('pendingUsersTabBtn');
-    
-    if (approvedTabBtn && pendingTabBtn) {
-        approvedTabBtn.addEventListener('click', () => switchUserTab('approved'));
-        pendingTabBtn.addEventListener('click', () => switchUserTab('pending'));
-    }
-    
-    // Botão de atualizar usuários
-    const refreshUsersBtn = document.getElementById('refreshUsersBtn');
-    if (refreshUsersBtn) {
-        refreshUsersBtn.addEventListener('click', loadUsers);
-    }
-    
-    // Fechar modal de edição
-    const closeEditUserModal = document.getElementById('closeEditUserModal');
-    if (closeEditUserModal) {
-        closeEditUserModal.addEventListener('click', () => {
-            document.getElementById('editUserModal').classList.add('hidden');
-        });
-    }
-    
-    // Cancelar edição
-    const cancelEditUserBtn = document.getElementById('cancelEditUserBtn');
-    if (cancelEditUserBtn) {
-        cancelEditUserBtn.addEventListener('click', () => {
-            document.getElementById('editUserModal').classList.add('hidden');
-        });
-    }
-    
-    // Salvar alterações do usuário
-    const editUserForm = document.getElementById('editUserForm');
-    if (editUserForm) {
-        editUserForm.addEventListener('submit', saveUserChanges);
-    }
-}
-
-function switchUserTab(tab) {
-    // Reset da UI
-    document.getElementById('approvedUsersTabBtn').classList.remove('border-primary', 'text-primary');
-    document.getElementById('approvedUsersTabBtn').classList.add('border-transparent', 'text-gray-500');
-    
-    document.getElementById('pendingUsersTabBtn').classList.remove('border-primary', 'text-primary');
-    document.getElementById('pendingUsersTabBtn').classList.add('border-transparent', 'text-gray-500');
-    
-    document.getElementById('approvedUsersList').classList.add('hidden');
-    document.getElementById('pendingUsersList').classList.add('hidden');
-    document.getElementById('emptyApprovedUsers').classList.add('hidden');
-    document.getElementById('emptyPendingUsers').classList.add('hidden');
-    
-    // Ativar tab selecionada
-    if (tab === 'approved') {
-        document.getElementById('approvedUsersTabBtn').classList.remove('border-transparent', 'text-gray-500');
-        document.getElementById('approvedUsersTabBtn').classList.add('border-primary', 'text-primary');
-        
-        if (document.querySelectorAll('#approvedUsersList > div').length > 0) {
-            document.getElementById('approvedUsersList').classList.remove('hidden');
-        } else {
-            document.getElementById('emptyApprovedUsers').classList.remove('hidden');
-        }
-    } else {
-        document.getElementById('pendingUsersTabBtn').classList.remove('border-transparent', 'text-gray-500');
-        document.getElementById('pendingUsersTabBtn').classList.add('border-primary', 'text-primary');
-        
-        if (document.querySelectorAll('#pendingUsersList > div').length > 0) {
-            document.getElementById('pendingUsersList').classList.remove('hidden');
-        } else {
-            document.getElementById('emptyPendingUsers').classList.remove('hidden');
-        }
-    }
-}
-
-// Carregar lista de usuários
+// Função para carregar usuários
 async function loadUsers() {
     // Mostrar loading
     document.getElementById('loadingUsers').classList.remove('hidden');
@@ -106,8 +15,8 @@ async function loadUsers() {
     
     try {
         // Buscar usuários no Firestore
-        const usersRef = collection(db, 'users');
-        const snapshot = await getDocs(usersRef);
+        const usersRef = window.firebase.collection(window.db, 'users');
+        const snapshot = await window.firebase.getDocs(usersRef);
         
         const approvedUsers = [];
         const pendingUsers = [];
@@ -158,11 +67,11 @@ async function loadUsers() {
     } catch (error) {
         console.error('Erro ao carregar usuários:', error);
         document.getElementById('loadingUsers').classList.add('hidden');
-        showToast('Erro ao carregar usuários. Tente novamente.', 'error');
+        alert('Erro ao carregar usuários. Tente novamente.');
     }
 }
 
-// Criar cartão de usuário
+// Função para criar cartão de usuário
 function createUserCard(user, type) {
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-700 rounded-lg shadow-custom p-4 border border-gray-200 dark:border-gray-600';
@@ -172,7 +81,7 @@ function createUserCard(user, type) {
     let accessTag = '';
     let accessColor = '';
     
-    if (user.email === ADMIN_EMAIL) {
+    if (user.email === window.ADMIN_EMAIL) {
         accessTag = 'Administrador';
         accessColor = 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100';
     } else if (user.accessLevel === 'full') {
@@ -200,7 +109,7 @@ function createUserCard(user, type) {
     card.innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between">
             <div class="mb-3 sm:mb-0">
-                <h3 class="font-medium text-gray-900 dark:text-white">${user.displayName || user.email}</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white">${user.displayName}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">${user.email}</p>
                 <div class="flex flex-wrap gap-2 mt-2">
                     <span class="px-2 py-1 text-xs font-medium rounded-full ${accessColor}">
@@ -231,7 +140,7 @@ function createUserCard(user, type) {
             <button class="edit-user-btn px-3 py-1 bg-primary hover:bg-secondary text-white text-sm rounded-md">
                 <i class="fas fa-edit mr-1"></i> Editar
             </button>
-            ${user.email !== ADMIN_EMAIL ? `
+            ${user.email !== window.ADMIN_EMAIL ? `
             <button class="delete-user-btn px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md">
                 <i class="fas fa-trash-alt mr-1"></i> Excluir
             </button>
@@ -246,11 +155,10 @@ function createUserCard(user, type) {
         card.querySelector('.approve-user-btn').addEventListener('click', async () => {
             try {
                 await approveUser(user.uid);
-                showToast('Usuário aprovado com sucesso', 'success');
                 loadUsers(); // Recarregar a lista depois
             } catch (error) {
                 console.error('Erro ao aprovar usuário:', error);
-                showToast('Erro ao aprovar usuário. Tente novamente.', 'error');
+                alert('Erro ao aprovar usuário. Tente novamente.');
             }
         });
         
@@ -258,11 +166,10 @@ function createUserCard(user, type) {
         card.querySelector('.reject-user-btn').addEventListener('click', async () => {
             try {
                 await rejectUser(user.uid);
-                showToast('Usuário rejeitado com sucesso', 'success');
                 loadUsers(); // Recarregar a lista depois
             } catch (error) {
                 console.error('Erro ao rejeitar usuário:', error);
-                showToast('Erro ao rejeitar usuário. Tente novamente.', 'error');
+                alert('Erro ao rejeitar usuário. Tente novamente.');
             }
         });
     } else {
@@ -272,16 +179,15 @@ function createUserCard(user, type) {
         });
         
         // Botão de excluir usuário (exceto para o admin)
-        if (user.email !== ADMIN_EMAIL) {
+        if (user.email !== window.ADMIN_EMAIL) {
             card.querySelector('.delete-user-btn').addEventListener('click', async () => {
                 if (confirm(`Tem certeza que deseja excluir o usuário ${user.displayName}?`)) {
                     try {
                         await deleteUser(user.uid);
-                        showToast('Usuário excluído com sucesso', 'success');
                         loadUsers(); // Recarregar a lista depois
                     } catch (error) {
                         console.error('Erro ao excluir usuário:', error);
-                        showToast('Erro ao excluir usuário. Tente novamente.', 'error');
+                        alert('Erro ao excluir usuário. Tente novamente.');
                     }
                 }
             });
@@ -291,11 +197,47 @@ function createUserCard(user, type) {
     return card;
 }
 
+// Função para trocar entre abas de usuários
+function switchUserTab(tab) {
+    // Reset da UI
+    document.getElementById('approvedUsersTabBtn').classList.remove('border-primary', 'text-primary');
+    document.getElementById('approvedUsersTabBtn').classList.add('border-transparent', 'text-gray-500');
+    
+    document.getElementById('pendingUsersTabBtn').classList.remove('border-primary', 'text-primary');
+    document.getElementById('pendingUsersTabBtn').classList.add('border-transparent', 'text-gray-500');
+    
+    document.getElementById('approvedUsersList').classList.add('hidden');
+    document.getElementById('pendingUsersList').classList.add('hidden');
+    document.getElementById('emptyApprovedUsers').classList.add('hidden');
+    document.getElementById('emptyPendingUsers').classList.add('hidden');
+    
+    // Ativar tab selecionada
+    if (tab === 'approved') {
+        document.getElementById('approvedUsersTabBtn').classList.remove('border-transparent', 'text-gray-500');
+        document.getElementById('approvedUsersTabBtn').classList.add('border-primary', 'text-primary');
+        
+        if (document.querySelectorAll('#approvedUsersList > div').length > 0) {
+            document.getElementById('approvedUsersList').classList.remove('hidden');
+        } else {
+            document.getElementById('emptyApprovedUsers').classList.remove('hidden');
+        }
+    } else {
+        document.getElementById('pendingUsersTabBtn').classList.remove('border-transparent', 'text-gray-500');
+        document.getElementById('pendingUsersTabBtn').classList.add('border-primary', 'text-primary');
+        
+        if (document.querySelectorAll('#pendingUsersList > div').length > 0) {
+            document.getElementById('pendingUsersList').classList.remove('hidden');
+        } else {
+            document.getElementById('emptyPendingUsers').classList.remove('hidden');
+        }
+    }
+}
+
 // Funções de gerenciamento de usuários
 async function approveUser(userId) {
     // Aprovação com acesso total por padrão
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, {
+    const userRef = window.firebase.doc(window.db, 'users', userId);
+    await window.firebase.updateDoc(userRef, {
         status: 'approved',
         accessLevel: 'full'
     });
@@ -303,14 +245,20 @@ async function approveUser(userId) {
 
 async function rejectUser(userId) {
     // Simplesmente excluir o usuário
-    const userRef = doc(db, 'users', userId);
-    await deleteDoc(userRef);
+    const userRef = window.firebase.doc(window.db, 'users', userId);
+    await window.firebase.deleteDoc(userRef);
+    
+    // Idealmente, também deveríamos excluir o usuário do Firebase Auth
+    // Isso exigiria uma função backend (Cloud Function)
 }
 
 async function deleteUser(userId) {
     // Excluir o documento do usuário
-    const userRef = doc(db, 'users', userId);
-    await deleteDoc(userRef);
+    const userRef = window.firebase.doc(window.db, 'users', userId);
+    await window.firebase.deleteDoc(userRef);
+    
+    // Idealmente, também deveríamos excluir o usuário do Firebase Auth
+    // Isso exigiria uma função backend (Cloud Function)
 }
 
 function openEditUserModal(user) {
@@ -336,6 +284,10 @@ function openEditUserModal(user) {
     document.getElementById('editUserModal').classList.remove('hidden');
 }
 
+function closeEditUserModal() {
+    document.getElementById('editUserModal').classList.add('hidden');
+}
+
 async function saveUserChanges(e) {
     e.preventDefault();
     
@@ -351,8 +303,8 @@ async function saveUserChanges(e) {
     
     try {
         // Atualizar informações do usuário
-        const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, {
+        const userRef = window.firebase.doc(window.db, 'users', userId);
+        await window.firebase.updateDoc(userRef, {
             displayName: name,
             phone: phone,
             branch: branch,
@@ -362,28 +314,26 @@ async function saveUserChanges(e) {
         });
         
         // Fechar o modal
-        document.getElementById('editUserModal').classList.add('hidden');
+        closeEditUserModal();
         
         // Mostrar toast de sucesso
-        showToast('Usuário atualizado com sucesso', 'success');
+        window.showToast('Usuário atualizado com sucesso', 'success');
         
         // Recarregar a lista de usuários
         loadUsers();
     } catch (error) {
         console.error('Erro ao salvar alterações:', error);
-        showToast('Erro ao salvar alterações. Tente novamente.', 'error');
+        window.showToast('Erro ao salvar alterações', 'error');
     }
 }
 
 // Exportar funções para uso global
-window.admin = {
-    loadUsers,
-    approveUser,
-    rejectUser,
-    deleteUser,
-    openEditUserModal,
-    saveUserChanges
-};
-
-// Inicializar admin ao carregar o módulo
-document.addEventListener('DOMContentLoaded', initAdmin);
+window.loadUsers = loadUsers;
+window.createUserCard = createUserCard;
+window.switchUserTab = switchUserTab;
+window.approveUser = approveUser;
+window.rejectUser = rejectUser;
+window.deleteUser = deleteUser;
+window.openEditUserModal = openEditUserModal;
+window.closeEditUserModal = closeEditUserModal;
+window.saveUserChanges = saveUserChanges;
