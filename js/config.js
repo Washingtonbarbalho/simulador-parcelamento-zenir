@@ -1,7 +1,4 @@
 // Firebase configuration
-// IMPORTANTE: Este arquivo contém informações sensíveis e deve ser adicionado ao .gitignore
-
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
 import { 
     getFirestore, 
@@ -48,10 +45,14 @@ const db = getFirestore(app);
 // Initialize Authentication
 const auth = getAuth(app);
 
-// Exportar para a janela global para usar em outras partes do código
-window.db = db;
-window.auth = auth;
-window.firebase = { 
+// Constantes da aplicação
+const ADMIN_EMAIL = "washington.wn8@gmail.com";
+
+// Exportar constantes, objetos e funções
+export { 
+    db, 
+    auth, 
+    ADMIN_EMAIL,
     collection, 
     addDoc,
     getDoc,
@@ -71,6 +72,3 @@ window.firebase = {
     signOut,
     updateProfile
 };
-
-// Constantes da aplicação
-window.ADMIN_EMAIL = "washington.wn8@gmail.com";
