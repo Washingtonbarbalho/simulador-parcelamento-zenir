@@ -1,26 +1,43 @@
 # Simulador de Parcelamento - Zenir Móveis
 
-Um sistema completo de simulação de parcelamento para a Zenir Móveis, desenvolvido para ajudar vendedores a criar estimativas de parcelamento para clientes.
+Sistema para simulação de parcelamento desenvolvido para a Zenir Móveis, permitindo o cálculo de valores de parcelas em diferentes condições, tanto para carnê quanto cartão.
 
-## Funcionalidades
+## Recursos
 
-- Simulação de parcelamento em carnê e cartão
-- Cálculo com diferentes tipos de juros e fatores
-- Preços promocionais ou de tabela
-- Suporte a peças de mostruário
-- Salvamento e gestão de histórico de simulações
-- Sistema de usuários com permissões diferentes
-- Administração de usuários
-- Interface responsiva (mobile-friendly)
-- Suporte a temas claro e escuro
+- **Simulação de Parcelamento**: Cálculo preciso de parcelas para diferentes condições
+- **Histórico de Simulações**: Armazenamento e consulta de simulações realizadas
+- **Gestão de Usuários**: Controle de acesso e permissões
+- **Múltiplos Modos de Pagamento**: Suporte para simulações de carnê e cartão
+- **Responsivo**: Interface adaptada para dispositivos móveis e desktop
 
 ## Tecnologias Utilizadas
 
 - HTML5, CSS3 e JavaScript
-- Firebase (Autenticação, Firestore)
-- TailwindCSS
-- FontAwesome
+- TailwindCSS para estilização
+- Firebase (Authentication e Firestore) para autenticação e armazenamento
+- Responsividade com design mobile-first
+
+## Requisitos
+
+Para executar o projeto localmente:
+
+1. Clone o repositório
+2. Configure as credenciais do Firebase no arquivo `js/config.js`
+3. Abra o arquivo `index.html` em um navegador ou use um servidor local
 
 ## Instalação
 
-1. Clone o repositório:
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/simulador-parcelamento-zenir.git
+
+# Entre na pasta do projeto
+cd simulador-parcelamento-zenir
+
+# Configure seu arquivo de configuração do Firebase
+# Copie o modelo e adicione suas credenciais
+cp js/config.example.js js/config.js
+
+# Abra o index.html no navegador ou use um servidor local
+# Se você tem o Node.js instalado, pode usar http-server:
+npx http-server
