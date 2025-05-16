@@ -1,456 +1,797 @@
-// main.js - Arquivo central para coordenar inicialização e exportações
-import { 
-    db, 
-    auth, 
-    ADMIN_EMAIL, 
-    FATORES, 
-    collection, 
-    addDoc, 
-    getDocs, 
-    getDoc, 
-    doc, 
-    deleteDoc, 
-    query, 
-    orderBy, 
-    limit,
-    where, 
-    updateDoc,
-    setDoc
-} from './config.js';
+// Variável global para controle da seção atual
+let currentSection = 'simulator';
 
-// Função para obter e incrementar o contador de clientes
-export async function getNextClientNumber() {
-    try {
-        console.log("Obtendo próximo número de cliente...");
-        
-        // Referência para o documento de contador
-        const counterRef = doc(db, "contadores", "clientes");
-        
-        // Tentar obter o documento atual
-        const counterDoc = await getDoc(counterRef);
-        
-        let currentCount = 1; // Valor padrão se não existir
-        
-        if (counterDoc.exists()) {
-            currentCount = counterDoc.data().contador + 1;
-            console.log("Contador atual:", currentCount - 1, "-> Próximo:", currentCount);
-            
-            // Atualizar o contador
-            await updateDoc(counterRef, {
-                contador: currentCount
-            });
-        } else {
-            console.log("Documento contador não existe, criando com valor inicial 1");
-            // Criar o documento de contador se não existir
-            await setDoc(counterRef, {
-                contador: currentCount
-            });
-        }
-        
-        return currentCount;
-    } catch (error) {
-        console.error("Erro ao obter número do cliente:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro no contador: ${error.message}`, 'error');
-        }
-        // Retornar um timestamp como fallback em caso de erro
-        return Math.floor(Date.now() / 1000);
-    }
+// Função para configurar eventos da interface
+function setupUIEvents() {
+    // Configurar abas de autenticação
+    setupAuthTabs();
+    
+    // Configurar eventos de formulários
+    setupAuthFormEvents();
+    
+    // Configurar eventos de visualização de senha
+    setupPasswordToggle();
+    
+    // Configurar formatação de telefone
+    setupPhoneFormatting();
+    
+    // Configurar os campos de entrada monetária
+    setupCurrencyInputs();
+    
+    // Gerar opções para o select múltiplo de parcelas
+    setupParcelas();
+    
+    // Configurar menu lateral
+    setupSidebar();
+    
+    // Configurar navegação entre seções
+    setupNavigation();
+
+    // Configurar eventos de administração
+    setupAdminEvents();
+    
+    // Configurar botões para fechar os modais de detalhes
+    setupModalCloseButtons();
+    
+    // Configurar eventos do simulador
+    setupSimulatorEvents();
 }
 
-// Função para salvar a simulação no Firestore
-export async function salvarSimulacao(dadosCliente) {
-    try {
-        console.log("Iniciando salvamento de simulação...");
+// Função para configurar eventos de formulários de autenticação
+function setupAuthFormEvents() {
+    // Configurar formulário de login
+    document.getElementById('loginBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
         
-        // Obter o próximo número de cliente
-        const clientNumber = await getNextClientNumber();
-        const clienteZenirId = `CLIENTE ZENIR ${clientNumber}`;
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
         
-        console.log("Código de cliente gerado:", clienteZenirId);
-        
-        // Preparar dados para o Firestore
-        const dadosCompletos = {
-            cliente: {
-                nome: dadosCliente.clientName.toUpperCase(),
-                telefone: dadosCliente.clientPhone,
-                produto: dadosCliente.productName.toUpperCase(),
-                codigo: clienteZenirId
-            },
-            simulacao: window.simulationResults,
-            dataHora: new Date().toISOString(),
-            status: "Pendente", // Status inicial
-            userId: window.currentUser.uid, // ID do usuário que criou a simulação
-            userName: window.currentUser.userData?.displayName || window.currentUser.email, // Nome do usuário que criou
-            userBranch: window.currentUser.userData?.branch || '' // Filial do usuário
-        };
-        
-        console.log("Dados preparados para salvamento:", dadosCompletos);
-        
-        // Salvar no Firestore
-        const docRef = await addDoc(collection(db, "simulacoes"), dadosCompletos);
-        console.log("Simulação salva com sucesso. ID:", docRef.id);
-        
-        return { success: true, id: docRef.id };
-    } catch (error) {
-        console.error("Erro ao salvar a simulação:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro ao salvar: ${error.message}`, 'error');
-        }
-        return { success: false, error: error.message };
-    }
-}
-
-// Função para carregar o histórico de simulações
-export async function loadSimulationHistory() {
-    console.log("Função loadSimulationHistory chamada do main.js");
-    
-    const historyList = document.getElementById('historyList');
-    const loadingElement = document.getElementById('loadingHistory');
-    const emptyElement = document.getElementById('emptyHistory');
-    
-    // Mostrar loading
-    historyList.innerHTML = '';
-    loadingElement.classList.remove('hidden');
-    emptyElement.classList.add('hidden');
-    
-    try {
-        // Log para debug
-        console.log("Iniciando carregamento do histórico...");
-        
-        // Verificar se o usuário está autenticado
-        if (!window.currentUser) {
-            console.error("Usuário não está autenticado!");
-            loadingElement.classList.add('hidden');
-            historyList.innerHTML = `
-                <div class="text-center py-8">
-                    <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-                    <p class="text-red-500">Erro: Usuário não está autenticado.</p>
-                </div>
-            `;
+        // Validação básica
+        if (!email || !password) {
+            document.getElementById('loginError').textContent = 'Preencha todos os campos.';
+            document.getElementById('loginError').classList.remove('hidden');
             return;
         }
         
-        // Log do usuário atual para debug
-        console.log("Usuário atual:", window.currentUser.email, window.currentUser.uid);
+        // Tenta fazer login
+        const result = await login(email, password);
         
-        // Criar query ordenada por data/hora (mais recentes primeiro)
-        // Com filtro dependendo do usuário (admin vê tudo, outros veem apenas suas simulações)
-        let simulationsQuery;
-        
-        if (window.currentUser.email === window.ADMIN_EMAIL) {
-            // Admin vê todas as simulações
-            console.log("Buscando simulações como ADMIN");
-            simulationsQuery = query(
-                collection(db, "simulacoes"),
-                orderBy("dataHora", "desc"),
-                limit(50)
-            );
-        } else {
-            // Usuário comum vê apenas suas simulações
-            console.log("Buscando simulações do usuário:", window.currentUser.uid);
-            simulationsQuery = query(
-                collection(db, "simulacoes"),
-                where("userId", "==", window.currentUser.uid),
-                orderBy("dataHora", "desc"),
-                limit(50)
-            );
+        if (!result.success) {
+            document.getElementById('loginError').textContent = result.error;
+            document.getElementById('loginError').classList.remove('hidden');
         }
+    });
+    
+    // Configurar formulário de cadastro
+    document.getElementById('registerBtn').addEventListener('click', async function(e) {
+        e.preventDefault();
         
-        // Buscar documentos
-        console.log("Executando consulta...");
-        const querySnapshot = await getDocs(simulationsQuery);
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const phone = document.getElementById('registerPhone').value;
+        const branch = document.getElementById('registerBranch').value;
+        const password = document.getElementById('registerPassword').value;
+        const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
         
-        console.log("Consulta concluída. Resultados:", querySnapshot.size);
-        
-        // Ocultar loading
-        loadingElement.classList.add('hidden');
-        
-        // Verificar se há resultados
-        if (querySnapshot.empty) {
-            console.log("Nenhuma simulação encontrada");
-            emptyElement.classList.remove('hidden');
+        // Validação
+        if (!name || !email || !phone || !branch || !password || !passwordConfirm) {
+            document.getElementById('registerError').textContent = 'Preencha todos os campos.';
+            document.getElementById('registerError').classList.remove('hidden');
             return;
         }
         
-        // Processar resultados
-        querySnapshot.forEach(docSnapshot => {
-            console.log("Processando documento:", docSnapshot.id);
-            const data = docSnapshot.data();
-            
-            // Criar o cartão para cada simulação
-            const card = createSimulationCard(docSnapshot.id, data);
-            historyList.appendChild(card);
-        });
-        
-    } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro no histórico: ${error.message}`, 'error');
+        if (password !== passwordConfirm) {
+            document.getElementById('registerError').textContent = 'As senhas não coincidem.';
+            document.getElementById('registerError').classList.remove('hidden');
+            return;
         }
         
-        loadingElement.classList.add('hidden');
+        if (password.length < 6) {
+            document.getElementById('registerError').textContent = 'A senha deve ter pelo menos 6 caracteres.';
+            document.getElementById('registerError').classList.remove('hidden');
+            return;
+        }
         
-        // Mostrar mensagem de erro
-        historyList.innerHTML = `
-            <div class="text-center py-8">
-                <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-                <p class="text-red-500">Erro ao carregar o histórico de simulações: ${error.message}</p>
-                <button id="retryLoadBtn" class="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary">Tentar novamente</button>
-            </div>
-        `;
+        // Validar formato do telefone
+        if (!phone.match(/^\(\d{2}\)\s*\d{5}-\d{4}$/)) {
+            document.getElementById('registerError').textContent = 'Formato de telefone inválido.';
+            document.getElementById('registerError').classList.remove('hidden');
+            return;
+        }
         
-        document.getElementById('retryLoadBtn').addEventListener('click', loadSimulationHistory);
+        // Tenta cadastrar
+        const result = await register(name, email, phone, branch, password);
+        
+        if (result.success) {
+            // Mostrar mensagem de sucesso
+            document.getElementById('registerSuccess').classList.remove('hidden');
+            
+            // Esconder o formulário
+            document.getElementById('registerForm').classList.add('hidden');
+            
+            // Redirecionar para login após 3 segundos
+            setTimeout(() => {
+                showPendingApproval();
+            }, 3000);
+        } else {
+            document.getElementById('registerError').textContent = result.error;
+            document.getElementById('registerError').classList.remove('hidden');
+        }
+    });
+
+    // Configurar logout pendente
+    document.getElementById('logoutBtnPending').addEventListener('click', logout);
+    
+    // Configurar logout do app
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+}
+
+// Função para configurar eventos de visualização de senha
+function setupPasswordToggle() {
+    // Login password toggle
+    document.getElementById('toggleLoginPassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('loginPassword');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+    
+    // Register password toggle
+    document.getElementById('toggleRegisterPassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('registerPassword');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+    
+    // Register password confirm toggle
+    document.getElementById('toggleRegisterPasswordConfirm').addEventListener('click', function() {
+        const passwordInput = document.getElementById('registerPasswordConfirm');
+        const icon = this.querySelector('i');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+}
+
+// Função para configurar formatação de telefone
+function setupPhoneFormatting() {
+    // Função para formatar telefone
+    function formatPhoneNumber(input) {
+        let value = input.value.replace(/\D/g, '');
+        
+        if (value.length <= 2) {
+            input.value = value.length > 0 ? `(${value}` : '';
+        } else if (value.length <= 7) {
+            input.value = `(${value.substring(0, 2)})${value.substring(2)}`;
+        } else {
+            input.value = `(${value.substring(0, 2)})${value.substring(2, 7)}-${value.substring(7, 11)}`;
+        }
+    }
+    
+    // Função para converter texto para maiúsculas em tempo real
+    function toUpperCaseInput(input) {
+        input.value = input.value.toUpperCase();
+    }
+    
+    // Aplicar formatação no cadastro
+    document.getElementById('registerPhone').addEventListener('input', function() {
+        formatPhoneNumber(this);
+    });
+    
+    // Aplicar formatação no editar usuário
+    document.getElementById('editUserPhone').addEventListener('input', function() {
+        formatPhoneNumber(this);
+    });
+    
+    // Aplicar formatação no telefone do cliente
+    document.getElementById('clientPhone').addEventListener('input', function() {
+        formatPhoneNumber(this);
+    });
+    
+    // Adicionar função toUpperCase para campos de texto - Cadastro
+    document.getElementById('registerName').addEventListener('input', function() {
+        toUpperCaseInput(this);
+    });
+    
+    document.getElementById('registerBranch').addEventListener('input', function() {
+        toUpperCaseInput(this);
+    });
+    
+    // Adicionar função toUpperCase para campos de texto - Edição de usuário
+    document.getElementById('editUserName').addEventListener('input', function() {
+        toUpperCaseInput(this);
+    });
+    
+    document.getElementById('editUserBranch').addEventListener('input', function() {
+        toUpperCaseInput(this);
+    });
+}
+
+// Função para configurar o menu lateral
+function setupSidebar() {
+    // Manipuladores para o menu lateral
+    document.getElementById('openSidebar').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.add('open');
+        const overlay = document.getElementById('overlay');
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.remove('opacity-0');
+        }, 10);
+    });
+    
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        sidebar.classList.remove('open');
+        overlay.classList.add('opacity-0');
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 300);
+    }
+    
+    document.getElementById('closeSidebar').addEventListener('click', closeSidebar);
+    document.getElementById('overlay').addEventListener('click', closeSidebar);
+    
+    window.closeSidebar = closeSidebar;
+}
+
+// Função para configurar navegação entre seções
+function setupNavigation() {
+    // Trocar entre seções
+    document.getElementById('showSimulator').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentSection !== 'simulator') {
+            showSection('simulator');
+            closeSidebar();
+        }
+    });
+    
+    document.getElementById('showHistory').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentSection !== 'history') {
+            showSection('history');
+            loadSimulationHistory();
+            closeSidebar();
+        }
+    });
+    
+    document.getElementById('showUsers').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentSection !== 'users') {
+            showSection('users');
+            loadUsers();
+            closeSidebar();
+        }
+    });
+}
+
+// Função para mostrar uma seção específica
+function showSection(sectionName) {
+    currentSection = sectionName;
+    
+    // Esconder todas as seções
+    document.getElementById('simulatorSection').classList.add('hidden');
+    document.getElementById('historySection').classList.add('hidden');
+    document.getElementById('usersSection').classList.add('hidden');
+    
+    // Mostrar a seção selecionada
+    if (sectionName === 'simulator') {
+        document.getElementById('simulatorSection').classList.remove('hidden');
+    } else if (sectionName === 'history') {
+        document.getElementById('historySection').classList.remove('hidden');
+    } else if (sectionName === 'users') {
+        document.getElementById('usersSection').classList.remove('hidden');
     }
 }
 
-// Função para criar cartão de simulação
-function createSimulationCard(id, data) {
-    console.log("Criando cartão para simulação:", id);
+// Função para configurar eventos de administração
+function setupAdminEvents() {
+    // Configurar guias do painel de gerenciamento de usuários
+    document.getElementById('approvedUsersTabBtn').addEventListener('click', () => switchUserTab('approved'));
+    document.getElementById('pendingUsersTabBtn').addEventListener('click', () => switchUserTab('pending'));
     
-    const card = document.createElement('div');
-    card.className = 'bg-white dark:bg-gray-700 rounded-lg shadow-custom p-4 border border-gray-200 dark:border-gray-600';
-    card.setAttribute('data-simulation-id', id);
+    // Atualizar lista de usuários
+    document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
     
-    // Extrair dados da simulação
-    const cliente = data.cliente || {};
-    const dataHora = data.dataHora ? new Date(data.dataHora) : new Date();
-    const status = data.status || 'Pendente';
-    const userName = data.userName || 'Usuário desconhecido';
-    const userBranch = data.userBranch || '';
+    // Configurar modal de edição de usuário
+    document.getElementById('closeEditUserModal').addEventListener('click', closeEditUserModal);
+    document.getElementById('cancelEditUserBtn').addEventListener('click', closeEditUserModal);
     
-    // Formatar data e hora
-    const dataFormatada = dataHora.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-    
-    const horaFormatada = dataHora.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    // Definir cores e ícones baseados no status
-    let statusColor = 'gray';
-    let statusIcon = 'clock';
-    
-    if (status === 'Concluída') {
-        statusColor = 'green';
-        statusIcon = 'check-circle';
-    } else if (status === 'Cancelada') {
-        statusColor = 'red';
-        statusIcon = 'times-circle';
-    } else if (status === 'Em Andamento') {
-        statusColor = 'blue';
-        statusIcon = 'spinner';
-    }
-    
-    // Preparar botões adicionais apenas se tiver telefone
-    let contactButtons = '';
-    if (cliente.telefone) {
-        // Limpar o número de telefone (apenas números)
-        const phoneClean = cliente.telefone.replace(/\D/g, '');
-        
-        contactButtons = `
-            <button type="button" class="contact-whatsapp-btn px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md" 
-                    title="Contato via WhatsApp">
-                <i class="fab fa-whatsapp mr-1"></i> WhatsApp
-            </button>
-            <button type="button" class="save-contact-btn px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-md"
-                    title="Salvar contato">
-                <i class="fas fa-address-card mr-1"></i> Contato
-            </button>
-        `;
-    }
-    
-    // Verificar permissões do usuário atual
-    const isAdmin = window.currentUser && window.currentUser.email === window.ADMIN_EMAIL;
-    
-    // Estrutura do cartão
-    card.innerHTML = `
-        <div class="flex flex-col sm:flex-row justify-between">
-            <div class="mb-3 sm:mb-0">
-                <h3 class="font-medium text-gray-900 dark:text-white">${cliente.nome || 'Cliente não informado'}</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${cliente.produto || 'Produto não informado'}</p>
-                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">${cliente.codigo || ''}</p>
-                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    <span class="inline-flex items-center">
-                        <i class="fas fa-user mr-1"></i>
-                        ${userName}${userBranch ? ` (${userBranch})` : ''}
-                    </span>
-                </div>
-            </div>
-            <div class="flex flex-col items-end">
-                <div class="flex items-center">
-                    <i class="fas fa-${statusIcon} text-${statusColor}-500 mr-1.5"></i>
-                    <span class="text-sm font-medium text-${statusColor}-500">${status}</span>
-                </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${dataFormatada} às ${horaFormatada}</p>
-                ${cliente.telefone ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${cliente.telefone}</p>` : ''}
-            </div>
-        </div>
-        
-        <div class="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex flex-wrap justify-end space-x-2">
-            ${contactButtons}
-            <button type="button" class="view-details-btn px-3 py-1 bg-primary hover:bg-secondary text-white text-sm rounded-md">
-                <i class="fas fa-eye mr-1"></i> Ver Detalhes
-            </button>
-            ${isAdmin ? `
-            <button type="button" class="delete-simulation-btn px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md">
-                <i class="fas fa-trash-alt mr-1"></i> Excluir
-            </button>
-            ` : ''}
-        </div>
-    `;
-    
-    // Adicionar manipuladores de eventos
-    setupCardEventHandlers(card, id, data, cliente);
-    
-    return card;
+    // Configurar formulário de edição de usuário
+    document.getElementById('editUserForm').addEventListener('submit', saveUserChanges);
 }
 
-// Configurar handlers de eventos para cartões de simulação
-function setupCardEventHandlers(card, id, data, cliente) {
-    // Botão "Ver Detalhes"
-    card.querySelector('.view-details-btn').addEventListener('click', () => {
-        // Aqui você deve chamar sua função para exibir detalhes
-        console.log("Ver detalhes da simulação:", id);
-        // viewSimulationDetails(id, data); // Implementar esta função
+// Função para configurar botões para fechar os modais de detalhes
+function setupModalCloseButtons() {
+    // Modal de detalhes da simulação
+    document.getElementById('closeDetailsModal').addEventListener('click', () => {
+        closeSimulationDetailsModal();
     });
     
-    // Botão "Excluir" (apenas para admin)
-    const deleteBtn = card.querySelector('.delete-simulation-btn');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-            console.log("Excluir simulação:", id);
-            // confirmDeleteSimulation(id, cliente.nome); // Implementar esta função
-        });
-    }
+    document.getElementById('closeDetailsBtn').addEventListener('click', () => {
+        closeSimulationDetailsModal();
+    });
     
-    // Botões de contato
-    if (cliente.telefone) {
-        const phoneClean = cliente.telefone.replace(/\D/g, '');
+    // Configurar o botão de salvar status
+    document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+        const simulationId = document.getElementById('simulationDetailsModal').getAttribute('data-simulation-id');
+        const newStatus = document.getElementById('simulationStatus').value;
         
-        // Botão WhatsApp
-        const whatsappBtn = card.querySelector('.contact-whatsapp-btn');
-        if (whatsappBtn) {
-            whatsappBtn.addEventListener('click', () => {
-                const mensagem = `Olá ${cliente.nome}! 👋 Tudo bem? Vi que você fez uma simulação para o *${cliente.produto}* e gostaria de conversar sobre condições especiais para este produto. Podemos agendar uma visita à loja? Ou gostaria de tirar alguma dúvida por aqui mesmo? 😊`;
-                const mensagemCodificada = encodeURIComponent(mensagem);
-                const whatsappUrl = `https://wa.me/55${phoneClean}?text=${mensagemCodificada}`;
-                window.open(whatsappUrl, '_blank');
-            });
-        }
-        
-        // Botão salvar contato
-        const contactBtn = card.querySelector('.save-contact-btn');
-        if (contactBtn) {
-            contactBtn.addEventListener('click', () => {
-                if (window.utils && typeof window.utils.downloadVCard === 'function') {
-                    window.utils.downloadVCard(cliente.nome, cliente.telefone, cliente.codigo);
-                } else {
-                    console.error("Função downloadVCard não encontrada");
-                }
-            });
-        }
-    }
-}
-
-// Registrar funções no contexto global (window)
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Inicializando funções globais a partir de main.js");
-    
-    // Registrar funções do histórico
-    window.history = window.history || {};
-    window.history.loadSimulationHistory = loadSimulationHistory;
-    window.history.getNextClientNumber = getNextClientNumber;
-    window.history.salvarSimulacao = salvarSimulacao;
-    
-    // Log para confirmar registro
-    console.log("Funções globais registradas:");
-    console.log("- window.history.loadSimulationHistory:", !!window.history.loadSimulationHistory);
-    console.log("- window.history.getNextClientNumber:", !!window.history.getNextClientNumber);
-    console.log("- window.history.salvarSimulacao:", !!window.history.salvarSimulacao);
-    
-    // Adicionar botão de salvamento ao modal
-    const saveBtn = document.getElementById('yesSaveBtn');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', function() {
-            // Fechar o modal de confirmação
-            document.getElementById('confirmModal').classList.add('hidden');
-            
-            // Mostrar o modal de preenchimento de dados
-            document.getElementById('saveModal').classList.remove('hidden');
-            
-            // Esconder mensagens
-            document.getElementById('saveSuccessMessage').classList.add('hidden');
-            document.getElementById('saveErrorMessage').classList.add('hidden');
-            
-            // Mostrar o formulário
-            document.getElementById('saveSimulationForm').classList.remove('hidden');
-        });
-    }
-    
-    // Manipulador do formulário de salvar
-    const saveForm = document.getElementById('saveSimulationForm');
-    if (saveForm) {
-        saveForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            // Validar campos
-            const clientName = document.getElementById('clientName').value.trim();
-            const clientPhone = document.getElementById('clientPhone').value.trim();
-            const productName = document.getElementById('productName').value.trim();
-            
-            if (!clientName || !clientPhone || !productName) {
-                document.getElementById('errorText').textContent = 'Preencha todos os campos.';
-                document.getElementById('saveErrorMessage').classList.remove('hidden');
-                document.getElementById('saveSimulationForm').classList.add('hidden');
-                return;
-            }
-            
-            // Validar formato do telefone
-            if (!clientPhone.match(/^\(\d{2}\)\d{5}-\d{4}$/)) {
-                document.getElementById('errorText').textContent = 'Formato de telefone inválido. Use (00)00000-0000.';
-                document.getElementById('saveErrorMessage').classList.remove('hidden');
-                document.getElementById('saveSimulationForm').classList.add('hidden');
-                return;
-            }
-            
-            // Esconder o formulário durante o processamento
-            document.getElementById('saveSimulationForm').classList.add('hidden');
-            
+        if (simulationId) {
             try {
-                // Salvar a simulação
-                const resultado = await window.history.salvarSimulacao({
-                    clientName,
-                    clientPhone,
-                    productName
+                // Mostrar loading no botão
+                const saveBtn = document.getElementById('saveStatusBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+                saveBtn.disabled = true;
+                
+                // Atualizar status no Firestore
+                const simulationRef = window.firebase.doc(window.db, "simulacoes", simulationId);
+                await window.firebase.updateDoc(simulationRef, {
+                    status: newStatus
                 });
                 
-                if (resultado.success) {
-                    // Mostrar mensagem de sucesso
-                    document.getElementById('saveSuccessMessage').classList.remove('hidden');
-                } else {
-                    // Mostrar mensagem de erro
-                    document.getElementById('errorText').textContent = `Erro ao salvar: ${resultado.error}`;
-                    document.getElementById('saveErrorMessage').classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error("Erro ao salvar a simulação:", error);
+                // Mostrar notificação toast
+                window.showToast('Status atualizado com sucesso!', 'success');
                 
-                // Mostrar mensagem de erro
-                document.getElementById('errorText').textContent = `Erro ao salvar: ${error.message}`;
-                document.getElementById('saveErrorMessage').classList.remove('hidden');
+                // Recarregar o histórico
+                loadSimulationHistory();
+                
+                // Fechar o modal de detalhes após salvamento bem-sucedido
+                closeSimulationDetailsModal();
+            } catch (error) {
+                console.error('Erro ao atualizar status:', error);
+                window.showToast('Erro ao atualizar status. Tente novamente.', 'error');
+                
+                // Restaurar estado original do botão
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
             }
-        });
-    }
-});
+        }
+    });
+}
 
-// Exportar funções para uso em outros módulos
-export {
-    loadSimulationHistory,
-    getNextClientNumber,
-    salvarSimulacao
-};
+// Função para configurar parcelas
+function setupParcelas() {
+    // Gerar opções para o select múltiplo de parcelas
+    const parcelasSelect = document.getElementById('parcelasSelect');
+    for (let i = 1; i <= 12; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `${i}x`;
+        parcelasSelect.appendChild(option);
+    }
+    
+    // Botões para selecionar/desmarcar todas as parcelas
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+        const select = document.getElementById('parcelasSelect');
+        for (let i = 0; i < select.options.length; i++) {
+            select.options[i].selected = true;
+        }
+    });
+    
+    document.getElementById('deselectAllBtn').addEventListener('click', () => {
+        const select = document.getElementById('parcelasSelect');
+        for (let i = 0; i < select.options.length; i++) {
+            select.options[i].selected = false;
+        }
+    });
+    
+    // Por padrão, desmarcar todas as parcelas
+    document.getElementById('deselectAllBtn').click();
+}
+
+// Função para configurar eventos do simulador
+function setupSimulatorEvents() {
+    // Adicionar manipulador para o botão Limpar Simulação
+    document.getElementById('clearSimulationBtn').addEventListener('click', reiniciarSimulacao);
+    
+    // Adicionar manipuladores para os botões do histórico
+    document.getElementById('refreshHistoryBtn').addEventListener('click', loadSimulationHistory);
+    document.getElementById('deleteAllSimulationsBtn').addEventListener('click', confirmDeleteAllSimulations);
+    
+    // Adicionar manipuladores para os radio buttons de tipo de preço
+    document.querySelectorAll('input[name="priceType"]').forEach(radio => {
+        radio.addEventListener('change', atualizarEstadoMostruario);
+    });
+    
+    // Inicializar o estado da caixa de mostruário
+    atualizarEstadoMostruario();
+    
+    // Manipulador do botão Salvar Simulação
+    document.getElementById('saveSimulationBtn').addEventListener('click', function() {
+        // Mostrar o modal de confirmação
+        document.getElementById('confirmModal').classList.remove('hidden');
+    });
+    
+    // Manipulador do botão "Não" do modal de confirmação
+    document.getElementById('noSaveBtn').addEventListener('click', function() {
+        // Fechar o modal de confirmação
+        document.getElementById('confirmModal').classList.add('hidden');
+        
+        // Limpar formulário e reiniciar simulação
+        reiniciarSimulacao();
+    });
+    
+    // Manipulador do botão "Sim" do modal de confirmação
+    document.getElementById('yesSaveBtn').addEventListener('click', function() {
+        // Fechar o modal de confirmação
+        document.getElementById('confirmModal').classList.add('hidden');
+        
+        // Mostrar o modal de preenchimento de dados
+        document.getElementById('saveModal').classList.remove('hidden');
+        
+        // Esconder mensagens
+        document.getElementById('saveSuccessMessage').classList.add('hidden');
+        document.getElementById('saveErrorMessage').classList.add('hidden');
+        
+        // Mostrar o formulário
+        document.getElementById('saveSimulationForm').classList.remove('hidden');
+    });
+    
+    // Manipulador do botão Cancelar no modal
+    document.getElementById('cancelSaveBtn').addEventListener('click', function() {
+        document.getElementById('saveModal').classList.add('hidden');
+    });
+    
+    // Manipulador para o botão Nova Simulação
+    document.getElementById('newSimulationBtn').addEventListener('click', function() {
+        document.getElementById('saveModal').classList.add('hidden');
+        reiniciarSimulacao();
+    });
+    
+    // Manipulador para o botão Tentar Novamente
+    document.getElementById('tryAgainBtn').addEventListener('click', function() {
+        document.getElementById('saveErrorMessage').classList.add('hidden');
+        document.getElementById('saveSimulationForm').classList.remove('hidden');
+    });
+    
+    // Formulário de simulação
+    document.getElementById('simulationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Obter valores do formulário
+        const valorProdutoOriginal = window.currencyToNumber(document.getElementById('productValue').value);
+        const valorGE = window.currencyToNumber(document.getElementById('geValue').value);
+        const valorEntrada = window.currencyToNumber(document.getElementById('entryValue').value);
+        const isMostruario = document.getElementById('isMostruario').checked;
+        const useSpecialDiscount = document.getElementById('useSpecialDiscount').checked;
+        
+        // Valor do produto após subtrair entrada (se houver)
+        const valorProduto = Math.max(0, valorProdutoOriginal - valorEntrada);
+        
+        // Obter opções selecionadas
+        const tipoParcelamento = document.querySelector('input[name="paymentType"]:checked').value;
+        const tipoPreco = document.querySelector('input[name="priceType"]:checked').value;
+        const usarFator = document.querySelector('input[name="useFactor"]:checked').value === 'sim';
+        const taxaPrestamista = document.querySelector('input[name="applyTaxaPrestamista"]:checked').value === 'sim';
+        
+        // Obter parcelas selecionadas do dropdown
+        const parcelasSelect = document.getElementById('parcelasSelect');
+        const parcelasSelecionadas = Array.from(parcelasSelect.selectedOptions)
+            .map(option => parseInt(option.value))
+            .sort((a, b) => a - b);
+        
+        // Verificar se há pelo menos uma parcela selecionada
+        if (parcelasSelecionadas.length === 0) {
+            alert('Selecione pelo menos uma opção de parcelamento.');
+            return;
+        }
+        
+        // Verificar se os valores são maiores que zero
+        if (valorProdutoOriginal <= 0) {
+            alert('Digite um valor válido para o produto.');
+            return;
+        }
+        
+        // Salvar entradas para uso posterior
+        window.simulationResults.inputs = {
+            valorProdutoOriginal,
+            valorGE,
+            valorEntrada,
+            valorProduto,
+            isMostruario,
+            useSpecialDiscount,
+            tipoParcelamento,
+            tipoPreco,
+            usarFator,
+            taxaPrestamista,
+            parcelasSelecionadas
+        };
+        
+        // Inicializar objeto de resultados
+        window.simulationResults.results = {
+            carne: {},
+            cartao: {}
+        };
+        
+        // Ocultar todas as seções de resultados
+        document.getElementById('resultSectionCarne').classList.add('hidden');
+        document.getElementById('resultSectionCartao').classList.add('hidden');
+        
+        // Limpar tabelas de resultados
+        document.getElementById('resultTableBodyCarne').innerHTML = '';
+        document.getElementById('resultTableBodyCartao').innerHTML = '';
+        
+        // Função para processar um tipo de parcelamento
+        const processarTipoParcelamento = (tipo) => {
+            // Selecionar a tabela correta
+            const tableBody = document.getElementById(`resultTableBody${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            
+            // Inicializar array de resultados para este tipo
+            window.simulationResults.results[tipo] = [];
+            
+            for (const numParcela of parcelasSelecionadas) {
+                const resultado = window.calcularParcela(
+                    valorProduto, 
+                    valorGE, 
+                    numParcela, 
+                    tipo, 
+                    tipoPreco, 
+                    usarFator, 
+                    taxaPrestamista,
+                    isMostruario
+                );
+                
+                // Salvar resultado para uso posterior
+                window.simulationResults.results[tipo].push({
+                    numParcela,
+                    ...resultado
+                });
+                
+                // Criar linha da tabela
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-100 dark:hover:bg-gray-700';
+                
+                // Calcular o total da compra (parcelas + entrada)
+                const totalCompra = resultado.totalParcelado + valorEntrada;
+                
+                // Calcular o valor inflacionado para desconto especial (apenas para carnê)
+                let valorParcelaInflacionada = 0;
+                let totalInflacionado = 0;
+                let descontoParcela = 0;
+                let descontoTotal = 0;
+                
+                if (useSpecialDiscount && tipo === 'carne') {
+                    valorParcelaInflacionada = window.calcularDescontoEspecial(valorProduto, valorGE, numParcela, taxaPrestamista);
+                    totalInflacionado = valorParcelaInflacionada * numParcela + valorEntrada;
+                    descontoParcela = valorParcelaInflacionada - resultado.valorParcela;
+                    descontoTotal = totalInflacionado - totalCompra;
+                }
+                
+                // Estilo especial para linha de mostruário
+                const mostruarioClass = resultado.isMostruarioIndicator ? 'text-yellow-600 dark:text-yellow-400 font-bold' : '';
+                
+                // Adicionar células
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="text-sm font-medium ${tipo === 'cartao' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'} ${mostruarioClass}">
+                                ${numParcela}x${resultado.isMostruarioIndicator ? ' (Mostruário)' : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${mostruarioClass}">
+                        ${useSpecialDiscount && tipo === 'carne' ? 
+                            `<div class="flex flex-col">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">Fora da promoção:</span>
+                                <span class="line-through text-gray-400">${window.formatCurrency(valorParcelaInflacionada)}</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Na promoção:</span>
+                                <span class="font-semibold">${window.formatCurrency(resultado.valorParcela)}</span>
+                                <span class="text-red-500 text-xs font-medium">Economia: ${window.formatCurrency(descontoParcela)}</span>
+                            </div>` 
+                            : window.formatCurrency(resultado.valorParcela)
+                        }
+                    </td>
+                    <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <button type="button" class="text-primary hover:text-secondary focus:outline-none verMaisBtn h-8 w-8 inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/20"
+                            data-parcela="${numParcela}"
+                            data-tipo="${tipo}"
+                            title="Ver detalhes">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+                
+                // Adicionar linha oculta para detalhes expandidos
+                const detailRow = document.createElement('tr');
+                detailRow.className = 'bg-gray-50 dark:bg-gray-800 hidden detailRow';
+                detailRow.setAttribute('data-parcela', numParcela);
+                detailRow.setAttribute('data-tipo', tipo);
+                
+                // Células da linha de detalhes
+                let detailHTML = `
+                    <td colspan="3" class="px-4 py-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">`;
+                
+                // Adicionar seção de desconto especial para carnê
+                if (useSpecialDiscount && tipo === 'carne') {
+                    detailHTML += `
+                            <div class="md:col-span-3 mb-2 pb-2 border-b border-gray-300 dark:border-gray-600">
+                                <p class="text-gray-500 dark:text-gray-400">Fora da promoção:</p>
+                                <p class="font-medium line-through text-gray-500">${window.formatCurrency(totalInflacionado)}</p>
+                                <p class="text-gray-500 dark:text-gray-400 mt-1">Na promoção:</p>
+                                <p class="font-medium">${window.formatCurrency(totalCompra)}</p>
+                                <p class="text-red-500 font-medium">Economia total: ${window.formatCurrency(descontoTotal)}</p>
+                            </div>`;
+                }
+                
+                detailHTML += `
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total da compra:</p>
+                                <p class="font-medium">${window.formatCurrency(totalCompra)}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total do produto${valorEntrada > 0 ? ' + entrada' : ''}:</p>
+                                <p class="font-medium">${window.formatCurrency(resultado.totalProduto + valorEntrada)}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total GE:</p>
+                                <p class="font-medium">${window.formatCurrency(resultado.totalGE)}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total prestamista:</p>
+                                <p class="font-medium">${window.formatCurrency(resultado.totalPrestamista)}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total de serviços:</p>
+                                <p class="font-medium">${window.formatCurrency(resultado.totalServicos)}</p>
+                            </div>`;
+                
+                // Adicionar explicação do mostruário se aplicável
+                if (resultado.isMostruarioIndicator) {
+                    detailHTML += `
+                            <div class="md:col-span-3 mt-2 border-t border-gray-300 dark:border-gray-600 pt-2">
+                                <p class="text-yellow-600 dark:text-yellow-400 font-medium">
+                                    Peça de mostruário: O produto está usando o fator de 12x do cartão (${window.FATORES.cartao[11]}) em vez do fator de carnê (${window.FATORES.carne[11]})
+                                </p>
+                            </div>`;
+                }
+                
+                detailHTML += `
+                        </div>
+                    </td>`;
+                
+                detailRow.innerHTML = detailHTML;
+                tableBody.appendChild(detailRow);
+            }
+            
+            // Mostrar a seção de resultados correspondente
+            document.getElementById(`resultSection${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.remove('hidden');
+        };
+        
+        // Processar conforme o tipo de parcelamento selecionado
+        if (tipoParcelamento === 'ambos') {
+            processarTipoParcelamento('cartao');
+            processarTipoParcelamento('carne');
+        } else {
+            processarTipoParcelamento(tipoParcelamento);
+        }
+        
+        // Adicionar event listeners para os botões "Ver mais"
+        document.querySelectorAll('.verMaisBtn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parcela = this.getAttribute('data-parcela');
+                const tipo = this.getAttribute('data-tipo');
+                
+                // Encontrar a linha de detalhes correspondente
+                const detailRow = document.querySelector(`.detailRow[data-parcela="${parcela}"][data-tipo="${tipo}"]`);
+                
+                // Alternar visibilidade da linha de detalhes
+                if (detailRow.classList.contains('hidden')) {
+                    detailRow.classList.remove('hidden');
+                    this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    this.title = "Ocultar detalhes";
+                } else {
+                    detailRow.classList.add('hidden');
+                    this.innerHTML = '<i class="fas fa-eye"></i>';
+                    this.title = "Ver detalhes";
+                }
+            });
+        });
+        
+        // Mostrar botões de ação
+        document.getElementById('saveButtonContainer').classList.remove('hidden');
+        
+        // Mostrar apenas o botão de salvar simulação se o usuário tiver permissão completa
+        if (currentUser && 
+            (currentUser.email === window.ADMIN_EMAIL || 
+            (currentUser.userData && currentUser.userData.accessLevel === 'full'))) {
+            document.querySelector('#saveSimulationBtn').classList.remove('hidden');
+        } else {
+            document.querySelector('#saveSimulationBtn').classList.add('hidden');
+        }
+        
+        // Rolar até os resultados
+        const primeiraSecao = document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-lg.shadow-md.p-6:not(.hidden)');
+        if (primeiraSecao) {
+            primeiraSecao.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+    
+    // Manipulador do formulário de salvar
+    document.getElementById('saveSimulationForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        // Validar campos
+        const clientName = document.getElementById('clientName').value.trim();
+        const clientPhone = document.getElementById('clientPhone').value.trim();
+        const productName = document.getElementById('productName').value.trim();
+        
+        if (!clientName || !clientPhone || !productName) {
+            document.getElementById('errorText').textContent = 'Preencha todos os campos.';
+            document.getElementById('saveErrorMessage').classList.remove('hidden');
+            document.getElementById('saveSimulationForm').classList.add('hidden');
+            return;
+        }
+        
+        // Validar formato do telefone
+        if (!clientPhone.match(/^\(\d{2}\)\d{5}-\d{4}$/)) {
+            document.getElementById('errorText').textContent = 'Formato de telefone inválido. Use (00)00000-0000.';
+            document.getElementById('saveErrorMessage').classList.remove('hidden');
+            document.getElementById('saveSimulationForm').classList.add('hidden');
+            return;
+        }
+        
+        // Esconder o formulário durante o processamento
+        document.getElementById('saveSimulationForm').classList.add('hidden');
+        
+        // Salvar a simulação
+        const resultado = await salvarSimulacao({
+            clientName,
+            clientPhone,
+            productName
+        });
+        
+        if (resultado.success) {
+            // Mostrar mensagem de sucesso
+            document.getElementById('saveSuccessMessage').classList.remove('hidden');
+        } else {
+            // Mostrar mensagem de erro
+            document.getElementById('errorText').textContent = `Erro ao salvar: ${resultado.error}`;
+            document.getElementById('saveErrorMessage').classList.remove('hidden');
+        }
+    });
+}
+
+// Inicialização quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar estado da autenticação na inicialização
+    window.firebase.onAuthStateChanged(window.auth, window.handleAuthStateChanged);
+    
+    // Configurar eventos da interface
+    setupUIEvents();
+    
+    // Exportar funções e variáveis para uso global
+    window.currentSection = currentSection;
+    window.showSection = showSection;
+    window.setupUIEvents = setupUIEvents;
+});
