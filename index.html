@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Zenir Simulador">
-    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3599,7 +3599,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('service-worker.js')
                     .then((registration) => {
                         console.log('Service Worker registrado com sucesso:', registration.scope);
                     })
@@ -3610,4 +3610,4 @@
         }
     </script>
 </body>
-            </html>
+</html>
