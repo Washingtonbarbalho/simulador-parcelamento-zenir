@@ -1,13 +1,14 @@
+// Determinar dinamicamente o caminho base
+const BASE_URL = self.location.href.replace('service-worker.js', '');
+
 const CACHE_NAME = 'zenir-simulador-v1';
-const BASE_PATH = './';
 
 const urlsToCache = [
-  BASE_PATH,
-  './index.html',
-  './manifest.json',
-  './icon-192x192.png',
-  './icon-512x512.png',
-  // Recursos estáticos que você deseja cachear
+  '',
+  'index.html',
+  'manifest.json',
+  'icon-192x192.png',
+  'icon-512x512.png',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
@@ -20,7 +21,16 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Cache aberto');
-        return cache.addAll(urlsToCache);
+        // Criar uma lista de URLs para cache com o caminho base correto
+        const cacheUrls = urlsToCache.map(url => {
+          // Ignorar URLs absolutas (que começam com http)
+          if (url.startsWith('http') || url === '') {
+            return url;
+          }
+          // Adicionar o caminho base às URLs relativas
+          return new URL(url, BASE_URL).href;
+        });
+        return cache.addAll(cacheUrls);
       })
   );
 });
@@ -36,8 +46,8 @@ self.addEventListener('fetch', (event) => {
         }
         
         // Clona a requisição porque ela só pode ser usada uma vez
-        return fetch(event.request.clone()).then(
-          (response) => {
+        return fetch(event.request.clone())
+          .then((response) => {
             // Verifica se recebemos uma resposta válida
             if(!response || response.status !== 200 || response.type !== 'basic') {
               return response;
@@ -52,8 +62,12 @@ self.addEventListener('fetch', (event) => {
               });
 
             return response;
-          }
-        );
+          })
+          .catch(error => {
+            console.error('Fetch failed:', error);
+            // Retorna uma resposta offline personalizada se desejar
+            // return caches.match('/offline.html');
+          });
       })
   );
 });
