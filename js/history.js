@@ -1,123 +1,5 @@
-import { 
-    db, 
-    collection, 
-    addDoc, 
-    getDocs, 
-    getDoc, 
-    doc, 
-    deleteDoc, 
-    query, 
-    orderBy, 
-    limit,
-    where, 
-    updateDoc,
-    setDoc
-} from './config.js';
-
-import { ADMIN_EMAIL } from './config.js';
-
-// Inicialização do histórico
-export function initHistory() {
-    console.log("Inicializando módulo de histórico");
-    
-    // Adicionar manipuladores para os botões do histórico
-    if (document.getElementById('refreshHistoryBtn')) {
-        document.getElementById('refreshHistoryBtn').addEventListener('click', loadSimulationHistory);
-    }
-    
-    if (document.getElementById('deleteAllSimulationsBtn')) {
-        document.getElementById('deleteAllSimulationsBtn').addEventListener('click', confirmDeleteAllSimulations);
-    }
-    
-    // Configurar a busca
-    setupSearchFunctionality();
-}
-
-// Função para obter e incrementar o contador de clientes
-export async function getNextClientNumber() {
-    try {
-        console.log("Obtendo próximo número de cliente...");
-        
-        // Referência para o documento de contador
-        const counterRef = doc(db, "contadores", "clientes");
-        
-        // Tentar obter o documento atual
-        const counterDoc = await getDoc(counterRef);
-        
-        let currentCount = 1; // Valor padrão se não existir
-        
-        if (counterDoc.exists()) {
-            currentCount = counterDoc.data().contador + 1;
-            console.log("Contador atual:", currentCount - 1, "-> Próximo:", currentCount);
-            
-            // Atualizar o contador
-            await updateDoc(counterRef, {
-                contador: currentCount
-            });
-        } else {
-            console.log("Documento contador não existe, criando com valor inicial 1");
-            // Criar o documento de contador se não existir
-            await setDoc(counterRef, {
-                contador: currentCount
-            });
-        }
-        
-        return currentCount;
-    } catch (error) {
-        console.error("Erro ao obter número do cliente:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro no contador: ${error.message}`, 'error');
-        }
-        // Retornar um timestamp como fallback em caso de erro
-        return Math.floor(Date.now() / 1000);
-    }
-}
-
-// Função para salvar a simulação no Firestore
-export async function salvarSimulacao(dadosCliente) {
-    try {
-        console.log("Iniciando salvamento de simulação...");
-        
-        // Obter o próximo número de cliente
-        const clientNumber = await getNextClientNumber();
-        const clienteZenirId = `CLIENTE ZENIR ${clientNumber}`;
-        
-        console.log("Código de cliente gerado:", clienteZenirId);
-        
-        // Preparar dados para o Firestore
-        const dadosCompletos = {
-            cliente: {
-                nome: dadosCliente.clientName.toUpperCase(),
-                telefone: dadosCliente.clientPhone,
-                produto: dadosCliente.productName.toUpperCase(),
-                codigo: clienteZenirId
-            },
-            simulacao: window.simulationResults,
-            dataHora: new Date().toISOString(),
-            status: "Pendente", // Status inicial
-            userId: window.currentUser.uid, // ID do usuário que criou a simulação
-            userName: window.currentUser.userData?.displayName || window.currentUser.email, // Nome do usuário que criou
-            userBranch: window.currentUser.userData?.branch || '' // Filial do usuário
-        };
-        
-        console.log("Dados preparados para salvamento:", dadosCompletos);
-        
-        // Salvar no Firestore
-        const docRef = await addDoc(collection(db, "simulacoes"), dadosCompletos);
-        console.log("Simulação salva com sucesso. ID:", docRef.id);
-        
-        return { success: true, id: docRef.id };
-    } catch (error) {
-        console.error("Erro ao salvar a simulação:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro ao salvar: ${error.message}`, 'error');
-        }
-        return { success: false, error: error.message };
-    }
-}
-
 // Função para carregar o histórico de simulações
-export async function loadSimulationHistory() {
+async function loadSimulationHistory() {
     const historyList = document.getElementById('historyList');
     const loadingElement = document.getElementById('loadingHistory');
     const emptyElement = document.getElementById('emptyHistory');
@@ -128,71 +10,45 @@ export async function loadSimulationHistory() {
     emptyElement.classList.add('hidden');
     
     try {
-        // Log para debug
-        console.log("Iniciando carregamento do histórico...");
-        
-        // Verificar se o usuário está autenticado
-        if (!window.currentUser) {
-            console.error("Usuário não está autenticado!");
-            loadingElement.classList.add('hidden');
-            historyList.innerHTML = `
-                <div class="text-center py-8">
-                    <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-                    <p class="text-red-500">Erro: Usuário não está autenticado.</p>
-                </div>
-            `;
-            return;
-        }
-        
-        // Log do usuário atual para debug
-        console.log("Usuário atual:", window.currentUser.email, window.currentUser.uid);
-        
         // Criar query ordenada por data/hora (mais recentes primeiro)
         // Com filtro dependendo do usuário (admin vê tudo, outros veem apenas suas simulações)
         let simulationsQuery;
         
-        if (window.currentUser.email === window.ADMIN_EMAIL) {
+        if (currentUser.email === window.ADMIN_EMAIL) {
             // Admin vê todas as simulações
-            console.log("Buscando simulações como ADMIN");
-            simulationsQuery = query(
-                collection(db, "simulacoes"),
-                orderBy("dataHora", "desc"),
-                limit(50)
+            simulationsQuery = window.firebase.query(
+                window.firebase.collection(window.db, "simulacoes"),
+                window.firebase.orderBy("dataHora", "desc"),
+                window.firebase.limit(50)
             );
         } else {
             // Usuário comum vê apenas suas simulações
-            console.log("Buscando simulações do usuário:", window.currentUser.uid);
-            simulationsQuery = query(
-                collection(db, "simulacoes"),
-                where("userId", "==", window.currentUser.uid),
-                orderBy("dataHora", "desc"),
-                limit(50)
+            simulationsQuery = window.firebase.query(
+                window.firebase.collection(window.db, "simulacoes"),
+                window.firebase.where("userId", "==", currentUser.uid),
+                window.firebase.orderBy("dataHora", "desc"),
+                window.firebase.limit(50)
             );
         }
         
         // Buscar documentos
-        console.log("Executando consulta...");
-        const querySnapshot = await getDocs(simulationsQuery);
-        
-        console.log("Consulta concluída. Resultados:", querySnapshot.size);
+        const querySnapshot = await window.firebase.getDocs(simulationsQuery);
         
         // Ocultar loading
         loadingElement.classList.add('hidden');
         
         // Verificar se há resultados
         if (querySnapshot.empty) {
-            console.log("Nenhuma simulação encontrada");
             emptyElement.classList.remove('hidden');
             return;
         }
         
         // Processar resultados
-        querySnapshot.forEach(docSnapshot => {
-            console.log("Processando documento:", docSnapshot.id);
-            const data = docSnapshot.data();
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
             
             // Criar o cartão para cada simulação
-            const card = createSimulationCard(docSnapshot.id, data);
+            const card = createSimulationCard(doc.id, data);
             historyList.appendChild(card);
         });
         
@@ -201,17 +57,13 @@ export async function loadSimulationHistory() {
         
     } catch (error) {
         console.error("Erro ao carregar histórico:", error);
-        if (window.debug && typeof window.debug.showDebugMessage === 'function') {
-            window.debug.showDebugMessage(`Erro no histórico: ${error.message}`, 'error');
-        }
-        
         loadingElement.classList.add('hidden');
         
         // Mostrar mensagem de erro
         historyList.innerHTML = `
             <div class="text-center py-8">
                 <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-3"></i>
-                <p class="text-red-500">Erro ao carregar o histórico de simulações: ${error.message}</p>
+                <p class="text-red-500">Erro ao carregar o histórico de simulações.</p>
                 <button id="retryLoadBtn" class="mt-3 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary">Tentar novamente</button>
             </div>
         `;
@@ -222,15 +74,13 @@ export async function loadSimulationHistory() {
 
 // Função para criar cartão de simulação para o histórico
 function createSimulationCard(id, data) {
-    console.log("Criando cartão para simulação:", id);
-    
     const card = document.createElement('div');
     card.className = 'bg-white dark:bg-gray-700 rounded-lg shadow-custom p-4 border border-gray-200 dark:border-gray-600';
     card.setAttribute('data-simulation-id', id);
     
     // Verificar permissões do usuário atual
-    const isAdmin = window.currentUser && window.currentUser.email === window.ADMIN_EMAIL;
-    const isOwner = window.currentUser && data.userId === window.currentUser.uid;
+    const isAdmin = currentUser && currentUser.email === window.ADMIN_EMAIL;
+    const isOwner = currentUser && data.userId === currentUser.uid;
     
     // Extrair dados da simulação
     const cliente = data.cliente || {};
@@ -352,49 +202,15 @@ function createSimulationCard(id, data) {
         
         // Botão de salvar contato
         card.querySelector('.save-contact-btn').addEventListener('click', () => {
-            downloadVCard(cliente.nome, cliente.telefone, cliente.codigo);
+            window.downloadVCard(cliente.nome, cliente.telefone, cliente.codigo);
         });
     }
     
     return card;
 }
 
-// Função para gerar e baixar vCard (contato)
-function downloadVCard(name, phone, code) {
-    // Formatação básica de vCard
-    const phoneClean = phone.replace(/\D/g, '');
-    
-    // Formatar o nome como "Nome do cliente + (código do cliente)"
-    const formattedName = `${name} (${code || 'cliente'})`;
-    
-    const vCardData = [
-        'BEGIN:VCARD',
-        'VERSION:3.0',
-        `FN:${formattedName}`,
-        `TEL;TYPE=CELL:+55${phoneClean}`,
-        'END:VCARD'
-    ].join('\n');
-    
-    // Criar blob e link para download
-    const blob = new Blob([vCardData], { type: 'text/vcard' });
-    const url = window.URL.createObjectURL(blob);
-    
-    // Criar elemento de link temporário e disparar o download
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${name.replace(/[^a-zA-Z0-9]/g, '_')}_zenir.vcf`;
-    document.body.appendChild(a);
-    a.click();
-    
-    // Limpar
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-}
-
 // Função para abrir o modal de detalhes da simulação
 function viewSimulationDetails(id, data) {
-    console.log("Abrindo detalhes da simulação:", id);
-    
     // Mostrar o modal
     const modal = document.getElementById('simulationDetailsModal');
     modal.classList.remove('hidden');
@@ -432,13 +248,11 @@ function viewSimulationDetails(id, data) {
 
 // Função para preencher os detalhes da simulação no modal
 function fillSimulationDetails(id, data) {
-    console.log("Preenchendo detalhes da simulação:", id);
-    
     const detailsContent = document.getElementById('simulationDetailsContent');
     
     // Verificar permissões do usuário atual
-    const isAdmin = window.currentUser && window.currentUser.email === window.ADMIN_EMAIL;
-    const isOwner = window.currentUser && data.userId === window.currentUser.uid;
+    const isAdmin = currentUser && currentUser.email === window.ADMIN_EMAIL;
+    const isOwner = currentUser && data.userId === currentUser.uid;
     
     // Permitir edição de status apenas para o administrador ou o dono da simulação
     const canEditStatus = isAdmin || isOwner;
@@ -496,38 +310,38 @@ function fillSimulationDetails(id, data) {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Valor do Produto:</p>
-                        <p class="font-medium">${formatCurrency(simulacao.inputs?.valorProdutoOriginal || 0)}</p>
+                        <p class="font-medium">${window.formatCurrency(simulacao.inputs.valorProdutoOriginal || 0)}</p>
                     </div>
                     
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Valor da GE:</p>
-                        <p class="font-medium">${formatCurrency(simulacao.inputs?.valorGE || 0)}</p>
+                        <p class="font-medium">${window.formatCurrency(simulacao.inputs.valorGE || 0)}</p>
                     </div>
                     
-                    ${simulacao.inputs?.valorEntrada > 0 ? `
+                    ${simulacao.inputs.valorEntrada > 0 ? `
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Valor da Entrada:</p>
-                        <p class="font-medium">${formatCurrency(simulacao.inputs?.valorEntrada || 0)}</p>
+                        <p class="font-medium">${window.formatCurrency(simulacao.inputs.valorEntrada || 0)}</p>
                     </div>
                     ` : ''}
                     
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Tipo de Preço:</p>
-                        <p class="font-medium">${simulacao.inputs?.tipoPreco === 'promocional' ? 'Promocional' : 'Tabela'}</p>
+                        <p class="font-medium">${simulacao.inputs.tipoPreco === 'promocional' ? 'Promocional' : 'Tabela'}</p>
                     </div>
                     
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Tipo de Parcelamento:</p>
-                        <p class="font-medium">${simulacao.inputs?.tipoParcelamento === 'carne' ? 'Carnê' : 
-                             simulacao.inputs?.tipoParcelamento === 'cartao' ? 'Cartão' : 'Ambos'}</p>
+                        <p class="font-medium">${simulacao.inputs.tipoParcelamento === 'carne' ? 'Carnê' : 
+                             simulacao.inputs.tipoParcelamento === 'cartao' ? 'Cartão' : 'Ambos'}</p>
                     </div>
                     
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Taxa Prestamista:</p>
-                        <p class="font-medium">${simulacao.inputs?.taxaPrestamista ? 'Sim' : 'Não'}</p>
+                        <p class="font-medium">${simulacao.inputs.taxaPrestamista ? 'Sim' : 'Não'}</p>
                     </div>
                     
-                    ${simulacao.inputs?.isMostruario ? `
+                    ${simulacao.inputs.isMostruario ? `
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Peça de Mostruário:</p>
                         <p class="font-medium">Sim</p>
@@ -538,12 +352,12 @@ function fillSimulationDetails(id, data) {
     `;
     
     // Adicionar resultados para cada tipo de parcelamento
-    if (simulacao.inputs?.tipoParcelamento === 'carne' || simulacao.inputs?.tipoParcelamento === 'ambos') {
-        html += getResultsTableHTML('Carnê', simulacao.results?.carne || []);
+    if (simulacao.inputs.tipoParcelamento === 'carne' || simulacao.inputs.tipoParcelamento === 'ambos') {
+        html += getResultsTableHTML('Carnê', simulacao.results.carne || []);
     }
     
-    if (simulacao.inputs?.tipoParcelamento === 'cartao' || simulacao.inputs?.tipoParcelamento === 'ambos') {
-        html += getResultsTableHTML('Cartão', simulacao.results?.cartao || []);
+    if (simulacao.inputs.tipoParcelamento === 'cartao' || simulacao.inputs.tipoParcelamento === 'ambos') {
+        html += getResultsTableHTML('Cartão', simulacao.results.cartao || []);
     }
     
     html += `</div>`;
@@ -591,12 +405,12 @@ function getResultsTableHTML(tipo, resultados) {
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                     <div class="text-sm font-medium">
-                        ${formatCurrency(resultado.valorParcela)}
+                        ${window.formatCurrency(resultado.valorParcela)}
                     </div>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap text-right">
                     <div class="text-sm font-medium">
-                        ${formatCurrency(resultado.totalParcelado)}
+                        ${window.formatCurrency(resultado.totalParcelado)}
                     </div>
                 </td>
             </tr>
@@ -613,25 +427,18 @@ function getResultsTableHTML(tipo, resultados) {
     return html;
 }
 
-// Função para formatar valores monetários
-function formatCurrency(value) {
-    if (typeof window.utils !== 'undefined' && typeof window.utils.formatCurrency === 'function') {
-        return window.utils.formatCurrency(value);
-    }
+// Função para fechar o modal de detalhes
+function closeSimulationDetailsModal() {
+    const modal = document.getElementById('simulationDetailsModal');
+    document.querySelector('.details-modal').classList.remove('open');
     
-    // Fallback caso a função não esteja disponível
-    return new Intl.NumberFormat('pt-BR', { 
-        style: 'currency', 
-        currency: 'BRL',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(value);
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
 }
 
 // Função para confirmar exclusão de simulação
 function confirmDeleteSimulation(id, clientName) {
-    console.log("Solicitando confirmação para exclusão:", id);
-    
     // Configurar a mensagem de confirmação
     const message = `Tem certeza que deseja excluir a simulação de "${clientName || 'cliente sem nome'}"?`;
     document.getElementById('deleteConfirmMessage').textContent = message;
@@ -650,18 +457,11 @@ function confirmDeleteSimulation(id, clientName) {
             // Fechar o modal
             modal.classList.add('hidden');
             
-            // Mostrar toast de sucesso
-            if (window.utils && typeof window.utils.showToast === 'function') {
-                window.utils.showToast('Simulação excluída com sucesso!', 'success');
-            }
-            
             // Recarregar o histórico
             loadSimulationHistory();
         } catch (error) {
             console.error('Erro ao excluir simulação:', error);
-            if (window.utils && typeof window.utils.showToast === 'function') {
-                window.utils.showToast('Erro ao excluir simulação. Tente novamente.', 'error');
-            }
+            alert('Erro ao excluir simulação. Tente novamente.');
             
             // Fechar o modal
             modal.classList.add('hidden');
@@ -677,18 +477,14 @@ function confirmDeleteSimulation(id, clientName) {
 
 // Função para excluir a simulação
 async function deleteSimulation(id) {
-    console.log("Excluindo simulação:", id);
-    const simulationRef = doc(db, "simulacoes", id);
-    await deleteDoc(simulationRef);
-    console.log("Simulação excluída com sucesso");
+    const simulationRef = window.firebase.doc(window.db, "simulacoes", id);
+    await window.firebase.deleteDoc(simulationRef);
 }
 
 // Função para confirmar exclusão de todas as simulações (apenas admin)
 function confirmDeleteAllSimulations() {
-    console.log("Solicitando confirmação para exclusão de todas as simulações");
-    
     // Verificar se o usuário é admin
-    if (window.currentUser && window.currentUser.email === window.ADMIN_EMAIL) {
+    if (currentUser && currentUser.email === window.ADMIN_EMAIL) {
         // Configurar a mensagem de confirmação
         const message = "ATENÇÃO: Você está prestes a excluir TODAS as simulações do sistema. Esta ação é irreversível. Deseja continuar?";
         document.getElementById('deleteConfirmMessage').textContent = message;
@@ -708,9 +504,7 @@ function confirmDeleteAllSimulations() {
                 modal.classList.add('hidden');
                 
                 // Mostrar toast de sucesso
-                if (window.utils && typeof window.utils.showToast === 'function') {
-                    window.utils.showToast('Todas as simulações foram excluídas com sucesso', 'success');
-                }
+                window.showToast('Todas as simulações foram excluídas com sucesso', 'success');
                 
                 // Recarregar o histórico
                 loadSimulationHistory();
@@ -718,9 +512,7 @@ function confirmDeleteAllSimulations() {
                 console.error('Erro ao excluir todas as simulações:', error);
                 
                 // Mostrar toast de erro
-                if (window.utils && typeof window.utils.showToast === 'function') {
-                    window.utils.showToast('Erro ao excluir as simulações. Tente novamente.', 'error');
-                }
+                window.showToast('Erro ao excluir as simulações. Tente novamente.', 'error');
                 
                 // Fechar o modal
                 modal.classList.add('hidden');
@@ -737,55 +529,46 @@ function confirmDeleteAllSimulations() {
 
 // Função para excluir todas as simulações (apenas admin)
 async function deleteAllSimulations() {
-    console.log("Iniciando exclusão de todas as simulações");
-    
     // Buscar todas as simulações
-    const simulationsRef = collection(db, "simulacoes");
-    const querySnapshot = await getDocs(simulationsRef);
-    
-    console.log(`Encontradas ${querySnapshot.size} simulações para excluir`);
+    const simulationsRef = window.firebase.collection(window.db, "simulacoes");
+    const querySnapshot = await window.firebase.getDocs(simulationsRef);
     
     // Criar um array de promessas para excluir cada documento
     const deletePromises = [];
-    querySnapshot.forEach(docSnapshot => {
-        deletePromises.push(deleteDoc(doc(db, "simulacoes", docSnapshot.id)));
+    querySnapshot.forEach(doc => {
+        deletePromises.push(window.firebase.deleteDoc(window.firebase.doc(window.db, "simulacoes", doc.id)));
     });
     
     // Executar todas as exclusões em paralelo
     await Promise.all(deletePromises);
-    
-    console.log("Todas as simulações foram excluídas com sucesso");
 }
 
 // Configurar funcionalidade de busca
 function setupSearchFunctionality() {
     const searchInput = document.getElementById('searchHistory');
-    if (!searchInput) return;
-    
-    console.log("Configurando funcionalidade de busca");
     
     searchInput.addEventListener('input', function() {
         const searchTerm = this.value.toLowerCase();
         const cards = document.querySelectorAll('#historyList > div');
         
-        console.log(`Pesquisando por: "${searchTerm}"`);
-        
         cards.forEach(card => {
-            // Procurar no nome do cliente, produto e código
+            // Corrigimos a busca para usar os novos seletores
+            // Nome do cliente está dentro de um H3 dentro da primeira div
             let clientName = '';
-            let productName = '';
-            let clientCode = '';
-            
             const clientNameElement = card.querySelector('h3');
             if (clientNameElement) {
                 clientName = clientNameElement.textContent.toLowerCase();
             }
             
+            // O produto está em um p dentro da primeira div
+            let productName = '';
             const productNameElement = card.querySelector('div > p');
             if (productNameElement) {
                 productName = productNameElement.textContent.toLowerCase();
             }
             
+            // Código do cliente também é pesquisável
+            let clientCode = '';
             const clientCodeElement = card.querySelector('.text-xs.font-medium.text-gray-500');
             if (clientCodeElement) {
                 clientCode = clientCodeElement.textContent.toLowerCase();
@@ -803,8 +586,6 @@ function setupSearchFunctionality() {
         // Verificar se há resultados visíveis
         const hasVisibleResults = Array.from(cards).some(card => !card.classList.contains('hidden'));
         
-        console.log(`Resultados encontrados: ${hasVisibleResults ? 'Sim' : 'Não'}`);
-        
         if (!hasVisibleResults) {
             const emptyElement = document.getElementById('emptyHistory');
             emptyElement.classList.remove('hidden');
@@ -816,15 +597,14 @@ function setupSearchFunctionality() {
 }
 
 // Exportar funções para uso global
-window.history = {
-    loadSimulationHistory,
-    salvarSimulacao,
-    getNextClientNumber,
-    viewSimulationDetails,
-    deleteSimulation,
-    confirmDeleteSimulation,
-    confirmDeleteAllSimulations
-};
-
-// Inicializar histórico ao carregar o módulo
-document.addEventListener('DOMContentLoaded', initHistory);
+window.loadSimulationHistory = loadSimulationHistory;
+window.createSimulationCard = createSimulationCard;
+window.viewSimulationDetails = viewSimulationDetails;
+window.fillSimulationDetails = fillSimulationDetails;
+window.getResultsTableHTML = getResultsTableHTML;
+window.closeSimulationDetailsModal = closeSimulationDetailsModal;
+window.confirmDeleteSimulation = confirmDeleteSimulation;
+window.deleteSimulation = deleteSimulation;
+window.confirmDeleteAllSimulations = confirmDeleteAllSimulations;
+window.deleteAllSimulations = deleteAllSimulations;
+window.setupSearchFunctionality = setupSearchFunctionality;
