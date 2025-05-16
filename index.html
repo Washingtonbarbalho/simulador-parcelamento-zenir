@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Parcelamento - Zenir Móveis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E3192', // Azul Zenir
+                        secondary: '#ED1C24', // Vermelho Zenir
+                        dark: '#231F20', // Preto/cinza escuro Zenir
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'custom': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'custom-hover': '0 8px 30px rgba(0, 0, 0, 0.12)',
+                    },
+                }
+            }
+        }
+        
+        // Detectar modo escuro
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    
+    <!-- Firebase SDK -->
+    <script type="module" src="js/config.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+    <!-- Tela de carregamento inicial -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 flex flex-col items-center justify-center z-50">
+        <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-32 mb-8 animate-pulse" alt="Zenir Móveis">
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 border-t-4 border-b-4 border-primary rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-700 dark:text-gray-300 text-lg font-medium">Carregando...</p>
+        </div>
+    </div>
+    
+    <!-- Seção de Login -->
+    <div id="authSection" class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 fadeIn">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mx-auto" alt="Zenir Móveis">
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Simulador de Parcelamento</h2>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 card">
+                <!-- Abas de login/cadastro -->
+                <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <button id="loginTabBtn" class="px-4 py-2 border-b-2 border-primary text-primary font-medium">
+                        Entrar
+                    </button>
+                    <button id="registerTabBtn" class="px-4 py-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium">
+                        Cadastrar
+                    </button>
+                    <button id="forgotPasswordTabBtn" class="px-4 py-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium ml-auto">
+                        Esqueci a senha
+                    </button>
+                </div>
+
+                <!-- Formulário de Login -->
+                <div id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">E-mail</label>
+                        <div class="mt-1">
+                            <input id="loginEmail" name="email" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="seu@email.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <div class="mt-1 relative">
+                            <input id="loginPassword" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="********">
+                            <button type="button" id="toggleLoginPassword" class="absolute inset-y-0 right-0 px-3 flex items-center">
+                                <i class="fas fa-eye text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button id="loginBtn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            Entrar
+                        </button>
+                    </div>
+
+                    <div id="loginError" class="text-red-600 dark:text-red-400 text-sm hidden"></div>
+                </div>
+
+                <!-- Formulário de Cadastro -->
+                <div id="registerForm" class="space-y-6 hidden">
+                    <div>
+                        <label for="registerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
+                        <div class="mt-1">
+                            <input id="registerName" name="name" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="Seu nome completo">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="registerEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">E-mail</label>
+                        <div class="mt-1">
+                            <input id="registerEmail" name="email" type="email" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="seu@email.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="registerPhone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telefone</label>
+                        <div class="mt-1">
+                            <input id="registerPhone" name="phone" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="registerBranch" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filial</label>
+                        <div class="mt-1">
+                            <input id="registerBranch" name="branch" type="text" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="Digite o nome da filial">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="registerPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
+                        <div class="mt-1 relative">
+                            <input id="registerPassword" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="Crie uma senha">
+                            <button type="button" id="toggleRegisterPassword" class="absolute inset-y-0 right-0 px-3 flex items-center">
+                                <i class="fas fa-eye text-gray-400"></i>
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Mínimo de 6 caracteres</p>
+                    </div>
+
+                    <div>
+                        <label for="registerPasswordConfirm" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Senha</label>
+                        <div class="mt-1 relative">
+                            <input id="registerPasswordConfirm" name="passwordConfirm" type="password" required class="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary text-base dark:bg-gray-700" placeholder="Repita a senha">
+                            <button type="button" id="toggleRegisterPasswordConfirm" class="absolute inset-y-0 right-0 px-3 flex items-center">
+                                <i class="fas fa-eye text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button id="registerBtn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                            Cadastrar
+                        </button>
+                    </div>
+
+                    <div id="registerError" class="text-red-600 dark:text-red-400 text-sm hidden"></div>
+                    <div id="registerSuccess" class="text-green-600 dark:text-green-400 text-sm hidden">
+                        Cadastro realizado! Seu acesso será liberado após aprovação do administrador.
+                    </div>
+                </div>
+
+                <!-- Formulário de Recuperação de Senha -->
+                <div id="forgotPasswordForm" class="space-y-6 hidden">
+                    <div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Entre em contato com o administrador do sistema para redefinir sua senha.
+                        </p>
+                        <p class="text-sm font-medium">
+                            E-mail para contato: <a href="mailto:washington.wn8@gmail.com" class="text-primary hover:underline">washington.wn8@gmail.com</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensagem de aprovação pendente -->
+    <div id="pendingApprovalSection" class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 fadeIn hidden">
+        <!-- Conteúdo da seção pendente (igual ao HTML original) -->
+        <!-- ... -->
+    </div>
+
+    <!-- Aplicação principal (após login) -->
+    <div id="appSection" class="hidden">
+        <!-- Menu lateral e todo o conteúdo da aplicação (igual ao HTML original) -->
+        <!-- ... -->
+    </div>
+    
+    <!-- Scripts -->
+    <script type="module" src="js/utilities.js"></script>
+    <script type="module" src="js/ui.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/simulator.js"></script>
+    <script type="module" src="js/history.js"></script>
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
