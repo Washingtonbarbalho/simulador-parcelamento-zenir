@@ -1,10 +1,12 @@
 const CACHE_NAME = 'zenir-simulador-v1';
+const BASE_PATH = './';
+
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  BASE_PATH,
+  './index.html',
+  './manifest.json',
+  './icon-192x192.png',
+  './icon-512x512.png',
   // Recursos estáticos que você deseja cachear
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
