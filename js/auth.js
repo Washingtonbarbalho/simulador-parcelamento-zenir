@@ -1,28 +1,5 @@
-// auth.js - Gerenciamento de autenticação e usuários
-import { 
-    auth, 
-    db, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signOut,
-    updateProfile,
-    onAuthStateChanged,
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc
-} from './config.js';
-
-import { ADMIN_EMAIL, currentUser } from './config.js';
-import { showToast } from './utilities.js';
-import { updateUIForAdminAccess, updateUIForUserAccess } from './ui.js';
-
-// Inicialização da autenticação
-export function initAuth() {
-    onAuthStateChanged(auth, handleAuthStateChanged);
-    setupAuthFormEvents();
-    setupPasswordToggle();
-}
+// Variável para armazenar dados do usuário atual
+let currentUser = null;
 
 // Função para lidar com mudanças no estado de autenticação
 async function handleAuthStateChanged(user) {
@@ -31,20 +8,20 @@ async function handleAuthStateChanged(user) {
     
     if (user) {
         // Usuário está autenticado
-        window.currentUser = user;
+        currentUser = user;
         
         // Buscar informações adicionais do usuário no Firestore
         try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userDoc = await window.firebase.getDoc(window.firebase.doc(window.db, 'users', user.uid));
             
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 
                 // Atualizar informações do usuário atual
-                window.currentUser.userData = userData;
+                currentUser.userData = userData;
                 
                 // Verificar status de aprovação
-                if (user.email === ADMIN_EMAIL) {
+                if (user.email === window.ADMIN_EMAIL) {
                     // Administrador tem acesso total
                     showApp();
                     updateUIForAdminAccess();
@@ -62,7 +39,7 @@ async function handleAuthStateChanged(user) {
                 
                 // Mostrar papel no sistema
                 let roleText = "";
-                if (user.email === ADMIN_EMAIL) {
+                if (user.email === window.ADMIN_EMAIL) {
                     roleText = "Administrador";
                 } else if (userData.status === 'approved') {
                     roleText = userData.accessLevel === 'full' ? "Acesso Total" : "Acesso Parcial";
@@ -76,19 +53,19 @@ async function handleAuthStateChanged(user) {
                     uid: user.uid,
                     email: user.email,
                     displayName: user.displayName || user.email.split('@')[0],
-                    status: user.email === ADMIN_EMAIL ? 'approved' : 'pending',
-                    accessLevel: user.email === ADMIN_EMAIL ? 'full' : 'none',
+                    status: user.email === window.ADMIN_EMAIL ? 'approved' : 'pending',
+                    accessLevel: user.email === window.ADMIN_EMAIL ? 'full' : 'none',
                     createdAt: new Date().toISOString(),
                     phone: '',
                     branch: ''
                 };
                 
-                await setDoc(doc(db, 'users', user.uid), newUserData);
+                await window.firebase.setDoc(window.firebase.doc(window.db, 'users', user.uid), newUserData);
                 
                 // Atualizar informações do usuário atual
-                window.currentUser.userData = newUserData;
+                currentUser.userData = newUserData;
                 
-                if (user.email === ADMIN_EMAIL) {
+                if (user.email === window.ADMIN_EMAIL) {
                     showApp();
                     updateUIForAdminAccess();
                 } else {
@@ -101,7 +78,7 @@ async function handleAuthStateChanged(user) {
         }
     } else {
         // Usuário não está autenticado
-        window.currentUser = null;
+        currentUser = null;
         showLoginForm();
     }
     
@@ -112,13 +89,13 @@ async function handleAuthStateChanged(user) {
 }
 
 // Função para fazer login
-export async function login(email, password) {
+async function login(email, password) {
     try {
         const loginError = document.getElementById('loginError');
         loginError.classList.add('hidden');
         
-        const credential = await signInWithEmailAndPassword(
-            auth, 
+        const credential = await window.firebase.signInWithEmailAndPassword(
+            window.auth, 
             email, 
             password
         );
@@ -143,7 +120,7 @@ export async function login(email, password) {
 }
 
 // Função para cadastrar um novo usuário
-export async function register(name, email, phone, branch, password) {
+async function register(name, email, phone, branch, password) {
     try {
         const registerError = document.getElementById('registerError');
         registerError.classList.add('hidden');
@@ -153,8 +130,8 @@ export async function register(name, email, phone, branch, password) {
         const branchUpper = branch.toUpperCase();
         
         // Criar usuário na autenticação do Firebase
-        const userCredential = await createUserWithEmailAndPassword(
-            auth, 
+        const userCredential = await window.firebase.createUserWithEmailAndPassword(
+            window.auth, 
             email, 
             password
         );
@@ -162,17 +139,17 @@ export async function register(name, email, phone, branch, password) {
         const user = userCredential.user;
         
         // Atualizar o nome de exibição no Auth
-        await updateProfile(user, { displayName: nameUpper });
+        await window.firebase.updateProfile(user, { displayName: nameUpper });
         
         // Criar documento do usuário no Firestore
-        await setDoc(doc(db, 'users', user.uid), {
+        await window.firebase.setDoc(window.firebase.doc(window.db, 'users', user.uid), {
             uid: user.uid,
             email: email,
             displayName: nameUpper,
             phone: phone,
             branch: branchUpper,
-            status: email === ADMIN_EMAIL ? 'approved' : 'pending',
-            accessLevel: email === ADMIN_EMAIL ? 'full' : 'none',
+            status: email === window.ADMIN_EMAIL ? 'approved' : 'pending',
+            accessLevel: email === window.ADMIN_EMAIL ? 'full' : 'none',
             createdAt: new Date().toISOString()
         });
         
@@ -196,10 +173,10 @@ export async function register(name, email, phone, branch, password) {
 }
 
 // Função para fazer logout
-export async function logout() {
+async function logout() {
     try {
-        await signOut(auth);
-        window.currentUser = null;
+        await window.firebase.signOut(window.auth);
+        currentUser = null;
         
         // Limpar campos de login
         document.getElementById('loginEmail').value = '';
@@ -228,7 +205,7 @@ export async function logout() {
     }
 }
 
-// Funções para gerenciar a UI
+// === Funções para atualizar a UI com base nas permissões ===
 function showLoginForm() {
     document.getElementById('authSection').classList.remove('hidden');
     document.getElementById('pendingApprovalSection').classList.add('hidden');
@@ -250,30 +227,89 @@ function showApp() {
     showSection('simulator');
 }
 
-function showSection(sectionName) {
-    window.currentSection = sectionName;
+function updateUIForAdminAccess() {
+    // Mostrar seção de administração
+    document.getElementById('adminSection').classList.remove('hidden');
     
-    // Esconder todas as seções
-    document.getElementById('simulatorSection').classList.add('hidden');
-    document.getElementById('historySection').classList.add('hidden');
-    document.getElementById('usersSection').classList.add('hidden');
+    // Habilitar acesso ao histórico e funcionalidade de salvar
+    document.querySelectorAll('.history-access-item').forEach(item => {
+        item.classList.remove('hidden');
+    });
     
-    // Mostrar a seção selecionada
-    if (sectionName === 'simulator') {
-        document.getElementById('simulatorSection').classList.remove('hidden');
-    } else if (sectionName === 'history') {
-        document.getElementById('historySection').classList.remove('hidden');
-    } else if (sectionName === 'users') {
-        document.getElementById('usersSection').classList.remove('hidden');
+    document.querySelectorAll('.save-access-item').forEach(item => {
+        item.classList.remove('hidden');
+    });
+    
+    // Mostrar botão "Excluir Todas" (apenas admin pode ver esse botão)
+    const deleteAllBtn = document.getElementById('deleteAllSimulationsBtn');
+    if (deleteAllBtn) {
+        deleteAllBtn.classList.remove('hidden');
     }
+    
+    // Administrador sempre tem acesso a todas as funcionalidades
+    const specialDiscountContainer = document.getElementById('useSpecialDiscount').parentElement.parentElement;
+    const mostruarioContainer = document.getElementById('isMostruario').parentElement.parentElement;
+    
+    specialDiscountContainer.classList.remove('hidden');
+    mostruarioContainer.classList.remove('hidden');
+    
+    // Ainda verificamos o tipo de preço para mostruário
+    atualizarEstadoMostruario();
 }
 
-// Funções para gerenciar autenticação
-function setupAuthTabs() {
-    // Configurar botões de aba
-    document.getElementById('loginTabBtn').addEventListener('click', () => switchAuthTab('login'));
-    document.getElementById('registerTabBtn').addEventListener('click', () => switchAuthTab('register'));
-    document.getElementById('forgotPasswordTabBtn').addEventListener('click', () => switchAuthTab('forgotPassword'));
+function updateUIForUserAccess(accessLevel) {
+    // Ocultar seção de administração
+    document.getElementById('adminSection').classList.add('hidden');
+    
+    // Ocultar botão "Excluir Todas" (apenas admin pode ver)
+    const deleteAllBtn = document.getElementById('deleteAllSimulationsBtn');
+    if (deleteAllBtn) {
+        deleteAllBtn.classList.add('hidden');
+    }
+    
+    // Verificar permissões especiais do usuário
+    const canUseSpecialDiscount = currentUser.userData.canUseSpecialDiscount === true;
+    const canUseMostruario = currentUser.userData.canUseMostruario === true;
+    
+    // Atualizar elementos baseados nas permissões
+    const specialDiscountContainer = document.getElementById('useSpecialDiscount').parentElement.parentElement;
+    const mostruarioContainer = document.getElementById('isMostruario').parentElement.parentElement;
+    
+    if (!canUseSpecialDiscount) {
+        specialDiscountContainer.classList.add('hidden');
+        document.getElementById('useSpecialDiscount').checked = false;
+    } else {
+        specialDiscountContainer.classList.remove('hidden');
+    }
+    
+    if (!canUseMostruario) {
+        mostruarioContainer.classList.add('hidden');
+        document.getElementById('isMostruario').checked = false;
+    } else {
+        mostruarioContainer.classList.remove('hidden');
+        // Ainda verificamos o tipo de preço para habilitar/desabilitar
+        atualizarEstadoMostruario();
+    }
+    
+    if (accessLevel === 'full') {
+        // Acesso total - pode visualizar histórico e salvar simulações
+        document.querySelectorAll('.history-access-item').forEach(item => {
+            item.classList.remove('hidden');
+        });
+        
+        document.querySelectorAll('.save-access-item').forEach(item => {
+            item.classList.remove('hidden');
+        });
+    } else {
+        // Acesso parcial - apenas simulador
+        document.querySelectorAll('.history-access-item').forEach(item => {
+            item.classList.add('hidden');
+        });
+        
+        document.querySelectorAll('.save-access-item').forEach(item => {
+            item.classList.add('hidden');
+        });
+    }
 }
 
 function switchAuthTab(tab) {
@@ -307,154 +343,15 @@ function switchAuthTab(tab) {
     }
 }
 
-function setupAuthFormEvents() {
-    setupAuthTabs();
-    
-    // Configurar formulário de login
-    document.getElementById('loginBtn').addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        
-        // Validação básica
-        if (!email || !password) {
-            document.getElementById('loginError').textContent = 'Preencha todos os campos.';
-            document.getElementById('loginError').classList.remove('hidden');
-            return;
-        }
-        
-        // Tenta fazer login
-        const result = await login(email, password);
-        
-        if (!result.success) {
-            document.getElementById('loginError').textContent = result.error;
-            document.getElementById('loginError').classList.remove('hidden');
-        }
-    });
-    
-    // Configurar formulário de cadastro
-    document.getElementById('registerBtn').addEventListener('click', async function(e) {
-        e.preventDefault();
-        
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const phone = document.getElementById('registerPhone').value;
-        const branch = document.getElementById('registerBranch').value;
-        const password = document.getElementById('registerPassword').value;
-        const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
-        
-        // Validação
-        if (!name || !email || !phone || !branch || !password || !passwordConfirm) {
-            document.getElementById('registerError').textContent = 'Preencha todos os campos.';
-            document.getElementById('registerError').classList.remove('hidden');
-            return;
-        }
-        
-        if (password !== passwordConfirm) {
-            document.getElementById('registerError').textContent = 'As senhas não coincidem.';
-            document.getElementById('registerError').classList.remove('hidden');
-            return;
-        }
-        
-        if (password.length < 6) {
-            document.getElementById('registerError').textContent = 'A senha deve ter pelo menos 6 caracteres.';
-            document.getElementById('registerError').classList.remove('hidden');
-            return;
-        }
-        
-        // Validar formato do telefone
-        if (!phone.match(/^\(\d{2}\)\s*\d{5}-\d{4}$/)) {
-            document.getElementById('registerError').textContent = 'Formato de telefone inválido.';
-            document.getElementById('registerError').classList.remove('hidden');
-            return;
-        }
-        
-        // Tenta cadastrar
-        const result = await register(name, email, phone, branch, password);
-        
-        if (result.success) {
-            // Mostrar mensagem de sucesso
-            document.getElementById('registerSuccess').classList.remove('hidden');
-            
-            // Esconder o formulário
-            document.getElementById('registerForm').classList.add('hidden');
-            
-            // Redirecionar para login após 3 segundos
-            setTimeout(() => {
-                showPendingApproval();
-            }, 3000);
-        } else {
-            document.getElementById('registerError').textContent = result.error;
-            document.getElementById('registerError').classList.remove('hidden');
-        }
-    });
-
-    // Configurar logout pendente
-    document.getElementById('logoutBtnPending').addEventListener('click', logout);
-    
-    // Configurar logout do app
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-}
-
-function setupPasswordToggle() {
-    // Login password toggle
-    document.getElementById('toggleLoginPassword').addEventListener('click', function() {
-        const passwordInput = document.getElementById('loginPassword');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
-    
-    // Register password toggle
-    document.getElementById('toggleRegisterPassword').addEventListener('click', function() {
-        const passwordInput = document.getElementById('registerPassword');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
-    
-    // Register password confirm toggle
-    document.getElementById('toggleRegisterPasswordConfirm').addEventListener('click', function() {
-        const passwordInput = document.getElementById('registerPasswordConfirm');
-        const icon = this.querySelector('i');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    });
-}
-
-// Exportar funções para uso global
-window.auth = {
-    login,
-    register,
-    logout,
-    showSection,
-    switchAuthTab
-};
-
-// Inicializar autenticação ao carregar o módulo
-document.addEventListener('DOMContentLoaded', initAuth);
+// Exportar funções e variáveis para uso global
+window.handleAuthStateChanged = handleAuthStateChanged;
+window.login = login;
+window.register = register;
+window.logout = logout;
+window.showLoginForm = showLoginForm;
+window.showPendingApproval = showPendingApproval;
+window.showApp = showApp;
+window.updateUIForAdminAccess = updateUIForAdminAccess;
+window.updateUIForUserAccess = updateUIForUserAccess;
+window.switchAuthTab = switchAuthTab;
+window.currentUser = currentUser;
