@@ -1,3 +1,19 @@
+// Importar dependências
+import { 
+    auth, 
+    db, 
+    ADMIN_EMAIL, 
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile,
+    signOut,
+    doc,
+    getDoc,
+    setDoc
+} from './config.js';
+
+import { showToast } from './utils.js';
+
 // Variável para armazenar dados do usuário atual
 let currentUser = null;
 
@@ -12,7 +28,7 @@ async function handleAuthStateChanged(user) {
         
         // Buscar informações adicionais do usuário no Firestore
         try {
-            const userDoc = await window.firebase.getDoc(window.firebase.doc(window.db, 'users', user.uid));
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
             
             if (userDoc.exists()) {
                 const userData = userDoc.data();
@@ -21,7 +37,7 @@ async function handleAuthStateChanged(user) {
                 currentUser.userData = userData;
                 
                 // Verificar status de aprovação
-                if (user.email === window.ADMIN_EMAIL) {
+                if (user.email === ADMIN_EMAIL) {
                     // Administrador tem acesso total
                     showApp();
                     updateUIForAdminAccess();
@@ -39,7 +55,7 @@ async function handleAuthStateChanged(user) {
                 
                 // Mostrar papel no sistema
                 let roleText = "";
-                if (user.email === window.ADMIN_EMAIL) {
+                if (user.email === ADMIN_EMAIL) {
                     roleText = "Administrador";
                 } else if (userData.status === 'approved') {
                     roleText = userData.accessLevel === 'full' ? "Acesso Total" : "Acesso Parcial";
@@ -53,19 +69,19 @@ async function handleAuthStateChanged(user) {
                     uid: user.uid,
                     email: user.email,
                     displayName: user.displayName || user.email.split('@')[0],
-                    status: user.email === window.ADMIN_EMAIL ? 'approved' : 'pending',
-                    accessLevel: user.email === window.ADMIN_EMAIL ? 'full' : 'none',
+                    status: user.email === ADMIN_EMAIL ? 'approved' : 'pending',
+                    accessLevel: user.email === ADMIN_EMAIL ? 'full' : 'none',
                     createdAt: new Date().toISOString(),
                     phone: '',
                     branch: ''
                 };
                 
-                await window.firebase.setDoc(window.firebase.doc(window.db, 'users', user.uid), newUserData);
+                await setDoc(doc(db, 'users', user.uid), newUserData);
                 
                 // Atualizar informações do usuário atual
                 currentUser.userData = newUserData;
                 
-                if (user.email === window.ADMIN_EMAIL) {
+                if (user.email === ADMIN_EMAIL) {
                     showApp();
                     updateUIForAdminAccess();
                 } else {
@@ -94,8 +110,8 @@ async function login(email, password) {
         const loginError = document.getElementById('loginError');
         loginError.classList.add('hidden');
         
-        const credential = await window.firebase.signInWithEmailAndPassword(
-            window.auth, 
+        const credential = await signInWithEmailAndPassword(
+            auth, 
             email, 
             password
         );
@@ -130,8 +146,8 @@ async function register(name, email, phone, branch, password) {
         const branchUpper = branch.toUpperCase();
         
         // Criar usuário na autenticação do Firebase
-        const userCredential = await window.firebase.createUserWithEmailAndPassword(
-            window.auth, 
+        const userCredential = await createUserWithEmailAndPassword(
+            auth, 
             email, 
             password
         );
@@ -139,17 +155,17 @@ async function register(name, email, phone, branch, password) {
         const user = userCredential.user;
         
         // Atualizar o nome de exibição no Auth
-        await window.firebase.updateProfile(user, { displayName: nameUpper });
+        await updateProfile(user, { displayName: nameUpper });
         
         // Criar documento do usuário no Firestore
-        await window.firebase.setDoc(window.firebase.doc(window.db, 'users', user.uid), {
+        await setDoc(doc(db, 'users', user.uid), {
             uid: user.uid,
             email: email,
             displayName: nameUpper,
             phone: phone,
             branch: branchUpper,
-            status: email === window.ADMIN_EMAIL ? 'approved' : 'pending',
-            accessLevel: email === window.ADMIN_EMAIL ? 'full' : 'none',
+            status: email === ADMIN_EMAIL ? 'approved' : 'pending',
+            accessLevel: email === ADMIN_EMAIL ? 'full' : 'none',
             createdAt: new Date().toISOString()
         });
         
@@ -175,7 +191,7 @@ async function register(name, email, phone, branch, password) {
 // Função para fazer logout
 async function logout() {
     try {
-        await window.firebase.signOut(window.auth);
+        await signOut(auth);
         currentUser = null;
         
         // Limpar campos de login
@@ -254,7 +270,9 @@ function updateUIForAdminAccess() {
     mostruarioContainer.classList.remove('hidden');
     
     // Ainda verificamos o tipo de preço para mostruário
-    atualizarEstadoMostruario();
+    if (window.atualizarEstadoMostruario) {
+        window.atualizarEstadoMostruario();
+    }
 }
 
 function updateUIForUserAccess(accessLevel) {
@@ -288,7 +306,9 @@ function updateUIForUserAccess(accessLevel) {
     } else {
         mostruarioContainer.classList.remove('hidden');
         // Ainda verificamos o tipo de preço para habilitar/desabilitar
-        atualizarEstadoMostruario();
+        if (window.atualizarEstadoMostruario) {
+            window.atualizarEstadoMostruario();
+        }
     }
     
     if (accessLevel === 'full') {
@@ -343,15 +363,36 @@ function switchAuthTab(tab) {
     }
 }
 
-// Exportar funções e variáveis para uso global
-window.handleAuthStateChanged = handleAuthStateChanged;
-window.login = login;
-window.register = register;
-window.logout = logout;
-window.showLoginForm = showLoginForm;
-window.showPendingApproval = showPendingApproval;
-window.showApp = showApp;
-window.updateUIForAdminAccess = updateUIForAdminAccess;
-window.updateUIForUserAccess = updateUIForUserAccess;
-window.switchAuthTab = switchAuthTab;
-window.currentUser = currentUser;
+// Função para mostrar uma seção específica (usado no auth.js e main.js)
+function showSection(sectionName) {
+    window.currentSection = sectionName;
+    
+    // Esconder todas as seções
+    document.getElementById('simulatorSection').classList.add('hidden');
+    document.getElementById('historySection').classList.add('hidden');
+    document.getElementById('usersSection').classList.add('hidden');
+    
+    // Mostrar a seção selecionada
+    if (sectionName === 'simulator') {
+        document.getElementById('simulatorSection').classList.remove('hidden');
+    } else if (sectionName === 'history') {
+        document.getElementById('historySection').classList.remove('hidden');
+    } else if (sectionName === 'users') {
+        document.getElementById('usersSection').classList.remove('hidden');
+    }
+}
+
+export {
+    currentUser,
+    handleAuthStateChanged,
+    login,
+    register,
+    logout,
+    showLoginForm,
+    showPendingApproval,
+    showApp,
+    updateUIForAdminAccess, 
+    updateUIForUserAccess,
+    switchAuthTab,
+    showSection
+};
