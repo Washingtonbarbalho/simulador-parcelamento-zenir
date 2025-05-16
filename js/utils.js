@@ -6,8 +6,6 @@ const FATORES = {
     carne: [1.0690, 0.5523, 0.3804, 0.2946, 0.2432, 0.2091, 0.1849, 0.1668, 0.1528, 0.1417, 0.1327, 0.1252]
 };
 
-window.FATORES = FATORES;
-
 // Função para formatar valores monetários
 function formatCurrency(value) {
     return new Intl.NumberFormat('pt-BR', { 
@@ -100,8 +98,10 @@ function downloadVCard(name, phone, code) {
     document.body.removeChild(a);
 }
 
-// Exportar funções para uso global
-window.formatCurrency = formatCurrency;
-window.currencyToNumber = currencyToNumber;
-window.showToast = showToast;
-window.downloadVCard = downloadVCard;
+export { 
+    FATORES, 
+    formatCurrency, 
+    currencyToNumber, 
+    showToast, 
+    downloadVCard 
+};
