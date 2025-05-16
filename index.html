@@ -43,9 +43,6 @@
             }
         });
     </script>
-    
-    <!-- Firebase SDK -->
-    <script type="module" src="js/config.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
     <!-- Tela de carregamento inicial -->
@@ -187,17 +184,628 @@
 
     <!-- Mensagem de aprovação pendente -->
     <div id="pendingApprovalSection" class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 fadeIn hidden">
-        <!-- Conteúdo da seção pendente (igual ao HTML original) -->
-        <!-- ... -->
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mx-auto" alt="Zenir Móveis">
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Acesso Pendente</h2>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 card">
+                <div class="text-center space-y-6">
+                    <div class="mx-auto w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Aprovação Pendente</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        Seu cadastro está pendente de aprovação pelo administrador. Você receberá acesso assim que for aprovado.
+                    </p>
+                    <button id="logoutBtnPending" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Aplicação principal (após login) -->
     <div id="appSection" class="hidden">
-        <!-- Menu lateral e todo o conteúdo da aplicação (igual ao HTML original) -->
-        <!-- ... -->
+        <!-- Menu lateral -->
+        <div id="overlay" class="overlay fixed inset-0 z-40 hidden opacity-0"></div>
+        
+        <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-50 shadow-xl overflow-y-auto">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-primary">Menu</h2>
+                <button id="closeSidebar" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="p-4">
+                <div class="mb-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Logado como:</p>
+                    <p id="userDisplayName" class="font-medium text-primary"></p>
+                    <p id="userRole" class="text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
+                </div>
+
+                <p class="text-xs uppercase font-semibold text-gray-500 dark:text-gray-400 mb-2 mt-4">Simulador</p>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" id="showSimulator" class="block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-calculator mr-2"></i> Simulador
+                        </a>
+                    </li>
+                    <li class="history-access-item">
+                        <a href="#" id="showHistory" class="block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <i class="fas fa-history mr-2"></i> Histórico de Simulações
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Seção Admin - Visível apenas para administrador -->
+                <div id="adminSection" class="hidden">
+                    <p class="text-xs uppercase font-semibold text-gray-500 dark:text-gray-400 mb-2 mt-6">Administração</p>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="#" id="showUsers" class="block p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <i class="fas fa-users mr-2"></i> Gerenciar Usuários
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button id="logoutBtn" class="flex w-full items-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 text-red-600 dark:text-red-400">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Sair
+                    </button>
+                </div>
+            </nav>
+        </div>
+        
+        <div class="container max-w-4xl mx-auto px-4 py-8">
+            <header class="mb-8 relative">
+                <button id="openSidebar" class="absolute top-0 left-0 p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-primary text-xl"></i>
+                </button>
+                
+                <div class="flex flex-col items-center justify-center mb-2">
+                    <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-32 mx-auto mb-1" alt="Zenir Móveis">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-white text-center">Simulador de Parcelamento</h1>
+                </div>
+            </header>
+
+            <!-- Seção do Simulador -->
+            <div id="simulatorSection">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-custom p-6 mb-8 card">
+                    <form id="simulationForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Valores -->
+                        <div class="space-y-4">
+                            <h2 class="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Valores</h2>
+                            
+                            <div class="space-y-2">
+                                <label for="productValue" class="block text-sm font-medium">Valor do Produto (R$)</label>
+                                <div class="relative">
+                                    <input type="text" id="productValue" inputmode="numeric" 
+                                        class="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" 
+                                        placeholder="R$ 0,00">
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="geValue" class="block text-sm font-medium">Valor da GE (R$)</label>
+                                <div class="relative">
+                                    <input type="text" id="geValue" inputmode="numeric" 
+                                        class="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" 
+                                        placeholder="R$ 0,00">
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label for="entryValue" class="block text-sm font-medium">Valor da Entrada (R$)</label>
+                                <div class="relative">
+                                    <input type="text" id="entryValue" inputmode="numeric" 
+                                        class="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" 
+                                        placeholder="R$ 0,00">
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="isMostruario" class="form-checkbox text-primary focus:ring-primary h-4 w-4" disabled>
+                                    <span class="ml-2 text-sm font-medium">Peça de Mostruário</span>
+                                </label>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Para peças de mostruário, o fator de 12x no carnê será o mesmo do cartão (apenas para o produto).
+                                    <span id="mostruarioDisabledMsg" class="block text-amber-600 dark:text-amber-400 italic">Disponível apenas para preço de tabela.</span>
+                                </p>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="useSpecialDiscount" class="form-checkbox text-primary focus:ring-primary h-4 w-4">
+                                    <span class="ml-2 text-sm font-medium">Usar Desconto Especial</span>
+                                </label>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Mostra o valor inflacionado (produto +50%) para criar ancoragem de preço na negociação.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Configurações -->
+                        <div class="space-y-4">
+                            <h2 class="text-lg font-semibold border-b border-gray-200 dark:border-gray-700 pb-2">Configurações</h2>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium">Tipo de Parcelamento</label>
+                                <div class="flex gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="paymentType" value="carne" class="form-radio text-primary focus:ring-primary h-4 w-4" checked>
+                                        <span class="ml-2 text-sm">Carnê</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="paymentType" value="cartao" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                        <span class="ml-2 text-sm">Cartão</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="paymentType" value="ambos" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                        <span class="ml-2 text-sm">Ambos</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium">Tipo de Preço</label>
+                                <div class="flex gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="priceType" value="promocional" class="form-radio text-primary focus:ring-primary h-4 w-4" checked>
+                                        <span class="ml-2 text-sm">Promocional</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="priceType" value="tabela" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                        <span class="ml-2 text-sm">Tabela</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium">Usar Fator</label>
+                                <div class="flex gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="useFactor" value="nao" class="form-radio text-primary focus:ring-primary h-4 w-4" checked>
+                                        <span class="ml-2 text-sm">Não</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="useFactor" value="sim" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                        <span class="ml-2 text-sm">Sim</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium">Aplicar Taxa Prestamista</label>
+                                <div class="flex gap-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="applyTaxaPrestamista" value="sim" class="form-radio text-primary focus:ring-primary h-4 w-4" checked>
+                                        <span class="ml-2 text-sm">Sim</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="applyTaxaPrestamista" value="nao" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                        <span class="ml-2 text-sm">Não</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Seleção de Parcelas -->
+                        <div class="md:col-span-2 space-y-4">
+                            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2">
+                                <h2 class="text-lg font-semibold">Parcelas</h2>
+                                <div class="flex gap-2">
+                                    <button type="button" id="selectAllBtn" class="text-sm text-primary hover:text-secondary focus:outline-none">
+                                        Selecionar Todas
+                                    </button>
+                                    <button type="button" id="deselectAllBtn" class="text-sm text-primary hover:text-secondary focus:outline-none">
+                                        Desmarcar Todas
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="relative">
+                                <label for="parcelasSelect" class="block text-sm font-medium mb-2">Selecione as parcelas:</label>
+                                <select id="parcelasSelect" multiple class="form-multiselect block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" size="6">
+                                    <!-- Opções de parcelas serão adicionadas via JavaScript -->
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                    Dica: Mantenha pressionada a tecla Ctrl (ou Cmd no Mac) para selecionar múltiplas parcelas.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Botão Calcular -->
+                        <div class="md:col-span-2 flex justify-center mt-4">
+                            <button type="submit" class="bg-secondary hover:bg-primary text-white font-medium py-3 px-8 rounded-lg transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 shadow-md">
+                                <i class="fas fa-calculator mr-2"></i> Calcular Parcelamento
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Resultados - Carnê -->
+                <div id="resultSectionCarne" class="bg-white dark:bg-gray-800 rounded-lg shadow-custom p-6 mb-6 hidden card">
+                    <h2 class="text-xl font-semibold mb-4 text-center text-primary">Tabela de Parcelamento - Carnê</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Parcelas
+                                    </th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Valor da Parcela
+                                    </th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Detalhes
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultTableBodyCarne" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Resultados serão adicionados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Resultados - Cartão -->
+                <div id="resultSectionCartao" class="bg-white dark:bg-gray-800 rounded-lg shadow-custom p-6 hidden card">
+                    <h2 class="text-xl font-semibold mb-4 text-center text-primary">Tabela de Parcelamento - Cartão</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Parcelas
+                                    </th>
+                                    <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Valor da Parcela
+                                    </th>
+                                    <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                        Detalhes
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultTableBodyCartao" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Resultados serão adicionados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Botões de ação -->
+                <div id="saveButtonContainer" class="flex justify-center gap-4 mt-6 mb-8 hidden">
+                    <button id="saveSimulationBtn" type="button" class="save-access-item bg-primary hover:bg-secondary text-white font-medium py-3 px-6 rounded-lg transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 shadow-md">
+                        <i class="fas fa-save mr-2"></i> Salvar Simulação
+                    </button>
+                    <button id="clearSimulationBtn" type="button" class="bg-secondary hover:bg-primary text-white font-medium py-3 px-6 rounded-lg transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-opacity-50 shadow-md">
+                        <i class="fas fa-trash-alt mr-2"></i> Limpar Simulação
+                    </button>
+                </div>
+                
+                <!-- Modal de confirmação para salvar simulação -->
+                <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Confirmar ação</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-6">Deseja salvar esta simulação?</p>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" id="noSaveBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary">
+                                Não
+                            </button>
+                            <button type="button" id="yesSaveBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary">
+                                Sim
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal para dados da simulação -->
+                <div id="saveModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Detalhes da Simulação</h3>
+                        
+                        <form id="saveSimulationForm" class="space-y-4">
+                            <div>
+                                <label for="clientName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome do Cliente</label>
+                                <input type="text" id="clientName" class="uppercase block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nome completo">
+                            </div>
+                            
+                            <div>
+                                <label for="clientPhone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefone</label>
+                                <input type="text" id="clientPhone" inputmode="numeric" class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="(00)00000-0000">
+                            </div>
+                            
+                            <div>
+                                <label for="productName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome do Produto</label>
+                                <input type="text" id="productName" class="uppercase block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Nome do produto">
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3 pt-4">
+                                <button type="button" id="cancelSaveBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    Cancelar
+                                </button>
+                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary">
+                                    Salvar
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Mensagem de sucesso -->
+                        <div id="saveSuccessMessage" class="hidden text-center pt-4">
+                            <p class="text-green-600 dark:text-green-400 font-medium mb-3">
+                                Simulação salva com sucesso!
+                            </p>
+                            <button id="newSimulationBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary">
+                                Nova Simulação
+                            </button>
+                        </div>
+                        
+                        <!-- Mensagem de erro -->
+                        <div id="saveErrorMessage" class="hidden text-center pt-4">
+                            <p class="text-red-600 dark:text-red-400 font-medium mb-3" id="errorText">
+                                Ocorreu um erro ao salvar a simulação.
+                            </p>
+                            <button id="tryAgainBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary">
+                                Tentar Novamente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção do Histórico de Simulações -->
+            <div id="historySection" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-custom p-6 mb-8 card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-primary">Histórico de Simulações</h2>
+                        <div class="flex space-x-4">
+                            <button id="deleteAllSimulationsBtn" class="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 focus:outline-none">
+                                <i class="fas fa-trash-alt mr-1"></i> Excluir Todas
+                            </button>
+                            <button id="refreshHistoryBtn" class="text-primary hover:text-secondary focus:outline-none">
+                                <i class="fas fa-sync-alt"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Barra de busca -->
+                    <div class="mb-6">
+                        <div class="relative">
+                            <input type="text" id="searchHistory" placeholder="Buscar por cliente ou produto" class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado de carregamento -->
+                    <div id="loadingHistory" class="flex justify-center items-center py-8 hidden">
+                        <div class="loading-spinner mr-3"></div>
+                        <p>Carregando histórico...</p>
+                    </div>
+                    
+                    <!-- Estado vazio -->
+                    <div id="emptyHistory" class="text-center py-8 hidden">
+                        <i class="fas fa-history text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-gray-500 dark:text-gray-400">Nenhuma simulação encontrada.</p>
+                    </div>
+                    
+                    <!-- Lista de simulações -->
+                    <div id="historyList" class="space-y-4">
+                        <!-- As simulações serão adicionadas aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Gerenciamento de Usuários (Admin) -->
+            <div id="usersSection" class="hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-custom p-6 mb-8 card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-primary">Gerenciamento de Usuários</h2>
+                        <button id="refreshUsersBtn" class="text-primary hover:text-secondary focus:outline-none">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                    </div>
+
+                    <!-- Guias de aprovados/pendentes -->
+                    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                        <button id="approvedUsersTabBtn" class="px-4 py-2 border-b-2 border-primary text-primary font-medium">
+                            Usuários Aprovados
+                        </button>
+                        <button id="pendingUsersTabBtn" class="px-4 py-2 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium">
+                            Solicitações Pendentes
+                        </button>
+                    </div>
+                    
+                    <!-- Estado de carregamento -->
+                    <div id="loadingUsers" class="flex justify-center items-center py-8">
+                        <div class="loading-spinner mr-3"></div>
+                        <p>Carregando usuários...</p>
+                    </div>
+                    
+                    <!-- Estado vazio -->
+                    <div id="emptyApprovedUsers" class="text-center py-8 hidden">
+                        <i class="fas fa-users text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-gray-500 dark:text-gray-400">Nenhum usuário aprovado encontrado.</p>
+                    </div>
+
+                    <div id="emptyPendingUsers" class="text-center py-8 hidden">
+                        <i class="fas fa-user-clock text-gray-400 text-4xl mb-3"></i>
+                        <p class="text-gray-500 dark:text-gray-400">Nenhuma solicitação pendente.</p>
+                    </div>
+                    
+                    <!-- Lista de usuários aprovados -->
+                    <div id="approvedUsersList" class="space-y-4 hidden">
+                        <!-- Os usuários serão adicionados aqui via JavaScript -->
+                    </div>
+
+                    <!-- Lista de usuários pendentes -->
+                    <div id="pendingUsersList" class="space-y-4 hidden">
+                        <!-- Os usuários pendentes serão adicionados aqui via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <!-- Scripts -->
+    <!-- Modal de Detalhes da Simulação -->
+    <div id="simulationDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="details-modal bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl mx-4 my-4 flex flex-col max-h-[90vh]">
+            <!-- Cabeçalho do modal -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detalhes da Simulação</h3>
+                <button id="closeDetailsModal" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Estado de carregamento -->
+            <div id="loadingDetails" class="flex-1 flex flex-col justify-center items-center py-8">
+                <div class="loading-spinner mb-3"></div>
+                <p>Carregando detalhes da simulação...</p>
+            </div>
+            
+            <!-- Conteúdo do modal (com scroll) -->
+            <div id="simulationDetailsContent" class="flex-1 overflow-y-auto custom-scrollbar p-4 hidden">
+                <!-- O conteúdo detalhado será inserido aqui via JavaScript -->
+            </div>
+            
+            <!-- Rodapé do modal -->
+            <div class="p-5 border-t border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Seletor de status -->
+                    <div class="flex flex-col space-y-2">
+                        <label for="simulationStatus" class="text-sm font-medium text-gray-700 dark:text-gray-300">Status da simulação:</label>
+                        <div class="flex items-center space-x-3">
+                            <select id="simulationStatus" class="border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm focus:ring-primary focus:border-primary py-2 px-3 w-full md:w-auto">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Concluída">Concluída</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                            <button id="saveStatusBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition-colors shadow-sm">
+                                <i class="fas fa-save mr-2"></i> Salvar Status
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Botão de fechar -->
+                    <div class="flex justify-end items-center">
+                        <button id="closeDetailsBtn" class="px-6 py-2 bg-primary text-white rounded-md hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary shadow-sm font-medium">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Usuário (Admin) -->
+    <div id="editUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Editar Usuário</h3>
+                <button id="closeEditUserModal" class="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="editUserForm" class="space-y-4">
+                <input type="hidden" id="editUserId">
+                
+                <div>
+                    <label for="editUserName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome Completo</label>
+                    <input type="text" id="editUserName" class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <div>
+                    <label for="editUserEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300">E-mail</label>
+                    <input type="email" id="editUserEmail" class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" readonly>
+                </div>
+
+                <div>
+                    <label for="editUserPhone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telefone</label>
+                    <input type="text" id="editUserPhone" class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+
+                <div>
+                    <label for="editUserBranch" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filial</label>
+                    <input type="text" id="editUserBranch" class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-base focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Digite o nome da filial">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nível de Acesso</label>
+                    <div class="space-y-2">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="editUserAccess" value="full" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                            <span class="ml-2 text-sm">Acesso Total (Simular e Salvar)</span>
+                        </label>
+                        <div class="flex items-start">
+                            <label class="inline-flex items-center">
+                                <input type="radio" name="editUserAccess" value="partial" class="form-radio text-primary focus:ring-primary h-4 w-4">
+                                <span class="ml-2 text-sm">Acesso Parcial (Apenas Simular)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Permissões Especiais</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="canUseSpecialDiscount" class="form-checkbox text-primary focus:ring-primary h-4 w-4">
+                            <span class="ml-2 text-sm">Permitir Desconto Especial</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="canUseMostruario" class="form-checkbox text-primary focus:ring-primary h-4 w-4">
+                            <span class="ml-2 text-sm">Permitir Peça de Mostruário</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelEditUserBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmação para exclusão -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Confirmar exclusão</h3>
+            <p id="deleteConfirmMessage" class="text-gray-700 dark:text-gray-300 mb-6">
+                Tem certeza que deseja excluir esta simulação?
+            </p>
+            
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="cancelDeleteBtn" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary">
+                    Cancelar
+                </button>
+                <button type="button" id="confirmDeleteBtn" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    Excluir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Carregado primeiro) -->
+    <script type="module" src="js/config.js"></script>
+    <!-- Outros scripts que dependem do Firebase -->
     <script type="module" src="js/utilities.js"></script>
     <script type="module" src="js/ui.js"></script>
     <script type="module" src="js/auth.js"></script>
@@ -205,4 +813,4 @@
     <script type="module" src="js/history.js"></script>
     <script type="module" src="js/admin.js"></script>
 </body>
-</html>
+                        </html>
