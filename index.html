@@ -24,7 +24,7 @@
                         primary: '#2E3192', // Azul Zenir
                         secondary: '#ED1C24', // Vermelho Zenir
                         dark: '#231F20', // Preto/cinza escuro Zenir
-                        lightbg: '#F3F4F6',
+                        whatsapp: '#25D366', // Verde do WhatsApp
                     },
                     fontFamily: {
                         'sans': ['Poppins', 'sans-serif'],
@@ -32,7 +32,6 @@
                     boxShadow: {
                         'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
                         'custom': '0 4px 20px rgba(0, 0, 0, 0.05)',
-                        'custom-hover': '0 10px 30px rgba(0, 0, 0, 0.1)',
                     },
                 }
             }
@@ -42,21 +41,13 @@
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
         }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
     </script>
     
     <!-- Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-app.js";
       import { 
-          getFirestore, collection, addDoc, getDocs, getDoc, doc, deleteDoc,
-          query, orderBy, limit, Timestamp, updateDoc, setDoc, where
+          getFirestore, collection, getDocs, getDoc, doc, deleteDoc, updateDoc, setDoc
       } from "https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore.js";
       import { 
           getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
@@ -79,8 +70,7 @@
       window.db = db;
       window.auth = auth;
       window.firebase = { 
-          collection, addDoc, getDoc, doc, deleteDoc, getDocs, 
-          query, orderBy, limit, Timestamp, updateDoc, setDoc, where,
+          collection, getDoc, doc, deleteDoc, getDocs, updateDoc, setDoc,
           createUserWithEmailAndPassword, signInWithEmailAndPassword, 
           onAuthStateChanged, signOut, updateProfile
       };
@@ -91,8 +81,7 @@
         /* Toast notification */
         .toast {
             position: fixed; top: 20px; right: 20px; padding: 16px 20px;
-            border-radius: 12px; max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 12px; max-width: 350px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             display: flex; align-items: center; z-index: 1000;
             transform: translateY(-100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -105,7 +94,6 @@
         .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar.open { transform: translateX(0); }
         
-        /* Loading */
         .loading-spinner {
             border: 3px solid rgba(46, 49, 146, 0.1); border-radius: 50%;
             border-top: 3px solid #2E3192; width: 28px; height: 28px;
@@ -113,51 +101,39 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Modern Cards */
-        .card { transition: all 0.3s ease; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); }
-        .dark .card { border-color: rgba(255,255,255,0.05); }
-        
         /* Inputs & Controls */
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
             transition: all 0.2s ease; border-radius: 10px !important;
         }
         input:focus, select:focus, textarea:focus {
-            border-color: #2E3192 !important; box-shadow: 0 0 0 4px rgba(46, 49, 146, 0.15) !important;
-            outline: none;
+            border-color: #2E3192 !important; box-shadow: 0 0 0 4px rgba(46, 49, 146, 0.15) !important; outline: none;
         }
         
-        /* Custom Checkbox/Radio */
-        .form-radio, .form-checkbox {
-            border-radius: 4px; transition: all 0.2s;
-        }
+        .form-radio, .form-checkbox { border-radius: 4px; transition: all 0.2s; }
         .form-radio { border-radius: 50%; }
         
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
-        
-        /* Animations */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .fadeIn { animation: fadeIn 0.4s ease-out forwards; }
         
-        /* Decorative UI Elements */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5);
         }
         .dark .glass-panel {
-            background: rgba(31, 41, 55, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(31, 41, 55, 0.7); border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Custom checkbox style for parcelas dropdown */
+        .parcela-checkbox:checked + div {
+            background-color: #2E3192; color: white; border-color: #2E3192;
+        }
+        .dark .parcela-checkbox:checked + div {
+            background-color: #3b82f6; border-color: #3b82f6;
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen selection:bg-primary selection:text-white transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen selection:bg-primary selection:text-white transition-colors duration-300 pb-10">
     
-    <!-- Tela de carregamento inicial -->
+    <!-- Tela de carregamento -->
     <div id="loadingScreen" class="fixed inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex flex-col items-center justify-center z-[100] transition-opacity duration-300">
         <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mb-6 animate-pulse" alt="Zenir Móveis">
         <div class="flex flex-col items-center">
@@ -175,61 +151,38 @@
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl shadow-primary/5 sm:rounded-2xl sm:px-10 border border-gray-100 dark:border-gray-700">
-                <!-- Abas de login/cadastro -->
                 <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
                     <button id="loginTabBtn" class="px-4 py-3 border-b-2 border-primary text-primary font-semibold transition-colors">Entrar</button>
-                    <button id="registerTabBtn" class="px-4 py-3 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 font-medium transition-colors">Cadastrar</button>
-                    <button id="forgotPasswordTabBtn" class="px-4 py-3 border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 font-medium ml-auto transition-colors text-sm"><i class="fas fa-key mr-1"></i> Ajuda</button>
+                    <button id="registerTabBtn" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">Cadastrar</button>
                 </div>
 
-                <!-- Formulário de Login -->
                 <div id="loginForm" class="space-y-5">
                     <div>
-                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
-                        <input id="loginEmail" type="email" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="seu@email.com">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
+                        <input id="loginEmail" type="email" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="seu@email.com">
                     </div>
                     <div>
-                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha</label>
                         <div class="relative">
-                            <input id="loginPassword" type="password" required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="••••••••">
-                            <button type="button" id="toggleLoginPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-primary">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                            <input id="loginPassword" type="password" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="••••••••">
+                            <button type="button" id="toggleLoginPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-primary"><i class="fas fa-eye"></i></button>
                         </div>
                     </div>
-                    <button id="loginBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary hover:bg-[#252875] focus:ring-4 focus:ring-primary/30 font-semibold text-lg transition-all transform active:scale-95">Entrar no Sistema</button>
+                    <button id="loginBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary hover:bg-[#252875] font-semibold text-lg transition-all transform active:scale-95">Entrar no Sistema</button>
                     <div id="loginError" class="text-red-500 text-sm text-center font-medium hidden bg-red-50 p-2 rounded-lg"></div>
                 </div>
 
-                <!-- Formulário de Cadastro -->
                 <div id="registerForm" class="space-y-4 hidden">
-                    <input id="registerName" type="text" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Nome Completo">
-                    <input id="registerEmail" type="email" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="E-mail profissional">
-                    <input id="registerPhone" type="text" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="WhatsApp (00) 00000-0000">
-                    <input id="registerBranch" type="text" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Nome da Filial">
-                    <div class="relative">
-                        <input id="registerPassword" type="password" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Crie uma senha (mín 6 char)">
-                        <button type="button" id="toggleRegisterPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400"><i class="fas fa-eye"></i></button>
-                    </div>
-                    <div class="relative">
-                        <input id="registerPasswordConfirm" type="password" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Repita a senha">
-                        <button type="button" id="toggleRegisterPasswordConfirm" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400"><i class="fas fa-eye"></i></button>
-                    </div>
-                    <button id="registerBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary hover:bg-[#252875] font-semibold text-lg transition-all mt-2">Solicitar Cadastro</button>
+                    <input id="registerName" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Nome Completo">
+                    <input id="registerEmail" type="email" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="E-mail profissional">
+                    <input id="registerPhone" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="WhatsApp (00) 00000-0000">
+                    <input id="registerBranch" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Nome da Filial">
+                    <input id="registerPassword" type="password" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Crie uma senha (mín 6 char)">
+                    <button id="registerBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary font-semibold text-lg transition-all mt-2">Solicitar Cadastro</button>
                     <div id="registerError" class="text-red-500 text-sm text-center hidden bg-red-50 p-2 rounded-lg"></div>
                     <div id="registerSuccess" class="text-emerald-600 text-sm text-center hidden bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                        <i class="fas fa-check-circle mr-1"></i> Cadastro realizado! Aguarde aprovação do administrador.
+                        <i class="fas fa-check-circle mr-1"></i> Cadastro realizado! Aguarde liberação do admin.
                     </div>
-                </div>
-
-                <!-- Esqueci a Senha -->
-                <div id="forgotPasswordForm" class="hidden text-center py-4">
-                    <div class="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-envelope-open-text text-primary text-2xl"></i>
-                    </div>
-                    <p class="text-gray-600 dark:text-gray-400 mb-2">Para redefinir sua senha ou solicitar acesso:</p>
-                    <p class="font-medium text-lg text-gray-900 dark:text-white">Fale com o Administrador</p>
-                    <a href="mailto:washington.wn8@gmail.com" class="inline-block mt-4 text-primary font-semibold hover:underline bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg">washington.wn8@gmail.com</a>
                 </div>
             </div>
         </div>
@@ -237,41 +190,35 @@
 
     <!-- Pendente -->
     <div id="pendingApprovalSection" class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 fadeIn hidden">
-        <div class="sm:mx-auto sm:w-full sm:max-w-md">
-            <div class="bg-white dark:bg-gray-800 py-10 px-6 shadow-xl rounded-2xl text-center border border-gray-100 dark:border-gray-700">
-                <div class="mx-auto w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-6">
-                    <i class="fas fa-user-clock text-amber-500 text-3xl animate-bounce"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Conta em Análise</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-8">Seu cadastro foi recebido e está aguardando liberação do administrador. Tente acessar novamente mais tarde.</p>
-                <button id="logoutBtnPending" class="w-full py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    Voltar ao Login
-                </button>
+        <div class="sm:mx-auto sm:w-full sm:max-w-md bg-white dark:bg-gray-800 py-10 px-6 shadow-xl rounded-2xl text-center">
+            <div class="mx-auto w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-user-clock text-amber-500 text-3xl animate-bounce"></i>
             </div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Conta em Análise</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-8">Seu cadastro aguarda liberação do administrador.</p>
+            <button id="logoutBtnPending" class="w-full py-3 px-4 border border-gray-300 rounded-xl font-medium">Voltar ao Login</button>
         </div>
     </div>
 
     <!-- App Principal -->
     <div id="appSection" class="hidden flex flex-col min-h-screen">
-        <!-- Sidebar & Overlay -->
+        <!-- Sidebar -->
         <div id="overlay" class="overlay fixed inset-0 z-40 hidden opacity-0"></div>
         
         <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-72 bg-white dark:bg-gray-800 z-50 shadow-2xl flex flex-col">
             <div class="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50">
                 <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-8" alt="Zenir">
-                <button id="closeSidebar" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
+                <button id="closeSidebar" class="p-2 rounded-full text-gray-500 hover:bg-gray-200"><i class="fas fa-times text-lg"></i></button>
             </div>
             
             <div class="p-5 flex-1 overflow-y-auto">
                 <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 rounded-xl border border-blue-100 dark:border-gray-600">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-inner">
+                        <div class="w-10 h-10 rounded-full bg-primary text-white flex shrink-0 items-center justify-center font-bold text-lg shadow-inner">
                             <i class="fas fa-user"></i>
                         </div>
-                        <div>
-                            <p id="userDisplayName" class="font-bold text-gray-900 dark:text-white truncate"></p>
+                        <div class="overflow-hidden">
+                            <p id="userDisplayName" class="font-bold text-gray-900 dark:text-white truncate w-[150px]"></p>
                             <p id="userRole" class="text-xs font-medium text-primary dark:text-blue-300"></p>
                         </div>
                     </div>
@@ -280,13 +227,8 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Navegação</p>
                 <ul class="space-y-1">
                     <li>
-                        <a href="#" id="showSimulator" class="flex items-center px-4 py-3 rounded-xl bg-primary/10 text-primary dark:text-white font-medium transition-colors">
+                        <a href="#" id="showSimulator" class="flex items-center px-4 py-3 rounded-xl bg-primary/10 text-primary font-medium">
                             <i class="fas fa-calculator w-6"></i> Simulador
-                        </a>
-                    </li>
-                    <li class="history-access-item">
-                        <a href="#" id="showHistory" class="flex items-center px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-colors">
-                            <i class="fas fa-history w-6"></i> Histórico
                         </a>
                     </li>
                 </ul>
@@ -295,7 +237,7 @@
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Administração</p>
                     <ul class="space-y-1">
                         <li>
-                            <a href="#" id="showUsers" class="flex items-center px-4 py-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition-colors">
+                            <a href="#" id="showUsers" class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 font-medium">
                                 <i class="fas fa-users-cog w-6"></i> Usuários
                             </a>
                         </li>
@@ -304,13 +246,12 @@
             </div>
             
             <div class="p-5 border-t border-gray-100 dark:border-gray-700">
-                <button id="logoutBtn" class="flex items-center justify-center w-full py-3 px-4 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 font-semibold transition-colors">
+                <button id="logoutBtn" class="flex items-center justify-center w-full py-3 px-4 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 font-semibold">
                     <i class="fas fa-sign-out-alt mr-2"></i> Encerrar Sessão
                 </button>
             </div>
         </div>
         
-        <!-- Main Content -->
         <div class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <header class="flex items-center justify-between mb-8 glass-panel p-4 rounded-2xl shadow-soft">
                 <button id="openSidebar" class="p-2 sm:p-3 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow text-primary transition-all">
@@ -319,563 +260,523 @@
                 <div class="flex flex-col items-center justify-center absolute left-1/2 transform -translate-x-1/2">
                     <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-10 sm:h-12 drop-shadow-sm" alt="Zenir">
                 </div>
-                <div class="w-10 h-10"></div> <!-- Spacer to keep image centered -->
+                <div class="w-10 h-10"></div>
             </header>
 
-            <!-- Seção do Simulador -->
+            <!-- SIMULADOR -->
             <div id="simulatorSection" class="fadeIn">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-soft p-5 sm:p-8 mb-8 border border-gray-100 dark:border-gray-700">
-                    
                     <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
                         <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">Nova Simulação</h1>
                         <p class="text-gray-500 dark:text-gray-400 mt-1">Preencha os valores para visualizar as parcelas.</p>
                     </div>
 
                     <form id="simulationForm" class="space-y-8">
-                        
-                        <!-- Bloco 1: Valores Financeiros -->
+                        <!-- Valores Financeiros -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-xl border border-gray-100 dark:border-gray-700">
                             <div>
-                                <label for="productValue" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Produto (R$)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Produto (R$)</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i class="fas fa-box text-primary/50"></i>
-                                    </div>
-                                    <input type="text" id="productValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 text-lg font-bold text-gray-900 dark:text-white rounded-xl" placeholder="0,00">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-box text-primary/50"></i></div>
+                                    <input type="text" id="productValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
                                 </div>
                             </div>
                             <div>
-                                <label for="geValue" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Garantia (R$)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Garantia (R$)</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i class="fas fa-shield-alt text-primary/50"></i>
-                                    </div>
-                                    <input type="text" id="geValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 text-lg font-bold text-gray-900 dark:text-white rounded-xl" placeholder="0,00">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-shield-alt text-primary/50"></i></div>
+                                    <input type="text" id="geValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
                                 </div>
                             </div>
                             <div>
-                                <label for="entryValue" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Entrada (R$)</label>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Entrada (R$)</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <i class="fas fa-money-bill-wave text-green-500/60"></i>
-                                    </div>
-                                    <input type="text" id="entryValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 text-lg font-bold text-gray-900 dark:text-white rounded-xl" placeholder="0,00">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-money-bill-wave text-green-500/60"></i></div>
+                                    <input type="text" id="entryValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Bloco 2: Tipo de Venda -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            
-                            <!-- Opções principais -->
+                            <!-- Tipo de Venda -->
                             <div class="space-y-5">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Tipo de Venda</h3>
-                                
                                 <div class="flex gap-3">
                                     <label class="flex-1 cursor-pointer">
                                         <input type="radio" name="priceType" value="promocional" class="peer sr-only" checked>
-                                        <div class="text-center px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-medium text-gray-600 dark:text-gray-300 transition-all peer-checked:border-secondary peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20 peer-checked:text-secondary">
-                                            <i class="fas fa-tag mr-1"></i> Promocional
+                                        <div class="flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-200 font-medium text-gray-600 transition-all peer-checked:border-secondary peer-checked:bg-red-50 peer-checked:text-secondary">
+                                            <i class="fas fa-tag mr-2"></i> Promocional
                                         </div>
                                     </label>
                                     <label class="flex-1 cursor-pointer">
                                         <input type="radio" name="priceType" value="tabela" class="peer sr-only">
-                                        <div class="text-center px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 font-medium text-gray-600 dark:text-gray-300 transition-all peer-checked:border-primary peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/20 peer-checked:text-primary">
-                                            <i class="fas fa-list-alt mr-1"></i> Tabela
+                                        <div class="flex items-center justify-center px-4 py-3 rounded-xl border-2 border-gray-200 font-medium text-gray-600 transition-all peer-checked:border-primary peer-checked:bg-blue-50 peer-checked:text-primary">
+                                            <i class="fas fa-list-alt mr-2"></i> Tabela
                                         </div>
                                     </label>
                                 </div>
 
-                                <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl space-y-3 border border-gray-100 dark:border-gray-600">
-                                    <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-gray-600 transition-colors">
+                                <div class="bg-gray-50 p-4 rounded-xl space-y-3 border border-gray-100">
+                                    <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
                                         <div class="relative">
                                             <input type="checkbox" id="isMostruario" class="sr-only peer">
-                                            <div class="w-10 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer peer-checked:bg-yellow-500 transition-colors"></div>
+                                            <div class="w-10 h-6 bg-gray-300 rounded-full peer peer-checked:bg-yellow-500 transition-colors"></div>
                                             <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
                                         </div>
-                                        <span class="ml-3 font-medium text-gray-700 dark:text-gray-200">Peça de Mostruário</span>
+                                        <span class="ml-3 font-medium text-gray-700">Peça de Mostruário</span>
                                     </label>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 pl-14 leading-relaxed">
-                                        Aplica o fator do cartão em 12x no carnê. Válido agora para Promocional e Tabela.
-                                    </p>
-
-                                    <div id="containerSpecialDiscount">
-                                        <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white dark:hover:bg-gray-600 transition-colors">
-                                            <div class="relative">
-                                                <input type="checkbox" id="useSpecialDiscount" class="sr-only peer">
-                                                <div class="w-10 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer peer-checked:bg-secondary transition-colors"></div>
-                                                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
-                                            </div>
-                                            <span class="ml-3 font-medium text-gray-700 dark:text-gray-200">Ancoragem de Preço</span>
-                                        </label>
-                                    </div>
+                                    <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
+                                        <div class="relative">
+                                            <input type="checkbox" id="useSpecialDiscount" class="sr-only peer">
+                                            <div class="w-10 h-6 bg-gray-300 rounded-full peer peer-checked:bg-secondary transition-colors"></div>
+                                            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
+                                        </div>
+                                        <span class="ml-3 font-medium text-gray-700">Ancoragem de Preço</span>
+                                    </label>
                                 </div>
                             </div>
 
                             <!-- Condições -->
                             <div class="space-y-5">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Condições</h3>
-                                
                                 <div>
-                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Meio de Pagamento:</p>
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Meio de Pagamento:</p>
                                     <div class="flex flex-wrap gap-2">
                                         <label class="cursor-pointer">
                                             <input type="radio" name="paymentType" value="carne" class="peer sr-only" checked>
-                                            <div class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Carnê</div>
+                                            <div class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Carnê</div>
                                         </label>
                                         <label class="cursor-pointer">
                                             <input type="radio" name="paymentType" value="cartao" class="peer sr-only">
-                                            <div class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Cartão</div>
+                                            <div class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Cartão</div>
                                         </label>
                                         <label class="cursor-pointer">
                                             <input type="radio" name="paymentType" value="ambos" class="peer sr-only">
-                                            <div class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Ambos</div>
+                                            <div class="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">Ambos</div>
                                         </label>
                                     </div>
                                 </div>
-
                                 <div class="flex gap-6 pt-2">
                                     <div>
-                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usar Fator Juros:</p>
-                                        <label class="inline-flex items-center mr-4">
-                                            <input type="radio" name="useFactor" value="nao" class="form-radio text-primary w-4 h-4 focus:ring-primary" checked>
-                                            <span class="ml-2 text-sm">Automático</span>
-                                        </label>
-                                        <label class="inline-flex items-center">
-                                            <input type="radio" name="useFactor" value="sim" class="form-radio text-primary w-4 h-4 focus:ring-primary">
-                                            <span class="ml-2 text-sm">Forçar</span>
-                                        </label>
+                                        <p class="text-sm font-medium text-gray-700 mb-2">Usar Fator Juros:</p>
+                                        <label class="inline-flex items-center mr-4"><input type="radio" name="useFactor" value="nao" class="form-radio text-primary" checked><span class="ml-2 text-sm">Automático</span></label>
+                                        <label class="inline-flex items-center"><input type="radio" name="useFactor" value="sim" class="form-radio text-primary"><span class="ml-2 text-sm">Forçar</span></label>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Taxa Prestamista:</p>
-                                        <label class="inline-flex items-center mr-4">
-                                            <input type="radio" name="applyTaxaPrestamista" value="sim" class="form-radio text-primary w-4 h-4 focus:ring-primary" checked>
-                                            <span class="ml-2 text-sm">Sim</span>
-                                        </label>
-                                        <label class="inline-flex items-center">
-                                            <input type="radio" name="applyTaxaPrestamista" value="nao" class="form-radio text-primary w-4 h-4 focus:ring-primary">
-                                            <span class="ml-2 text-sm">Não</span>
-                                        </label>
+                                        <p class="text-sm font-medium text-gray-700 mb-2">Taxa Prestamista:</p>
+                                        <label class="inline-flex items-center mr-4"><input type="radio" name="applyTaxaPrestamista" value="sim" class="form-radio text-primary" checked><span class="ml-2 text-sm">Sim</span></label>
+                                        <label class="inline-flex items-center"><input type="radio" name="applyTaxaPrestamista" value="nao" class="form-radio text-primary"><span class="ml-2 text-sm">Não</span></label>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Configurações Avançadas de Parcelamento (Nova Funcionalidade) -->
-                        <div class="border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-xl overflow-hidden">
-                            <button type="button" id="toggleAdvancedConfig" class="w-full px-5 py-4 flex justify-between items-center text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors focus:outline-none">
+                        <!-- Configurações Avançadas de Parcelamento -->
+                        <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl overflow-hidden">
+                            <button type="button" id="toggleAdvancedConfig" class="w-full px-5 py-4 flex justify-between items-center text-left hover:bg-indigo-50 transition-colors focus:outline-none">
                                 <div class="flex items-center">
                                     <i class="fas fa-sliders-h text-indigo-500 mr-3"></i>
-                                    <span class="font-semibold text-gray-800 dark:text-gray-200">Regras de Parcelamento (Até quantas vezes Sem Juros)</span>
+                                    <span class="font-semibold text-gray-800">Regras de Parcelamento (Até quantas vezes Sem Juros)</span>
                                 </div>
                                 <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300" id="advancedIcon"></i>
                             </button>
-                            
-                            <div id="advancedConfigPanel" class="px-5 pb-5 pt-2 hidden border-t border-indigo-100 dark:border-gray-700">
-                                <p class="text-xs text-indigo-600 dark:text-indigo-400 mb-4 bg-indigo-100 dark:bg-indigo-900/40 inline-block px-3 py-1 rounded-full font-medium">
-                                    Estes valores mudam automaticamente conforme o "Tipo de Venda", mas você pode editar para negociações especiais.
-                                </p>
-                                
+                            <div id="advancedConfigPanel" class="px-5 pb-5 pt-2 hidden border-t border-indigo-100">
+                                <p class="text-xs text-indigo-600 mb-4 bg-indigo-100 inline-block px-3 py-1 rounded-full font-medium">Estes valores mudam sozinhos, mas você pode editar livremente.</p>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: Produto</label>
-                                        <div class="flex items-center">
-                                            <input type="number" id="limitProdCartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded text-center font-bold text-primary">
-                                            <span class="ml-2 text-sm text-gray-600">x sem juros</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: GE</label>
-                                        <div class="flex items-center">
-                                            <input type="number" id="limitGECartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded text-center font-bold text-primary">
-                                            <span class="ml-2 text-sm text-gray-600">x sem juros</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-file-invoice mr-1"></i> Carnê: Produto</label>
-                                        <div class="flex items-center">
-                                            <input type="number" id="limitProdCarne" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded text-center font-bold text-primary">
-                                            <span class="ml-2 text-sm text-gray-600">x sem juros</span>
-                                        </div>
-                                    </div>
-                                    <div class="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-                                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-file-invoice mr-1"></i> Carnê: GE</label>
-                                        <div class="flex items-center">
-                                            <input type="number" id="limitGECarne" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded text-center font-bold text-primary">
-                                            <span class="ml-2 text-sm text-gray-600">x sem juros</span>
-                                        </div>
-                                    </div>
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: Prod</label><input type="number" id="limitProdCartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: GE</label><input type="number" id="limitGECartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-file-invoice mr-1"></i> Carnê: Prod</label><input type="number" id="limitProdCarne" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
+                                    <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-file-invoice mr-1"></i> Carnê: GE</label><input type="number" id="limitGECarne" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Seleção de Parcelas e Botão Calcular -->
-                        <div class="flex flex-col sm:flex-row gap-6 items-end border-t border-gray-100 dark:border-gray-700 pt-6">
-                            <div class="w-full sm:w-2/3">
-                                <div class="flex justify-between mb-2">
-                                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">Quais parcelas exibir?</label>
-                                    <div class="space-x-2">
-                                        <button type="button" id="selectAllBtn" class="text-xs font-semibold text-primary hover:text-secondary bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded">Todas</button>
-                                        <button type="button" id="deselectAllBtn" class="text-xs font-semibold text-gray-500 hover:text-red-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Limpar</button>
+                        <!-- Novo Seletor Modal de Parcelas e Botão Calcular -->
+                        <div class="flex flex-col sm:flex-row gap-6 items-end border-t border-gray-100 pt-6">
+                            <div class="w-full sm:w-2/3 relative" id="parcelasContainer">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Quais parcelas exibir?</label>
+                                
+                                <!-- Botão que abre o dropdown -->
+                                <button type="button" id="btnToggleParcelas" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-left flex justify-between items-center hover:bg-gray-50 shadow-sm transition-colors">
+                                    <span class="text-gray-700 font-medium"><span id="parcelasCount" class="font-bold text-primary">12</span> parcelas selecionadas</span>
+                                    <i class="fas fa-chevron-down text-gray-400" id="parcelasDropdownIcon"></i>
+                                </button>
+                                
+                                <!-- Dropdown Grid -->
+                                <div id="parcelasDropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-20">
+                                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                                        <span class="font-bold text-gray-700 text-sm">Selecione:</span>
+                                        <div class="space-x-2">
+                                            <button type="button" id="selectAllBtn" class="text-xs font-semibold text-primary hover:text-secondary bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">Todas</button>
+                                            <button type="button" id="deselectAllBtn" class="text-xs font-semibold text-gray-600 hover:text-red-500 bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Nenhuma</button>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2" id="parcelasGrid">
+                                        <!-- Checkboxes dinâmicos gerados via JS -->
                                     </div>
                                 </div>
-                                <select id="parcelasSelect" multiple class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-base shadow-sm focus:ring-primary focus:border-primary custom-scrollbar h-28">
-                                    <!-- Populated by JS -->
-                                </select>
                             </div>
                             
                             <div class="w-full sm:w-1/3">
-                                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#4A4EB8] hover:from-secondary hover:to-[#FF4D54] text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:ring-4 focus:ring-primary/40">
-                                    <i class="fas fa-magic text-xl"></i> 
-                                    <span class="text-lg">Calcular</span>
+                                <button type="submit" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#4A4EB8] hover:from-secondary hover:to-[#FF4D54] text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                                    <i class="fas fa-magic text-xl"></i> <span class="text-lg">Calcular</span>
                                 </button>
                             </div>
                         </div>
                     </form>
                 </div>
                 
-                <!-- Resultados - Carnê -->
+                <!-- Resultados -->
                 <div id="resultSectionCarne" class="hidden mb-8 fadeIn">
-                    <h2 class="text-xl font-bold mb-4 flex items-center text-primary dark:text-white">
-                        <i class="fas fa-file-invoice text-secondary mr-2"></i> Opções no Carnê
-                    </h2>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-900/50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Parcelas</th>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Valor Mensal</th>
-                                        <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Ação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="resultTableBodyCarne" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800"></tbody>
-                            </table>
-                        </div>
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-file-invoice text-secondary mr-2"></i> Opções no Carnê</h2>
+                    <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
+                        <table class="min-w-full divide-y divide-gray-100">
+                            <thead class="bg-gray-50"><tr><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th><th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Total</th></tr></thead>
+                            <tbody id="resultTableBodyCarne" class="divide-y divide-gray-100 bg-white"></tbody>
+                        </table>
                     </div>
                 </div>
                 
-                <!-- Resultados - Cartão -->
                 <div id="resultSectionCartao" class="hidden mb-8 fadeIn">
-                    <h2 class="text-xl font-bold mb-4 flex items-center text-primary dark:text-white">
-                        <i class="fas fa-credit-card text-blue-500 mr-2"></i> Opções no Cartão
-                    </h2>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-900/50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Parcelas</th>
-                                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Valor Mensal</th>
-                                        <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Ação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="resultTableBodyCartao" class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800"></tbody>
-                            </table>
-                        </div>
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-credit-card text-blue-500 mr-2"></i> Opções no Cartão</h2>
+                    <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
+                        <table class="min-w-full divide-y divide-gray-100">
+                            <thead class="bg-gray-50"><tr><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th><th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Total</th></tr></thead>
+                            <tbody id="resultTableBodyCartao" class="divide-y divide-gray-100 bg-white"></tbody>
+                        </table>
                     </div>
                 </div>
                 
-                <!-- Ações Pós Simulação -->
-                <div id="saveButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
-                    <button id="saveSimulationBtn" type="button" class="save-access-item bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                        <i class="fas fa-cloud-upload-alt"></i> Salvar p/ Histórico
+                <!-- Ações WhatsApp Pós Simulação -->
+                <div id="wppButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
+                    <button id="openWppModalBtn" type="button" class="bg-whatsapp hover:bg-green-600 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                        <i class="fab fa-whatsapp text-xl"></i> Enviar p/ WhatsApp
                     </button>
-                    <button id="clearSimulationBtn" type="button" class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 font-bold py-3 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                    <button id="clearSimulationBtn" type="button" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
                         <i class="fas fa-undo"></i> Nova Simulação
                     </button>
                 </div>
             </div>
 
-            <!-- Modais (Salvar, Histórico, etc) mantidos ocultos aqui. Estrutura similar ao original mas com Tailwind arredondado -->
-            
-            <div id="saveModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 transform transition-all">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Salvar Negociação</h3>
-                    <form id="saveSimulationForm" class="space-y-4">
-                        <input type="text" id="clientName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-700 uppercase" placeholder="Nome do Cliente">
-                        <input type="text" id="clientPhone" inputmode="numeric" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-700" placeholder="WhatsApp (00)00000-0000">
-                        <input type="text" id="productName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 dark:bg-gray-700 uppercase" placeholder="Modelo do Produto">
+            <!-- Modal de WhatsApp -->
+            <div id="whatsappModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
+                    <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
+                        <i class="fab fa-whatsapp text-3xl text-whatsapp"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-center text-gray-900 mb-6">Enviar para o Cliente</h3>
+                    
+                    <div class="space-y-4">
+                        <input type="text" id="wppClientName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50" placeholder="Nome do Cliente">
+                        <input type="text" id="wppClientPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50" placeholder="Celular (00) 00000-0000" maxlength="15">
+                        
                         <div class="flex gap-3 pt-4">
-                            <button type="button" id="cancelSaveBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold">Cancelar</button>
-                            <button type="submit" class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-md">Salvar</button>
+                            <button type="button" id="cancelWppBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200">Cancelar</button>
+                            <button type="button" id="sendWppBtn" class="flex-1 py-3 bg-whatsapp text-white rounded-xl font-semibold shadow-md hover:bg-green-600">Enviar Agora</button>
                         </div>
-                    </form>
-                    <div id="saveSuccessMessage" class="hidden text-center py-6">
-                        <i class="fas fa-check-circle text-5xl text-emerald-500 mb-4"></i>
-                        <p class="text-emerald-600 font-bold mb-4">Simulação Salva!</p>
-                        <button id="newSimulationBtn" class="w-full py-3 bg-primary text-white rounded-xl font-bold">Voltar</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Outras seções (Histórico, Usuários) ocultas por padrão. A lógica no JS cuida de alternar -->
-            <div id="historySection" class="hidden">
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-soft p-6 card">
+            <!-- GERENCIAMENTO DE USUÁRIOS (ADMIN) -->
+            <div id="usersSection" class="hidden fadeIn">
+                <div class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-primary dark:text-white">Histórico</h2>
-                        <button id="refreshHistoryBtn" class="text-primary hover:text-secondary bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
+                        <h2 class="text-2xl font-bold text-primary">Gerenciamento de Usuários</h2>
+                        <button id="refreshUsersBtn" class="text-primary hover:text-secondary bg-blue-50 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
                     </div>
-                    <input type="text" id="searchHistory" placeholder="Buscar cliente..." class="w-full px-4 py-3 mb-6 border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-700">
-                    <div id="historyList" class="space-y-4"></div>
+
+                    <div class="flex border-b border-gray-200 mb-6 gap-2">
+                        <button id="tabApproved" class="px-4 py-3 border-b-2 border-primary text-primary font-semibold transition-colors">Aprovados</button>
+                        <button id="tabPending" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">Solicitações</button>
+                    </div>
+
+                    <div id="loadingUsers" class="flex justify-center py-8"><div class="loading-spinner"></div></div>
+                    
+                    <!-- Listas -->
+                    <div id="approvedListContainer" class="hidden space-y-4"></div>
+                    <div id="pendingListContainer" class="hidden space-y-4"></div>
+                    
+                    <!-- Vazio -->
+                    <div id="emptyUsers" class="hidden text-center py-10 text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i><p>Nenhum usuário encontrado nesta lista.</p>
+                    </div>
                 </div>
             </div>
-            
         </div>
     </div>
 
     <!-- Scripts da Lógica Principal -->
     <script>
-        // === Constantes e Configurações ===
         const ADMIN_EMAIL = "washington.wn8@gmail.com";
-        
-        // Fatores de parcelamento originais Zenir
         const FATORES = {
             cartao: [1.0292, 0.5220, 0.3530, 0.2685, 0.2179, 0.1841, 0.1600, 0.1420, 0.1280, 0.1168, 0.1076, 0.1000],
             carne: [1.0690, 0.5523, 0.3804, 0.2946, 0.2432, 0.2091, 0.1849, 0.1668, 0.1528, 0.1417, 0.1327, 0.1252]
         };
-
-        // REGRAS BASE DE NEGÓCIO (Limites de Vezes Sem Juros)
         const REGRAS_PADRAO = {
-            promocional: {
-                cartao: { produto: 1, ge: 3 }, // Novo: Cartão promo é só 1x sem juros (produto)
-                carne:  { produto: 0, ge: 3 }  // Novo: Carnê promo produto não tem sem juros (0)
-            },
-            tabela: {
-                cartao: { produto: 3, ge: 3 },
-                carne:  { produto: 3, ge: 3 }
-            }
+            promocional: { cartao: { produto: 1, ge: 3 }, carne: { produto: 0, ge: 3 } },
+            tabela: { cartao: { produto: 3, ge: 3 }, carne: { produto: 3, ge: 3 } }
         };
         
-        let currentSection = 'simulator';
         let simulationResults = { inputs: {}, results: {} };
         let currentUser = null;
 
-        // Ao carregar a página
         document.addEventListener('DOMContentLoaded', function() {
             window.firebase.onAuthStateChanged(window.auth, handleAuthStateChanged);
             setupAuthUI();
             setupCurrencyInputs();
-            setupParcelas();
+            setupParcelasDropdown();
             setupSidebar();
-            setupRulesCustomization(); // Inicia o controlador de regras dinâmicas
+            setupRulesCustomization();
+            setupWhatsAppFlow();
+            setupAdminPanel();
         });
 
         // ==========================================
-        // LÓGICA DE REGRAS DINÂMICAS (NOVO)
+        // NOVO: SELECTOR DE PARCELAS DROPDOWN
+        // ==========================================
+        function setupParcelasDropdown() {
+            const grid = document.getElementById('parcelasGrid');
+            const btnToggle = document.getElementById('btnToggleParcelas');
+            const dropdown = document.getElementById('parcelasDropdown');
+            const icon = document.getElementById('parcelasDropdownIcon');
+            const countLabel = document.getElementById('parcelasCount');
+            
+            // Gerar checkboxes dinamicamente
+            for (let i = 1; i <= 12; i++) {
+                const wrapper = document.createElement('label');
+                wrapper.className = "cursor-pointer relative block";
+                wrapper.innerHTML = `
+                    <input type="checkbox" class="sr-only parcela-checkbox" value="${i}" checked>
+                    <div class="px-2 py-2 border-2 border-gray-200 rounded-lg text-center font-bold text-gray-600 transition-colors hover:border-primary/50 select-none text-sm">
+                        ${i}x
+                    </div>
+                `;
+                grid.appendChild(wrapper);
+            }
+
+            const updateCount = () => {
+                const checked = document.querySelectorAll('.parcela-checkbox:checked').length;
+                countLabel.textContent = checked;
+            };
+
+            // Toggle Dropdown
+            btnToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+                icon.classList.toggle('rotate-180');
+            });
+
+            // Fechar ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('parcelasContainer').contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                    icon.classList.remove('rotate-180');
+                }
+            });
+
+            // Updates ao clicar num checkbox
+            document.querySelectorAll('.parcela-checkbox').forEach(chk => {
+                chk.addEventListener('change', updateCount);
+            });
+
+            // Botoes Todas/Nenhuma
+            document.getElementById('selectAllBtn').addEventListener('click', () => {
+                document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = true);
+                updateCount();
+            });
+            document.getElementById('deselectAllBtn').addEventListener('click', () => {
+                document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = false);
+                updateCount();
+            });
+        }
+
+        function getSelectedParcelas() {
+            const checkboxes = document.querySelectorAll('.parcela-checkbox:checked');
+            return Array.from(checkboxes).map(c => parseInt(c.value)).sort((a, b) => a - b);
+        }
+
+        // ==========================================
+        // INTEGRAÇÃO WHATSAPP (Substitui Histórico/Salvar)
+        // ==========================================
+        function setupWhatsAppFlow() {
+            const wppBtn = document.getElementById('openWppModalBtn');
+            const modal = document.getElementById('whatsappModal');
+            const cancelBtn = document.getElementById('cancelWppBtn');
+            const sendBtn = document.getElementById('sendWppBtn');
+            const phoneInput = document.getElementById('wppClientPhone');
+
+            // Máscara de telefone
+            phoneInput.addEventListener('input', function(e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
+            wppBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+            cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+            sendBtn.addEventListener('click', () => {
+                const name = document.getElementById('wppClientName').value.trim();
+                const phone = phoneInput.value.replace(/\D/g, '');
+
+                if(!phone || phone.length < 10) {
+                    alert("Informe um número de WhatsApp válido.");
+                    return;
+                }
+
+                // Gerar Texto Orçamento
+                let msg = `*SIMULAÇÃO ZENIR MÓVEIS* 🔴🔵\n\n`;
+                if(name) msg += `Olá, *${name}*! Segue a sua simulação:\n\n`;
+                else msg += `Olá! Segue a sua simulação:\n\n`;
+                
+                msg += `💰 *Valores do Orçamento:*\n`;
+                msg += `Produto: ${formatCurrency(simulationResults.inputs.valorProdutoOriginal)}\n`;
+                if(simulationResults.inputs.valorGE > 0) msg += `Garantia: ${formatCurrency(simulationResults.inputs.valorGE)}\n`;
+                if(simulationResults.inputs.valorEntrada > 0) msg += `Entrada: ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
+                msg += `\n`;
+
+                const addTable = (tipoStr, dataArr) => {
+                    if(!dataArr || dataArr.length === 0) return "";
+                    let t = `💳 *Opções no ${tipoStr}:*\n`;
+                    dataArr.forEach(r => {
+                        let ind = r.isMostruarioIndicator ? " (Mostruário)" : "";
+                        t += `• ${r.numParcela}x de *${formatCurrency(r.valorParcela)}*${ind}\n`;
+                    });
+                    t += `\n`;
+                    return t;
+                };
+
+                msg += addTable("Carnê", simulationResults.results.carne);
+                msg += addTable("Cartão", simulationResults.results.cartao);
+
+                msg += `_Lembrando que os valores estão sujeitos à análise de crédito e alterações._\n`;
+                msg += `Qualquer dúvida, estou à disposição!`;
+
+                const url = `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+                modal.classList.add('hidden');
+            });
+        }
+
+        // ==========================================
+        // LÓGICA DE REGRAS DINÂMICAS
         // ==========================================
         function setupRulesCustomization() {
             const toggleBtn = document.getElementById('toggleAdvancedConfig');
             const panel = document.getElementById('advancedConfigPanel');
             const icon = document.getElementById('advancedIcon');
 
-            // Abrir/Fechar painel avançado
             toggleBtn.addEventListener('click', () => {
                 panel.classList.toggle('hidden');
                 icon.classList.toggle('rotate-180');
             });
 
-            // Escutar mudança nos botões de Tabela/Promocional
             document.querySelectorAll('input[name="priceType"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    aplicarRegrasPadraoUI(e.target.value);
-                });
+                radio.addEventListener('change', (e) => aplicarRegrasPadraoUI(e.target.value));
             });
-
-            // Aplica os valores padrão iniciais (Promocional é o checked padrão no HTML)
             aplicarRegrasPadraoUI('promocional');
         }
 
-        // Preenche os inputs de regras com base no tipo selecionado
         function aplicarRegrasPadraoUI(tipoPreco) {
             const regras = REGRAS_PADRAO[tipoPreco];
-            
             document.getElementById('limitProdCartao').value = regras.cartao.produto;
             document.getElementById('limitGECartao').value = regras.cartao.ge;
             document.getElementById('limitProdCarne').value = regras.carne.produto;
             document.getElementById('limitGECarne').value = regras.carne.ge;
         }
 
-        // Lê os valores atuais que estão nos inputs (caso o usuário tenha alterado)
         function obterLimitesAtuais() {
             return {
-                cartao: {
-                    produto: parseInt(document.getElementById('limitProdCartao').value) || 0,
-                    ge: parseInt(document.getElementById('limitGECartao').value) || 0
-                },
-                carne: {
-                    produto: parseInt(document.getElementById('limitProdCarne').value) || 0,
-                    ge: parseInt(document.getElementById('limitGECarne').value) || 0
-                }
+                cartao: { prod: parseInt(document.getElementById('limitProdCartao').value)||0, ge: parseInt(document.getElementById('limitGECartao').value)||0 },
+                carne: { prod: parseInt(document.getElementById('limitProdCarne').value)||0, ge: parseInt(document.getElementById('limitGECarne').value)||0 }
             };
         }
 
         // ==========================================
-        // MOTOR DE CÁLCULO
+        // MOTOR DE CÁLCULO DA SIMULAÇÃO
         // ==========================================
-        function calcularParcela(valorTotal, valorGE, numParcela, tipoParcelamento, tipoPreco, usarFatorForcado, taxaPrestamista, isMostruario, limitesAtuais) {
-            let valorParcelaProduto = 0;
-            let valorParcelaGE = 0;
-            const indice = numParcela - 1;
-            
-            // Regra Mostruário (Aplica fator cartão em 12x no carnê para o produto)
-            // Agora válido tanto para tabela quanto promocional se o checkbox estiver marcado.
-            const aplicaMostruario = (isMostruario && tipoParcelamento === 'carne' && numParcela === 12);
+        function calcularParcela(valorTotal, valorGE, numParcela, tipoPag, usarFator, taxaPrestamista, isMostruario, limites) {
+            let valorProduto = 0, valorSeguro = 0;
+            const idx = numParcela - 1;
+            const isMostr = (isMostruario && tipoPag === 'carne' && numParcela === 12);
 
-            if (usarFatorForcado) {
-                // Força juros em tudo, ignorando limites de "sem juros"
-                valorParcelaProduto = valorTotal * (aplicaMostruario ? FATORES.cartao[11] : FATORES[tipoParcelamento][indice]);
-                valorParcelaGE = valorGE * FATORES[tipoParcelamento][indice];
+            if (usarFator) {
+                valorProduto = valorTotal * (isMostr ? FATORES.cartao[11] : FATORES[tipoPag][idx]);
+                valorSeguro = valorGE * FATORES[tipoPag][idx];
             } else {
-                // Pega os limites customizáveis para o tipo de pagamento atual (cartao ou carne)
-                const limiteProduto = limitesAtuais[tipoParcelamento].produto;
-                const limiteGE = limitesAtuais[tipoParcelamento].ge;
-
-                // Lógica Produto
-                if (numParcela <= limiteProduto && limiteProduto > 0) {
-                    valorParcelaProduto = valorTotal / numParcela; // Sem Juros
-                } else {
-                    valorParcelaProduto = valorTotal * (aplicaMostruario ? FATORES.cartao[11] : FATORES[tipoParcelamento][indice]); // Com Juros
-                }
-
-                // Lógica GE
-                if (numParcela <= limiteGE && limiteGE > 0) {
-                    valorParcelaGE = valorGE / numParcela; // Sem Juros
-                } else {
-                    valorParcelaGE = valorGE * FATORES[tipoParcelamento][indice]; // Com Juros
-                }
+                const lProd = limites[tipoPag].prod;
+                const lGe = limites[tipoPag].ge;
+                valorProduto = (numParcela <= lProd && lProd > 0) ? (valorTotal/numParcela) : (valorTotal * (isMostr ? FATORES.cartao[11] : FATORES[tipoPag][idx]));
+                valorSeguro = (numParcela <= lGe && lGe > 0) ? (valorGE/numParcela) : (valorGE * FATORES[tipoPag][idx]);
             }
             
-            let valorParcela = valorParcelaProduto + valorParcelaGE;
+            let vParcela = valorProduto + valorSeguro;
+            if (taxaPrestamista && tipoPag === 'carne') vParcela += (vParcela * 0.06);
             
-            // Taxa Prestamista (apenas carnê)
-            let valorTaxaPrestamista = 0;
-            if (taxaPrestamista && tipoParcelamento === 'carne') {
-                valorTaxaPrestamista = valorParcela * 0.06;
-                valorParcela += valorTaxaPrestamista;
-            }
-            
-            return {
-                valorParcela,
-                valorParcelaProduto,
-                valorParcelaGE,
-                valorTaxaPrestamista,
-                totalParcelado: valorParcela * numParcela,
-                totalProduto: valorParcelaProduto * numParcela,
-                totalGE: valorParcelaGE * numParcela,
-                totalPrestamista: valorTaxaPrestamista * numParcela,
-                totalServicos: (valorParcelaGE * numParcela) + (valorTaxaPrestamista * numParcela),
-                isMostruarioIndicator: aplicaMostruario
-            };
+            return { valorParcela: vParcela, totalParcelado: vParcela * numParcela, isMostruarioIndicator: isMostr };
         }
 
-        // Submissão do Formulário de Simulação
         document.getElementById('simulationForm').addEventListener('submit', function(event) {
             event.preventDefault();
+            const valProdOg = currencyToNumber(document.getElementById('productValue').value);
+            const valGE = currencyToNumber(document.getElementById('geValue').value);
+            const valEntrada = currencyToNumber(document.getElementById('entryValue').value);
+            const isMostr = document.getElementById('isMostruario').checked;
+            const valProd = Math.max(0, valProdOg - valEntrada);
             
-            const valorProdutoOriginal = currencyToNumber(document.getElementById('productValue').value);
-            const valorGE = currencyToNumber(document.getElementById('geValue').value);
-            const valorEntrada = currencyToNumber(document.getElementById('entryValue').value);
-            const isMostruario = document.getElementById('isMostruario').checked;
-            
-            const valorProduto = Math.max(0, valorProdutoOriginal - valorEntrada);
-            
-            const tipoParcelamento = document.querySelector('input[name="paymentType"]:checked').value;
-            const tipoPreco = document.querySelector('input[name="priceType"]:checked').value;
+            const tipoPag = document.querySelector('input[name="paymentType"]:checked').value;
             const usarFator = document.querySelector('input[name="useFactor"]:checked').value === 'sim';
-            const taxaPrestamista = document.querySelector('input[name="applyTaxaPrestamista"]:checked').value === 'sim';
+            const taxaPrestam = document.querySelector('input[name="applyTaxaPrestamista"]:checked').value === 'sim';
+            const limites = obterLimitesAtuais();
+            const parcelasSel = getSelectedParcelas();
             
-            const limitesAtuais = obterLimitesAtuais(); // Captura estado dos inputs da config avançada
-
-            const parcelasSelect = document.getElementById('parcelasSelect');
-            const parcelasSelecionadas = Array.from(parcelasSelect.selectedOptions).map(opt => parseInt(opt.value)).sort((a,b)=>a-b);
+            if (parcelasSel.length === 0 || valProdOg <= 0) return alert('Insira um valor e selecione parcelas.');
             
-            if (parcelasSelecionadas.length === 0 || valorProdutoOriginal <= 0) {
-                alert('Preencha um valor de produto e selecione parcelas.');
-                return;
-            }
-            
-            // Setup results UI
             document.getElementById('resultSectionCarne').classList.add('hidden');
             document.getElementById('resultSectionCartao').classList.add('hidden');
             document.getElementById('resultTableBodyCarne').innerHTML = '';
             document.getElementById('resultTableBodyCartao').innerHTML = '';
             
-            // Store inputs for history
-            simulationResults.inputs = {
-                valorProdutoOriginal, valorGE, valorEntrada, valorProduto,
-                isMostruario, tipoParcelamento, tipoPreco, usarFator, taxaPrestamista,
-                limitesAtuais // Salva as regras que foram usadas
-            };
+            simulationResults.inputs = { valorProdutoOriginal: valProdOg, valorGE: valGE, valorEntrada: valEntrada };
             simulationResults.results = { carne: [], cartao: [] };
 
             const processar = (tipo) => {
                 const tbody = document.getElementById(`resultTableBody${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
-                
-                parcelasSelecionadas.forEach(numParcela => {
-                    const res = calcularParcela(valorProduto, valorGE, numParcela, tipo, tipoPreco, usarFator, taxaPrestamista, isMostruario, limitesAtuais);
-                    simulationResults.results[tipo].push({ numParcela, ...res });
+                parcelasSel.forEach(n => {
+                    const res = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites);
+                    simulationResults.results[tipo].push({ numParcela: n, ...res });
                     
-                    const row = document.createElement('tr');
-                    const isM = res.isMostruarioIndicator;
-                    row.innerHTML = `
-                        <td class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                            <span class="font-bold text-lg ${tipo==='cartao'?'text-blue-600':'text-green-600'}">${numParcela}x</span>
-                            ${isM ? '<span class="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full font-bold">Mostruário</span>' : ''}
-                        </td>
-                        <td class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
-                            <span class="font-bold text-xl text-gray-800 dark:text-gray-100">${formatCurrency(res.valorParcela)}</span>
-                        </td>
-                        <td class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 text-right">
-                            <span class="text-sm text-gray-500 font-medium">Total: ${formatCurrency(res.totalParcelado + valorEntrada)}</span>
-                        </td>
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-lg text-gray-800">${n}x</span> ${res.isMostruarioIndicator?'<span class="text-xs bg-yellow-100 text-yellow-800 px-2 rounded">Mostruário</span>':''}</td>
+                        <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-xl text-primary">${formatCurrency(res.valorParcela)}</span></td>
+                        <td class="px-6 py-4 border-b border-gray-100 text-right"><span class="text-sm text-gray-500 font-medium">${formatCurrency(res.totalParcelado + valEntrada)}</span></td>
                     `;
-                    tbody.appendChild(row);
+                    tbody.appendChild(tr);
                 });
                 document.getElementById(`resultSection${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.remove('hidden');
             };
 
-            if (tipoParcelamento === 'ambos') { processar('cartao'); processar('carne'); }
-            else { processar(tipoParcelamento); }
+            if (tipoPag === 'ambos') { processar('cartao'); processar('carne'); } else { processar(tipoPag); }
             
-            document.getElementById('saveButtonContainer').classList.remove('hidden');
-            
-            // Scroll to results softly
-            setTimeout(() => {
-                document.querySelector('#resultSectionCarne:not(.hidden), #resultSectionCartao:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 150);
+            document.getElementById('wppButtonContainer').classList.remove('hidden');
+            setTimeout(() => document.querySelector('#resultSectionCarne:not(.hidden), #resultSectionCartao:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         });
 
         // ==========================================
-        // HELPERS E UTILS
+        // HELPERS
         // ==========================================
         function setupCurrencyInputs() {
-            document.querySelectorAll('#productValue, #geValue, #entryValue').forEach(input => {
-                input.addEventListener('input', function() {
-                    let val = this.value.replace(/\D/g, '');
-                    val = (parseInt(val) || 0) / 100;
-                    this.value = val === 0 ? '' : 'R$ ' + val.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+            document.querySelectorAll('#productValue, #geValue, #entryValue').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    let v = this.value.replace(/\D/g, '');
+                    v = (parseInt(v)||0)/100;
+                    this.value = v===0 ? '' : 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
                 });
             });
         }
-
-        function setupParcelas() {
-            const select = document.getElementById('parcelasSelect');
-            for (let i = 1; i <= 12; i++) {
-                select.options.add(new Option(`${i} vezes`, i));
-            }
-            document.getElementById('selectAllBtn').addEventListener('click', () => Array.from(select.options).forEach(o=>o.selected=true));
-            document.getElementById('deselectAllBtn').addEventListener('click', () => Array.from(select.options).forEach(o=>o.selected=false));
-        }
-
-        function currencyToNumber(val) {
-            if (!val) return 0;
-            return parseFloat(val.replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
-        }
-
-        function formatCurrency(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-        }
+        function currencyToNumber(v) { return parseFloat((v||'').replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''))||0; }
+        function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
 
         // ==========================================
         // AUTH & NAVEGAÇÃO BÁSICA
@@ -909,58 +810,40 @@
         }
 
         function setupAuthUI() {
-            // Tabs
-            const tabs = {
-                login: { btn: 'loginTabBtn', form: 'loginForm' },
-                register: { btn: 'registerTabBtn', form: 'registerForm' },
-                forgot: { btn: 'forgotPasswordTabBtn', form: 'forgotPasswordForm' }
-            };
-
-            Object.keys(tabs).forEach(key => {
-                document.getElementById(tabs[key].btn).addEventListener('click', () => {
-                    Object.values(tabs).forEach(t => {
-                        document.getElementById(t.form).classList.add('hidden');
-                        document.getElementById(t.btn).classList.remove('border-primary', 'text-primary');
-                        document.getElementById(t.btn).classList.add('border-transparent', 'text-gray-500');
-                    });
-                    document.getElementById(tabs[key].form).classList.remove('hidden');
-                    document.getElementById(tabs[key].btn).classList.remove('border-transparent', 'text-gray-500');
-                    document.getElementById(tabs[key].btn).classList.add('border-primary', 'text-primary');
-                });
+            document.getElementById('loginTabBtn').addEventListener('click', () => {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginTabBtn').classList.add('border-primary','text-primary');
+                document.getElementById('loginTabBtn').classList.remove('border-transparent','text-gray-500');
+                document.getElementById('registerTabBtn').classList.remove('border-primary','text-primary');
+                document.getElementById('registerTabBtn').classList.add('border-transparent','text-gray-500');
+            });
+            document.getElementById('registerTabBtn').addEventListener('click', () => {
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerTabBtn').classList.add('border-primary','text-primary');
+                document.getElementById('registerTabBtn').classList.remove('border-transparent','text-gray-500');
+                document.getElementById('loginTabBtn').classList.remove('border-primary','text-primary');
+                document.getElementById('loginTabBtn').classList.add('border-transparent','text-gray-500');
             });
 
-            // Login Action
-            document.getElementById('loginBtn').addEventListener('click', async (e) => {
-                e.preventDefault();
-                const em = document.getElementById('loginEmail').value;
-                const pw = document.getElementById('loginPassword').value;
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                const em = document.getElementById('loginEmail').value, pw = document.getElementById('loginPassword').value;
                 if(!em||!pw) return;
-                try {
-                    await window.firebase.signInWithEmailAndPassword(window.auth, em, pw);
-                } catch(err) {
-                    const errBox = document.getElementById('loginError');
-                    errBox.textContent = "Erro ao entrar. Verifique credenciais.";
-                    errBox.classList.remove('hidden');
-                }
+                try { await window.firebase.signInWithEmailAndPassword(window.auth, em, pw); }
+                catch(e) { document.getElementById('loginError').textContent="Erro ao entrar. Verifique credenciais."; document.getElementById('loginError').classList.remove('hidden'); }
             });
 
-            // Logout
             document.getElementById('logoutBtn').addEventListener('click', () => window.firebase.signOut(window.auth));
             document.getElementById('logoutBtnPending').addEventListener('click', () => window.firebase.signOut(window.auth));
             
-            // Salvar (Simulação Mock UI)
-            document.getElementById('saveSimulationBtn').addEventListener('click', () => {
-                document.getElementById('saveModal').classList.remove('hidden');
-            });
-            document.getElementById('cancelSaveBtn').addEventListener('click', () => {
-                document.getElementById('saveModal').classList.add('hidden');
-            });
             document.getElementById('clearSimulationBtn').addEventListener('click', () => {
                 document.getElementById('simulationForm').reset();
-                aplicarRegrasPadraoUI('promocional'); // Reseta a customização para o padrão
+                aplicarRegrasPadraoUI('promocional');
+                document.getElementById('deselectAllBtn').click(); // Limpa selects
                 document.getElementById('resultSectionCarne').classList.add('hidden');
                 document.getElementById('resultSectionCartao').classList.add('hidden');
-                document.getElementById('saveButtonContainer').classList.add('hidden');
+                document.getElementById('wppButtonContainer').classList.add('hidden');
                 window.scrollTo({top:0, behavior:'smooth'});
             });
         }
@@ -968,27 +851,109 @@
         function setupSidebar() {
             const toggle = () => {
                 document.getElementById('sidebar').classList.toggle('open');
-                const over = document.getElementById('overlay');
-                over.classList.toggle('hidden');
-                setTimeout(()=> over.classList.toggle('opacity-0'), 10);
+                document.getElementById('overlay').classList.toggle('hidden');
+                setTimeout(()=> document.getElementById('overlay').classList.toggle('opacity-0'), 10);
             };
             document.getElementById('openSidebar').addEventListener('click', toggle);
             document.getElementById('closeSidebar').addEventListener('click', toggle);
             document.getElementById('overlay').addEventListener('click', toggle);
             
-            // Navigations
             document.getElementById('showSimulator').addEventListener('click', (e) => {
                 e.preventDefault(); toggle();
                 document.getElementById('simulatorSection').classList.remove('hidden');
-                document.getElementById('historySection').classList.add('hidden');
+                document.getElementById('usersSection').classList.add('hidden');
             });
-            document.getElementById('showHistory').addEventListener('click', (e) => {
+            document.getElementById('showUsers').addEventListener('click', (e) => {
                 e.preventDefault(); toggle();
                 document.getElementById('simulatorSection').classList.add('hidden');
-                document.getElementById('historySection').classList.remove('hidden');
-                // Aqui iria a chamada para loadSimulationHistory() do seu script original
+                document.getElementById('usersSection').classList.remove('hidden');
+                loadUsers();
             });
         }
+
+        // ==========================================
+        // GERENCIAMENTO DE USUÁRIOS (ADMIN)
+        // ==========================================
+        function setupAdminPanel() {
+            const tabA = document.getElementById('tabApproved'), tabP = document.getElementById('tabPending');
+            const listA = document.getElementById('approvedListContainer'), listP = document.getElementById('pendingListContainer');
+
+            const switchTab = (showApproved) => {
+                if(showApproved) {
+                    tabA.classList.add('border-primary','text-primary'); tabA.classList.remove('border-transparent','text-gray-500');
+                    tabP.classList.remove('border-primary','text-primary'); tabP.classList.add('border-transparent','text-gray-500');
+                    listA.classList.remove('hidden'); listP.classList.add('hidden');
+                } else {
+                    tabP.classList.add('border-primary','text-primary'); tabP.classList.remove('border-transparent','text-gray-500');
+                    tabA.classList.remove('border-primary','text-primary'); tabA.classList.add('border-transparent','text-gray-500');
+                    listP.classList.remove('hidden'); listA.classList.add('hidden');
+                }
+                checkEmptyState();
+            };
+
+            tabA.addEventListener('click', () => switchTab(true));
+            tabP.addEventListener('click', () => switchTab(false));
+            document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
+            
+            window.checkEmptyState = () => {
+                const activeList = listA.classList.contains('hidden') ? listP : listA;
+                document.getElementById('emptyUsers').classList.toggle('hidden', activeList.children.length > 0);
+            };
+        }
+
+        async function loadUsers() {
+            document.getElementById('loadingUsers').classList.remove('hidden');
+            const listA = document.getElementById('approvedListContainer');
+            const listP = document.getElementById('pendingListContainer');
+            listA.innerHTML = ''; listP.innerHTML = '';
+
+            try {
+                const snap = await window.firebase.getDocs(window.firebase.collection(window.db, 'users'));
+                snap.forEach(doc => {
+                    const u = {id: doc.id, ...doc.data()};
+                    const card = createCardUsuario(u);
+                    if(u.status === 'approved') listA.appendChild(card);
+                    else listP.appendChild(card);
+                });
+            } catch(e) { console.error(e); }
+
+            document.getElementById('loadingUsers').classList.add('hidden');
+            window.checkEmptyState();
+        }
+
+        function createCardUsuario(u) {
+            const div = document.createElement('div');
+            div.className = "p-4 border rounded-xl shadow-sm bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4";
+            const isP = u.status === 'pending';
+            
+            div.innerHTML = `
+                <div>
+                    <p class="font-bold text-gray-900">${u.displayName} ${u.email===ADMIN_EMAIL?'<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1">Admin</span>':''}</p>
+                    <p class="text-sm text-gray-500">${u.email}</p>
+                </div>
+                <div class="flex gap-2">
+                    ${isP ? `
+                        <button class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-600" onclick="window.approveUser('${u.id}')">Aprovar</button>
+                        <button class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-600" onclick="window.deleteUser('${u.id}')">Rejeitar</button>
+                    ` : `
+                        ${u.email !== ADMIN_EMAIL ? `<button class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-100" onclick="window.deleteUser('${u.id}')">Excluir</button>` : ''}
+                    `}
+                </div>
+            `;
+            return div;
+        }
+
+        window.approveUser = async (id) => {
+            if(!confirm("Aprovar este usuário?")) return;
+            await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', id), {status: 'approved'});
+            loadUsers();
+        };
+
+        window.deleteUser = async (id) => {
+            if(!confirm("Tem certeza que deseja remover este usuário?")) return;
+            await window.firebase.deleteDoc(window.firebase.doc(window.db, 'users', id));
+            loadUsers();
+        };
     </script>
 </body>
 </html>
