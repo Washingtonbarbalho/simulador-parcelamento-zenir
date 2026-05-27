@@ -156,7 +156,7 @@
                     <button id="registerTabBtn" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition-colors">Cadastrar</button>
                 </div>
 
-                <div id="loginForm" class="space-y-5">
+                <form id="loginForm" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail</label>
                         <input id="loginEmail" type="email" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="seu@email.com">
@@ -168,11 +168,11 @@
                             <button type="button" id="toggleLoginPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-primary"><i class="fas fa-eye"></i></button>
                         </div>
                     </div>
-                    <button id="loginBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary hover:bg-[#252875] font-semibold text-lg transition-all transform active:scale-95">Entrar no Sistema</button>
+                    <button type="button" id="loginBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary hover:bg-[#252875] font-semibold text-lg transition-all transform active:scale-95">Entrar no Sistema</button>
                     <div id="loginError" class="text-red-500 text-sm text-center font-medium hidden bg-red-50 p-2 rounded-lg"></div>
-                </div>
+                </form>
 
-                <div id="registerForm" class="space-y-4 hidden">
+                <form id="registerForm" class="space-y-4 hidden">
                     <input id="registerName" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Nome Completo">
                     <input id="registerEmail" type="email" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="E-mail profissional">
                     <input id="registerPhone" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="WhatsApp (00) 00000-0000">
@@ -181,12 +181,12 @@
                         <input id="registerPassword" type="password" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Crie uma senha (mín 6 char)">
                         <button type="button" id="toggleRegisterPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400"><i class="fas fa-eye"></i></button>
                     </div>
-                    <button id="registerBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary font-semibold text-lg transition-all mt-2">Solicitar Cadastro</button>
+                    <button type="button" id="registerBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary font-semibold text-lg transition-all mt-2">Solicitar Cadastro</button>
                     <div id="registerError" class="text-red-500 text-sm text-center hidden bg-red-50 p-2 rounded-lg"></div>
                     <div id="registerSuccess" class="text-emerald-600 text-sm text-center hidden bg-emerald-50 p-3 rounded-lg border border-emerald-200">
                         <i class="fas fa-check-circle mr-1"></i> Cadastro realizado! Aguarde liberação do admin.
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -504,7 +504,6 @@
                         <button id="refreshUsersBtn" class="text-primary hover:text-secondary bg-blue-50 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
                     </div>
 
-                    <!-- Barra de Busca -->
                     <div class="relative mb-4">
                         <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         <input type="text" id="searchUsersInput" placeholder="Buscar consultor por nome, email ou filial..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white transition-colors">
@@ -584,6 +583,7 @@
             setupCurrencyInputs();
             setupParcelasLista();
             setupSidebar();
+            setupRulesCustomization(); // ATENÇÃO: Esta é a linha principal que estava faltando antes!
             setupWhatsAppFlow();
             setupAdminPanel();
         });
@@ -602,7 +602,6 @@
         // UTILITÁRIO: RESETAR O SIMULADOR (LIMPEZA TOTAL)
         // ==========================================
         function resetSimulator() {
-            // Limpa os valores ao invés de usar reset() para evitar erro no html
             document.getElementById('productValue').value = '';
             document.getElementById('geValue').value = '';
             document.getElementById('entryValue').value = '';
@@ -616,7 +615,6 @@
             document.getElementById('wppProductName').value = '';
             document.getElementById('wppClientPhone').value = '';
             
-            // Força reset visual e lógica
             document.getElementById('isMostruario').checked = false;
             document.getElementById('useSpecialDiscount').checked = false;
             document.querySelector('input[name="priceType"][value="promocional"]').checked = true;
@@ -702,8 +700,6 @@
         // ==========================================
         async function fetchGlobalRules() {
             try {
-                // Tenta puxar as regras globais do Firestore. 
-                // Se o Firebase bloquear por regras de segurança (permission-denied), ele cai no catch silenciosamente.
                 const snap = await window.firebase.getDoc(window.firebase.doc(window.db, 'settings', 'global_rules'));
                 if(snap.exists()) {
                     const data = snap.data();
@@ -723,37 +719,43 @@
         }
 
         function setupRulesCustomization() {
+            // Abertura do painel de configuração customizada de juros da simulação
             document.getElementById('toggleAdvancedConfig').addEventListener('click', () => {
                 document.getElementById('advancedConfigPanel').classList.toggle('hidden');
                 document.getElementById('advancedIcon').classList.toggle('rotate-180');
             });
+
+            // Atualiza valores dos inputs do painel ao trocar Tabela / Promo
             document.querySelectorAll('input[name="priceType"]').forEach(r => r.addEventListener('change', (e) => aplicarRegrasPadraoUI(e.target.value)));
             
-            // Configurações Globais (Painel Admin)
-            document.getElementById('saveGlobalSettingsBtn').addEventListener('click', async () => {
-                if(!confirm("Atualizar as regras padrão afetará TODOS os vendedores no próximo login. Continuar?")) return;
-                
-                const newRules = {
-                    promocional: {
-                        cartao: { produto: parseInt(document.getElementById('global_promo_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_promo_cartao_ge').value)||0 },
-                        carne: { produto: parseInt(document.getElementById('global_promo_carne_prod').value)||0, ge: parseInt(document.getElementById('global_promo_carne_ge').value)||0 }
-                    },
-                    tabela: {
-                        cartao: { produto: parseInt(document.getElementById('global_tab_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_tab_cartao_ge').value)||0 },
-                        carne: { produto: parseInt(document.getElementById('global_tab_carne_prod').value)||0, ge: parseInt(document.getElementById('global_tab_carne_ge').value)||0 }
+            // Configurações Globais (Painel Admin - Salva no BD)
+            const globalSaveBtn = document.getElementById('saveGlobalSettingsBtn');
+            if(globalSaveBtn) {
+                globalSaveBtn.addEventListener('click', async () => {
+                    if(!confirm("Atualizar as regras padrão afetará TODOS os vendedores no próximo login. Continuar?")) return;
+                    
+                    const newRules = {
+                        promocional: {
+                            cartao: { produto: parseInt(document.getElementById('global_promo_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_promo_cartao_ge').value)||0 },
+                            carne: { produto: parseInt(document.getElementById('global_promo_carne_prod').value)||0, ge: parseInt(document.getElementById('global_promo_carne_ge').value)||0 }
+                        },
+                        tabela: {
+                            cartao: { produto: parseInt(document.getElementById('global_tab_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_tab_cartao_ge').value)||0 },
+                            carne: { produto: parseInt(document.getElementById('global_tab_carne_prod').value)||0, ge: parseInt(document.getElementById('global_tab_carne_ge').value)||0 }
+                        }
+                    };
+                    
+                    try {
+                        await window.firebase.setDoc(window.firebase.doc(window.db, 'settings', 'global_rules'), newRules);
+                        REGRAS_PADRAO = newRules;
+                        aplicarRegrasPadraoUI(document.querySelector('input[name="priceType"]:checked').value); 
+                        showToast("Configurações globais salvas com sucesso!");
+                    } catch(e) { 
+                        console.error(e);
+                        showToast("Erro ao salvar. Verifique as regras de segurança do Firebase.", "error"); 
                     }
-                };
-                
-                try {
-                    await window.firebase.setDoc(window.firebase.doc(window.db, 'settings', 'global_rules'), newRules);
-                    REGRAS_PADRAO = newRules;
-                    aplicarRegrasPadraoUI('promocional'); // refresh local
-                    showToast("Configurações globais salvas com sucesso!");
-                } catch(e) { 
-                    console.error(e);
-                    showToast("Erro ao salvar. Verifique as regras de segurança do Firebase.", "error"); 
-                }
-            });
+                });
+            }
         }
         
         function fillGlobalSettingsForm() {
@@ -808,11 +810,11 @@
                     let resA = (useSpecial && tipo === 'carne') ? calc(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, true) : null;
                     
                     simulationResults.results[tipo].push({ numParcela: n, ...resR });
-                    const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/50";
+                    const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/50 transition-colors";
                     tr.innerHTML = `
                         <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-lg text-gray-800">${n}x</span> ${resR.isMostruarioIndicator?'<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded ml-2 font-bold">Produto FL</span>':''}</td>
                         <td class="px-6 py-4 border-b border-gray-100">${resA ? `<div class="flex flex-col text-left"><span class="text-xs text-red-500 line-through font-medium">Tabela: ${formatCurrency(resA.valorParcela)}</span><span class="font-bold text-xl text-primary">Na Promoção: ${formatCurrency(resR.valorParcela)}</span></div>` : `<span class="font-bold text-xl text-primary">${formatCurrency(resR.valorParcela)}</span>`}</td>
-                        <td class="px-6 py-4 border-b border-gray-100 text-center"><button type="button" class="btn-toggle-detail text-gray-400 hover:text-primary p-2 transition-colors" data-target="detail-${tipo}-${n}"><i class="fas fa-eye text-lg"></i></button></td>
+                        <td class="px-6 py-4 border-b border-gray-100 text-center"><button type="button" class="btn-toggle-detail text-gray-400 hover:text-primary p-2 focus:outline-none transition-colors" data-target="detail-${tipo}-${n}"><i class="fas fa-eye text-lg"></i></button></td>
                     `;
                     tbody.appendChild(tr);
 
@@ -879,7 +881,7 @@
                         applyUserPermissions(uData);
                         resetSimulator();
                         
-                        // Garante que a tela exibida é o simulador sem simular um clique
+                        // Garante que a tela exibida é o simulador
                         document.getElementById('simulatorSection').classList.remove('hidden');
                         document.getElementById('usersSection').classList.add('hidden');
                         document.getElementById('globalSettingsSection').classList.add('hidden');
@@ -918,13 +920,13 @@
             regPhone.addEventListener('input', function(e) { let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/); e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : ''); });
 
             document.getElementById('loginTabBtn').addEventListener('click', () => {
-                document.querySelectorAll('#registerForm input').forEach(i => i.value = ''); // Limpa form oposto
+                document.querySelectorAll('#registerForm input').forEach(i => i.value = ''); 
                 document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden');
                 document.getElementById('loginTabBtn').classList.add('border-primary','text-primary'); document.getElementById('loginTabBtn').classList.remove('border-transparent','text-gray-500');
                 document.getElementById('registerTabBtn').classList.remove('border-primary','text-primary'); document.getElementById('registerTabBtn').classList.add('border-transparent','text-gray-500');
             });
             document.getElementById('registerTabBtn').addEventListener('click', () => {
-                document.querySelectorAll('#loginForm input').forEach(i => i.value = ''); // Limpa form oposto
+                document.querySelectorAll('#loginForm input').forEach(i => i.value = ''); 
                 document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden');
                 document.getElementById('registerTabBtn').classList.add('border-primary','text-primary'); document.getElementById('registerTabBtn').classList.remove('border-transparent','text-gray-500');
                 document.getElementById('loginTabBtn').classList.remove('border-primary','text-primary'); document.getElementById('loginTabBtn').classList.add('border-transparent','text-gray-500');
@@ -948,7 +950,7 @@
                     await window.firebase.updateProfile(cred.user, { displayName: name.toUpperCase() });
                     await window.firebase.setDoc(window.firebase.doc(window.db, 'users', cred.user.uid), { uid: cred.user.uid, displayName: name.toUpperCase(), email, phone, branch: branch.toUpperCase(), status: 'pending', allowAncoragem: true, allowProdutoFL: true, allowCustomRules: true, allowWhatsApp: true });
                     document.getElementById('registerSuccess').classList.remove('hidden'); document.getElementById('registerError').classList.add('hidden');
-                    window.firebase.signOut(window.auth); // Desloga o cara para ele ir pra pendente visualmente limpo
+                    window.firebase.signOut(window.auth); 
                 } catch (e) { document.getElementById('registerError').textContent = "Erro: " + e.message; document.getElementById('registerError').classList.remove('hidden'); }
                 finally { document.getElementById('loadingScreen').style.opacity = '0'; setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 300); }
             });
@@ -1139,4 +1141,4 @@
         };
     </script>
 </body>
-</html>
+    </html>
