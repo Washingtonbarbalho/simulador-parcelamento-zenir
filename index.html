@@ -21,10 +21,10 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#2E3192', // Azul Zenir
-                        secondary: '#ED1C24', // Vermelho Zenir
-                        dark: '#231F20', // Preto/cinza escuro Zenir
-                        whatsapp: '#25D366', // Verde do WhatsApp
+                        primary: '#2E3192',
+                        secondary: '#ED1C24',
+                        dark: '#231F20',
+                        whatsapp: '#25D366',
                     },
                     fontFamily: {
                         'sans': ['Poppins', 'sans-serif'],
@@ -77,7 +77,6 @@
     <style>
         body { font-family: 'Poppins', sans-serif; }
         
-        /* Toast notification */
         .toast {
             position: fixed; top: 20px; right: 20px; padding: 16px 20px;
             border-radius: 12px; max-width: 350px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -100,7 +99,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Inputs & Controls */
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
             transition: all 0.2s ease; border-radius: 10px !important;
         }
@@ -121,21 +119,10 @@
             background: rgba(31, 41, 55, 0.7); border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        /* Custom scrollbar para o seletor de lista */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #F1F5F9;
-            border-radius: 10px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #CBD5E1;
-            border-radius: 10px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: #94A3B8;
-        }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #F1F5F9; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen selection:bg-primary selection:text-white transition-colors duration-300 pb-10">
@@ -151,7 +138,7 @@
         <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mb-6" alt="Zenir Móveis">
         <div class="flex flex-col items-center">
             <div class="loading-spinner mb-4 w-12 h-12"></div>
-            <p class="text-primary dark:text-gray-300 text-lg font-medium tracking-wide">Iniciando sistema...</p>
+            <p class="text-primary dark:text-gray-300 text-lg font-medium tracking-wide">Carregando sistema...</p>
         </div>
     </div>
 
@@ -243,9 +230,9 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Navegação</p>
                 <ul class="space-y-1">
                     <li>
-                        <a href="#" id="showSimulator" class="flex items-center px-4 py-3 rounded-xl bg-primary/10 text-primary font-medium">
-                            <i class="fas fa-calculator w-6"></i> Simulador
-                        </a>
+                        <button id="showSimulator" class="w-full flex items-center px-4 py-3 rounded-xl bg-primary/10 text-primary font-medium transition-colors hover:bg-primary/20">
+                            <i class="fas fa-calculator w-6 text-left"></i> Simulador
+                        </button>
                     </li>
                 </ul>
 
@@ -253,16 +240,21 @@
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Administração</p>
                     <ul class="space-y-1">
                         <li>
-                            <a href="#" id="showUsers" class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 font-medium">
-                                <i class="fas fa-users-cog w-6"></i> Usuários e Permissões
-                            </a>
+                            <button id="showUsers" class="w-full flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 font-medium transition-colors">
+                                <i class="fas fa-users-cog w-6 text-left"></i> Usuários
+                            </button>
+                        </li>
+                        <li>
+                            <button id="showGlobalSettings" class="w-full flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 font-medium transition-colors">
+                                <i class="fas fa-cogs w-6 text-left"></i> Configurações Padrão
+                            </button>
                         </li>
                     </ul>
                 </div>
             </div>
             
             <div class="p-5 border-t border-gray-100 dark:border-gray-700">
-                <button id="logoutBtn" class="flex items-center justify-center w-full py-3 px-4 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 font-semibold">
+                <button id="logoutBtn" class="flex items-center justify-center w-full py-3 px-4 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 font-semibold transition-colors">
                     <i class="fas fa-sign-out-alt mr-2"></i> Encerrar Sessão
                 </button>
             </div>
@@ -279,7 +271,7 @@
                 <div class="w-10 h-10"></div>
             </header>
 
-            <!-- SIMULADOR -->
+            <!-- SIMULADOR SECTION -->
             <div id="simulatorSection" class="fadeIn">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-soft p-5 sm:p-8 mb-8 border border-gray-100 dark:border-gray-700">
                     <div class="mb-6 border-b border-gray-100 dark:border-gray-700 pb-4">
@@ -288,7 +280,6 @@
                     </div>
 
                     <form id="simulationForm" class="space-y-8">
-                        <!-- Valores Financeiros -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-gray-50/50 dark:bg-gray-900/30 p-5 rounded-xl border border-gray-100 dark:border-gray-700">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Produto (R$)</label>
@@ -314,7 +305,6 @@
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Tipo de Venda -->
                             <div class="space-y-5">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Tipo de Venda</h3>
                                 <div class="flex gap-3">
@@ -333,7 +323,6 @@
                                 </div>
 
                                 <div class="bg-gray-50 p-4 rounded-xl space-y-3 border border-gray-100">
-                                    <!-- Produto FL (Permissão dinâmica) -->
                                     <label id="containerProdutoFL" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
                                         <div class="relative">
                                             <input type="checkbox" id="isMostruario" class="sr-only peer">
@@ -343,7 +332,6 @@
                                         <span class="ml-3 font-medium text-gray-700">Produto FL</span>
                                     </label>
                                     
-                                    <!-- Ancoragem (Permissão dinâmica) -->
                                     <label id="containerSpecialDiscount" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
                                         <div class="relative">
                                             <input type="checkbox" id="useSpecialDiscount" class="sr-only peer">
@@ -355,7 +343,6 @@
                                 </div>
                             </div>
 
-                            <!-- Condições -->
                             <div class="space-y-5">
                                 <h3 class="text-sm font-bold uppercase tracking-wider text-gray-400">Condições</h3>
                                 <div>
@@ -390,17 +377,17 @@
                             </div>
                         </div>
 
-                        <!-- Configurações Avançadas de Parcelamento (Permissão dinâmica) -->
+                        <!-- Configurações Avançadas -->
                         <div id="containerCustomRules" class="border border-indigo-100 bg-indigo-50/30 rounded-xl overflow-hidden">
                             <button type="button" id="toggleAdvancedConfig" class="w-full px-5 py-4 flex justify-between items-center text-left hover:bg-indigo-50 transition-colors focus:outline-none">
                                 <div class="flex items-center">
                                     <i class="fas fa-sliders-h text-indigo-500 mr-3"></i>
-                                    <span class="font-semibold text-gray-800">Regras de Parcelamento (Até quantas vezes Sem Juros)</span>
+                                    <span class="font-semibold text-gray-800">Regras de Parcelamento (Exceções)</span>
                                 </div>
                                 <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300" id="advancedIcon"></i>
                             </button>
                             <div id="advancedConfigPanel" class="px-5 pb-5 pt-2 hidden border-t border-indigo-100">
-                                <p class="text-xs text-indigo-600 mb-4 bg-indigo-100 inline-block px-3 py-1 rounded-full font-medium">Estes valores mudam sozinhos, mas você pode editar livremente.</p>
+                                <p class="text-xs text-indigo-600 mb-4 bg-indigo-100 inline-block px-3 py-1 rounded-full font-medium">Você pode editar pontualmente as vezes sem juros para esta simulação.</p>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: Prod</label><input type="number" id="limitProdCartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
                                     <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><label class="block text-xs font-bold text-gray-500 uppercase mb-1"><i class="fas fa-credit-card mr-1"></i> Cartão: GE</label><input type="number" id="limitGECartao" min="0" max="12" class="w-16 px-2 py-1 bg-gray-50 border rounded text-center font-bold text-primary"></div>
@@ -410,16 +397,13 @@
                             </div>
                         </div>
                         
-                        <!-- Seletor de Parcelas em Formato Lista e Botão Calcular -->
                         <div class="flex flex-col sm:flex-row gap-6 items-end border-t border-gray-100 pt-6">
                             <div class="w-full sm:w-2/3 relative" id="parcelasContainer">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Quais parcelas exibir?</label>
-                                
                                 <button type="button" id="btnToggleParcelas" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-left flex justify-between items-center hover:bg-gray-50 shadow-sm transition-colors">
                                     <span class="text-gray-700 font-medium"><span id="parcelasCount" class="font-bold text-primary">0</span> parcelas selecionadas</span>
                                     <i class="fas fa-chevron-down text-gray-400" id="parcelasDropdownIcon"></i>
                                 </button>
-                                
                                 <div id="parcelasDropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-20">
                                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
                                         <span class="font-bold text-gray-700 text-sm">Selecione as Parcelas:</span>
@@ -428,12 +412,9 @@
                                             <button type="button" id="deselectAllBtn" class="text-xs font-semibold text-gray-600 hover:text-red-500 bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Nenhuma</button>
                                         </div>
                                     </div>
-                                    <div class="max-h-48 overflow-y-auto custom-scroll space-y-1 pr-1" id="parcelasGrid">
-                                        <!-- Checkboxes dinâmicos gerados via JS -->
-                                    </div>
+                                    <div class="max-h-48 overflow-y-auto custom-scroll space-y-1 pr-1" id="parcelasGrid"></div>
                                 </div>
                             </div>
-                            
                             <div class="w-full sm:w-1/3">
                                 <button type="submit" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-[#4A4EB8] hover:from-secondary hover:to-[#FF4D54] text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                     <i class="fas fa-magic text-xl"></i> <span class="text-lg">Calcular</span>
@@ -443,7 +424,6 @@
                     </form>
                 </div>
                 
-                <!-- Resultados - Carnê -->
                 <div id="resultSectionCarne" class="hidden mb-8 fadeIn">
                     <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-file-invoice text-secondary mr-2"></i> Opções no Carnê</h2>
                     <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
@@ -460,7 +440,6 @@
                     </div>
                 </div>
                 
-                <!-- Resultados - Cartão -->
                 <div id="resultSectionCartao" class="hidden mb-8 fadeIn">
                     <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-credit-card text-blue-500 mr-2"></i> Opções no Cartão</h2>
                     <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
@@ -477,7 +456,6 @@
                     </div>
                 </div>
                 
-                <!-- Ações WhatsApp Pós Simulação (Permissão dinâmica) -->
                 <div id="wppButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
                     <button id="openWppModalBtn" type="button" class="bg-whatsapp hover:bg-green-600 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
                         <i class="fab fa-whatsapp text-xl"></i> Enviar Orçamento por WhatsApp
@@ -488,7 +466,7 @@
                 </div>
             </div>
 
-            <!-- Modal de WhatsApp -->
+            <!-- Modal WhatsApp -->
             <div id="whatsappModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
                 <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
                     <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
@@ -503,7 +481,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">NOME DO PRODUTO</label>
-                            <input type="text" id="wppProductName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Guarda-Roupa Casal 6 Portas">
+                            <input type="text" id="wppProductName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Guarda-Roupa Casal">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 mb-1">CELULAR DO CLIENTE</label>
@@ -518,12 +496,18 @@
                 </div>
             </div>
 
-            <!-- GERENCIAMENTO DE USUÁRIOS E PERMISSÕES (ADMIN) -->
+            <!-- ADMIN: Usuários -->
             <div id="usersSection" class="hidden fadeIn">
                 <div class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-primary">Gerenciamento e Permissões</h2>
+                        <h2 class="text-2xl font-bold text-primary">Gerenciamento de Usuários</h2>
                         <button id="refreshUsersBtn" class="text-primary hover:text-secondary bg-blue-50 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+
+                    <!-- Barra de Busca -->
+                    <div class="relative mb-4">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="searchUsersInput" placeholder="Buscar consultor por nome, email ou filial..." class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white transition-colors">
                     </div>
 
                     <div class="flex border-b border-gray-200 mb-6 gap-2">
@@ -533,33 +517,66 @@
 
                     <div id="loadingUsers" class="flex justify-center py-8"><div class="loading-spinner"></div></div>
                     
-                    <!-- Contêineres de Listagem -->
                     <div id="approvedListContainer" class="hidden space-y-4"></div>
                     <div id="pendingListContainer" class="hidden space-y-4"></div>
                     
-                    <!-- Estado Vazio -->
                     <div id="emptyUsers" class="hidden text-center py-10 text-gray-500">
                         <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i><p>Nenhum usuário encontrado nesta lista.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN: Configurações Globais -->
+            <div id="globalSettingsSection" class="hidden fadeIn">
+                <div class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100 max-w-3xl mx-auto">
+                    <h2 class="text-2xl font-bold text-primary mb-2"><i class="fas fa-cogs mr-2"></i> Configurações Padrão de Rede</h2>
+                    <p class="text-gray-500 text-sm mb-8">Defina quantas vezes sem juros cada modalidade suporta. Essas regras serão atualizadas automaticamente no simulador de todos os vendedores.</p>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-red-50 p-5 rounded-xl border border-red-100">
+                            <h3 class="font-bold text-secondary text-lg mb-4"><i class="fas fa-tag mr-2"></i> Preços Promocionais</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Cartão: Prod</label><input type="number" id="global_promo_cartao_prod" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Cartão: GE</label><input type="number" id="global_promo_cartao_ge" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Carnê: Prod</label><input type="number" id="global_promo_carne_prod" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Carnê: GE</label><input type="number" id="global_promo_carne_ge" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                            <h3 class="font-bold text-primary text-lg mb-4"><i class="fas fa-list-alt mr-2"></i> Preços de Tabela</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Cartão: Prod</label><input type="number" id="global_tab_cartao_prod" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Cartão: GE</label><input type="number" id="global_tab_cartao_ge" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Carnê: Prod</label><input type="number" id="global_tab_carne_prod" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Carnê: GE</label><input type="number" id="global_tab_carne_ge" class="w-full px-3 py-2 border rounded-lg text-center font-bold"></div>
+                            </div>
+                        </div>
+
+                        <button id="saveGlobalSettingsBtn" class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:bg-[#252875] transition-all text-lg">
+                            <i class="fas fa-save mr-2"></i> Salvar e Aplicar a Todos
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts da Lógica Principal -->
     <script>
         const ADMIN_EMAIL = "washington.wn8@gmail.com";
         const FATORES = {
             cartao: [1.0292, 0.5220, 0.3530, 0.2685, 0.2179, 0.1841, 0.1600, 0.1420, 0.1280, 0.1168, 0.1076, 0.1000],
             carne: [1.0690, 0.5523, 0.3804, 0.2946, 0.2432, 0.2091, 0.1849, 0.1668, 0.1528, 0.1417, 0.1327, 0.1252]
         };
-        const REGRAS_PADRAO = {
+        
+        let REGRAS_PADRAO = {
             promocional: { cartao: { produto: 1, ge: 3 }, carne: { produto: 0, ge: 3 } },
             tabela: { cartao: { produto: 3, ge: 3 }, carne: { produto: 3, ge: 3 } }
         };
         
         let simulationResults = { inputs: {}, results: {} };
         let currentUser = null;
+        let allUsersData = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             window.firebase.onAuthStateChanged(window.auth, handleAuthStateChanged);
@@ -567,98 +584,81 @@
             setupCurrencyInputs();
             setupParcelasLista();
             setupSidebar();
-            setupRulesCustomization();
             setupWhatsAppFlow();
             setupAdminPanel();
         });
 
-        // Toast de Notificações
         function showToast(text, type = 'success') {
             const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon-class');
-            const textSpan = document.getElementById('toast-text');
-            
+            document.getElementById('toast-icon-class').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            document.getElementById('toast-text').textContent = text;
             toast.className = `toast ${type}`;
-            textSpan.textContent = text;
-            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-            
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('show'), 50);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.classList.add('hidden'), 400);
-            }, 3000);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.classList.add('hidden'), 400); }, 3000);
         }
 
         // ==========================================
-        // SELETOR DE PARCELAS EM FORMATO LISTA (NENHUMA CHECADA POR PADRÃO)
+        // UTILITÁRIO: RESETAR O SIMULADOR (LIMPEZA TOTAL)
+        // ==========================================
+        function resetSimulator() {
+            // Limpa os valores ao invés de usar reset() para evitar erro no html
+            document.getElementById('productValue').value = '';
+            document.getElementById('geValue').value = '';
+            document.getElementById('entryValue').value = '';
+            document.getElementById('deselectAllBtn').click(); 
+            
+            document.getElementById('resultSectionCarne').classList.add('hidden');
+            document.getElementById('resultSectionCartao').classList.add('hidden');
+            document.getElementById('wppButtonContainer').classList.add('hidden');
+            
+            document.getElementById('wppClientName').value = '';
+            document.getElementById('wppProductName').value = '';
+            document.getElementById('wppClientPhone').value = '';
+            
+            // Força reset visual e lógica
+            document.getElementById('isMostruario').checked = false;
+            document.getElementById('useSpecialDiscount').checked = false;
+            document.querySelector('input[name="priceType"][value="promocional"]').checked = true;
+            document.querySelector('input[name="paymentType"][value="carne"]').checked = true;
+            document.querySelector('input[name="useFactor"][value="nao"]').checked = true;
+            document.querySelector('input[name="applyTaxaPrestamista"][value="sim"]').checked = true;
+            
+            aplicarRegrasPadraoUI('promocional');
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        // ==========================================
+        // PARCELAS LISTA E DROPDOWN
         // ==========================================
         function setupParcelasLista() {
-            const grid = document.getElementById('parcelasGrid');
-            const btnToggle = document.getElementById('btnToggleParcelas');
-            const dropdown = document.getElementById('parcelasDropdown');
-            const icon = document.getElementById('parcelasDropdownIcon');
-            const countLabel = document.getElementById('parcelasCount');
+            const grid = document.getElementById('parcelasGrid'), btnToggle = document.getElementById('btnToggleParcelas');
+            const dropdown = document.getElementById('parcelasDropdown'), icon = document.getElementById('parcelasDropdownIcon');
             
             for (let i = 1; i <= 12; i++) {
                 const row = document.createElement('label');
                 row.className = "flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-100 transition-colors select-none";
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary parcela-checkbox" value="${i}">
-                        <span class="font-bold text-gray-700 text-sm">${i} vezes</span>
-                    </div>
-                    <span class="text-xs text-gray-400 font-medium">${i}x sem/com juros</span>
-                `;
+                row.innerHTML = `<div class="flex items-center gap-3"><input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary parcela-checkbox" value="${i}"><span class="font-bold text-gray-700 text-sm">${i} vezes</span></div><span class="text-xs text-gray-400 font-medium">${i}x sem/com juros</span>`;
                 grid.appendChild(row);
             }
 
-            const updateCount = () => {
-                const checked = document.querySelectorAll('.parcela-checkbox:checked').length;
-                countLabel.textContent = checked;
-            };
+            const updateCount = () => { document.getElementById('parcelasCount').textContent = document.querySelectorAll('.parcela-checkbox:checked').length; };
 
-            btnToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdown.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
-            });
+            btnToggle.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('hidden'); icon.classList.toggle('rotate-180'); });
+            document.addEventListener('click', (e) => { if (!document.getElementById('parcelasContainer').contains(e.target)) { dropdown.classList.add('hidden'); icon.classList.remove('rotate-180'); }});
+            document.querySelectorAll('.parcela-checkbox').forEach(chk => chk.addEventListener('change', updateCount));
 
-            document.addEventListener('click', (e) => {
-                if (!document.getElementById('parcelasContainer').contains(e.target)) {
-                    dropdown.classList.add('hidden');
-                    icon.classList.remove('rotate-180');
-                }
-            });
-
-            document.querySelectorAll('.parcela-checkbox').forEach(chk => {
-                chk.addEventListener('change', updateCount);
-            });
-
-            document.getElementById('selectAllBtn').addEventListener('click', () => {
-                document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = true);
-                updateCount();
-            });
-            document.getElementById('deselectAllBtn').addEventListener('click', () => {
-                document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = false);
-                updateCount();
-            });
+            document.getElementById('selectAllBtn').addEventListener('click', () => { document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = true); updateCount(); });
+            document.getElementById('deselectAllBtn').addEventListener('click', () => { document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = false); updateCount(); });
         }
-
-        function getSelectedParcelas() {
-            const checkboxes = document.querySelectorAll('.parcela-checkbox:checked');
-            return Array.from(checkboxes).map(c => parseInt(c.value)).sort((a, b) => a - b);
-        }
+        function getSelectedParcelas() { return Array.from(document.querySelectorAll('.parcela-checkbox:checked')).map(c => parseInt(c.value)).sort((a, b) => a - b); }
 
         // ==========================================
-        // FLUXO DO WHATSAPP OTIMIZADO
+        // WHATSAPP
         // ==========================================
         function setupWhatsAppFlow() {
-            const wppBtn = document.getElementById('openWppModalBtn');
-            const modal = document.getElementById('whatsappModal');
-            const cancelBtn = document.getElementById('cancelWppBtn');
-            const sendBtn = document.getElementById('sendWppBtn');
+            const wppBtn = document.getElementById('openWppModalBtn'), modal = document.getElementById('whatsappModal');
+            const cancelBtn = document.getElementById('cancelWppBtn'), sendBtn = document.getElementById('sendWppBtn');
             const phoneInput = document.getElementById('wppClientPhone');
 
             phoneInput.addEventListener('input', function(e) {
@@ -674,250 +674,161 @@
                 const product = document.getElementById('wppProductName').value.trim();
                 const phone = phoneInput.value.replace(/\D/g, '');
 
-                if(!product) {
-                    alert("Por favor, preencha o nome do produto para enviar.");
-                    return;
-                }
-                if(!phone || phone.length < 10) {
-                    alert("Informe um número de WhatsApp válido.");
-                    return;
-                }
+                if(!product) return alert("Por favor, preencha o nome do produto para enviar.");
+                if(!phone || phone.length < 10) return alert("Informe um número de WhatsApp válido.");
 
-                let msg = `*ORÇAMENTO ZENIR MÓVEIS* 🔴🔵\n\n`;
-                if(name) msg += `Olá, *${name}*! Segue a sua simulação de parcelamento:\n\n`;
-                else msg += `Olá! Segue a sua simulação de parcelamento:\n\n`;
-                
-                msg += `📦 *Produto:* ${product.toUpperCase()}\n`;
-                if(simulationResults.inputs.valorEntrada > 0) {
-                    msg += `💰 *Entrada:* ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
-                }
+                let msg = `*ORÇAMENTO ZENIR MÓVEIS* 🔴🔵\n\n${name?`Olá, *${name}*! `:'Olá! '}Segue a sua simulação de parcelamento:\n\n📦 *Produto:* ${product.toUpperCase()}\n`;
+                if(simulationResults.inputs.valorEntrada > 0) msg += `💰 *Entrada:* ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
                 msg += `\n`;
 
-                const addTable = (tipoStr, dataArr) => {
-                    if(!dataArr || dataArr.length === 0) return "";
-                    let t = `💳 *Opções no ${tipoStr}:*\n`;
-                    dataArr.forEach(r => {
-                        let ind = r.isMostruarioIndicator ? " (Produto FL)" : "";
-                        t += `• *${r.numParcela}x de ${formatCurrency(r.valorParcela)}*${ind}\n`;
-                    });
-                    t += `\n`;
-                    return t;
+                const addTbl = (tipo, arr) => {
+                    if(!arr || arr.length === 0) return "";
+                    let t = `💳 *Opções no ${tipo}:*\n`;
+                    arr.forEach(r => t += `• *${r.numParcela}x de ${formatCurrency(r.valorParcela)}*${r.isMostruarioIndicator?" (Produto FL)":""}\n`);
+                    return t + `\n`;
                 };
 
-                msg += addTable("Carnê", simulationResults.results.carne);
-                msg += addTable("Cartão", simulationResults.results.cartao);
+                msg += addTbl("Carnê", simulationResults.results.carne);
+                msg += addTbl("Cartão", simulationResults.results.cartao);
+                msg += `_Condições sujeitas a análise de crédito e alterações._\nQualquer dúvida, fale comigo por aqui! 😊`;
 
-                msg += `_Condições sujeitas a análise de crédito e alterações._\n`;
-                msg += `Qualquer dúvida, fale comigo por aqui! 😊`;
-
-                const url = `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`;
-                window.open(url, '_blank');
+                window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
                 modal.classList.add('hidden');
             });
         }
 
         // ==========================================
-        // CONFIGURAÇÕES AVANÇADAS & REGRAS
+        // REGRAS (GLOBAIS & CUSTOM)
         // ==========================================
-        function setupRulesCustomization() {
-            const toggleBtn = document.getElementById('toggleAdvancedConfig');
-            const panel = document.getElementById('advancedConfigPanel');
-            const icon = document.getElementById('advancedIcon');
-
-            toggleBtn.addEventListener('click', () => {
-                panel.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
-            });
-
-            document.querySelectorAll('input[name="priceType"]').forEach(radio => {
-                radio.addEventListener('change', (e) => aplicarRegrasPadraoUI(e.target.value));
-            });
-            aplicarRegrasPadraoUI('promocional');
+        async function fetchGlobalRules() {
+            try {
+                // Tenta puxar as regras globais do Firestore. 
+                // Se o Firebase bloquear por regras de segurança (permission-denied), ele cai no catch silenciosamente.
+                const snap = await window.firebase.getDoc(window.firebase.doc(window.db, 'settings', 'global_rules'));
+                if(snap.exists()) {
+                    const data = snap.data();
+                    if(data.promocional && data.tabela) REGRAS_PADRAO = data;
+                }
+            } catch(e) { 
+                console.log("Aviso: Não foi possível ler as regras globais do Firebase. Usando regras padrão do sistema.");
+            }
         }
 
         function aplicarRegrasPadraoUI(tipoPreco) {
-            const regras = REGRAS_PADRAO[tipoPreco];
-            document.getElementById('limitProdCartao').value = regras.cartao.produto;
-            document.getElementById('limitGECartao').value = regras.cartao.ge;
-            document.getElementById('limitProdCarne').value = regras.carne.produto;
-            document.getElementById('limitGECarne').value = regras.carne.ge;
+            const r = REGRAS_PADRAO[tipoPreco];
+            document.getElementById('limitProdCartao').value = r.cartao.produto;
+            document.getElementById('limitGECartao').value = r.cartao.ge;
+            document.getElementById('limitProdCarne').value = r.carne.produto;
+            document.getElementById('limitGECarne').value = r.carne.ge;
         }
 
-        function obterLimitesAtuais() {
-            return {
-                cartao: { prod: parseInt(document.getElementById('limitProdCartao').value)||0, ge: parseInt(document.getElementById('limitGECartao').value)||0 },
-                carne: { prod: parseInt(document.getElementById('limitProdCarne').value)||0, ge: parseInt(document.getElementById('limitGECarne').value)||0 }
-            };
-        }
-
-        // ==========================================
-        // MOTOR DE CÁLCULO
-        // ==========================================
-        function calcularParcela(valorTotal, valorGE, numParcela, tipoPag, usarFator, taxaPrestamista, isMostruario, limites, useSpecialDiscount) {
-            let valorProduto = 0, valorSeguro = 0;
-            const idx = numParcela - 1;
+        function setupRulesCustomization() {
+            document.getElementById('toggleAdvancedConfig').addEventListener('click', () => {
+                document.getElementById('advancedConfigPanel').classList.toggle('hidden');
+                document.getElementById('advancedIcon').classList.toggle('rotate-180');
+            });
+            document.querySelectorAll('input[name="priceType"]').forEach(r => r.addEventListener('change', (e) => aplicarRegrasPadraoUI(e.target.value)));
             
-            // "Produto FL" (antiga peça de mostruário) agora é válida para TODAS as parcelas do carnê
-            const aplicaMostr = (isMostruario && tipoPag === 'carne');
-
-            // Correção Ancoragem de Preço (Produto + 50% de valor original)
-            let valorProdutoBase = valorTotal;
-            if (useSpecialDiscount && tipoPag === 'carne') {
-                valorProdutoBase = valorTotal * 1.5;
-            }
-
-            if (usarFator) {
-                // Se Produto FL estiver ativo, usa o fator do cartão correspondente àquela parcela no cálculo do produto
-                valorProduto = valorProdutoBase * (aplicaMostr ? FATORES.cartao[idx] : FATORES[tipoPag][idx]);
-                valorSeguro = valorGE * FATORES[tipoPag][idx];
-            } else {
-                const lProd = limites[tipoPag].prod;
-                const lGe = limites[tipoPag].ge;
+            // Configurações Globais (Painel Admin)
+            document.getElementById('saveGlobalSettingsBtn').addEventListener('click', async () => {
+                if(!confirm("Atualizar as regras padrão afetará TODOS os vendedores no próximo login. Continuar?")) return;
                 
-                // Cálculo Produto Sem/Com Juros
-                if (numParcela <= lProd && lProd > 0) {
-                    valorProduto = valorProdutoBase / numParcela;
-                } else {
-                    valorProduto = valorProdutoBase * (aplicaMostr ? FATORES.cartao[idx] : FATORES[tipoPag][idx]);
+                const newRules = {
+                    promocional: {
+                        cartao: { produto: parseInt(document.getElementById('global_promo_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_promo_cartao_ge').value)||0 },
+                        carne: { produto: parseInt(document.getElementById('global_promo_carne_prod').value)||0, ge: parseInt(document.getElementById('global_promo_carne_ge').value)||0 }
+                    },
+                    tabela: {
+                        cartao: { produto: parseInt(document.getElementById('global_tab_cartao_prod').value)||0, ge: parseInt(document.getElementById('global_tab_cartao_ge').value)||0 },
+                        carne: { produto: parseInt(document.getElementById('global_tab_carne_prod').value)||0, ge: parseInt(document.getElementById('global_tab_carne_ge').value)||0 }
+                    }
+                };
+                
+                try {
+                    await window.firebase.setDoc(window.firebase.doc(window.db, 'settings', 'global_rules'), newRules);
+                    REGRAS_PADRAO = newRules;
+                    aplicarRegrasPadraoUI('promocional'); // refresh local
+                    showToast("Configurações globais salvas com sucesso!");
+                } catch(e) { 
+                    console.error(e);
+                    showToast("Erro ao salvar. Verifique as regras de segurança do Firebase.", "error"); 
                 }
-
-                // Cálculo Seguro Sem/Com Juros
-                if (numParcela <= lGe && lGe > 0) {
-                    valorSeguro = valorGE / numParcela;
-                } else {
-                    valorSeguro = valorGE * FATORES[tipoPag][idx];
-                }
-            }
+            });
+        }
+        
+        function fillGlobalSettingsForm() {
+            document.getElementById('global_promo_cartao_prod').value = REGRAS_PADRAO.promocional.cartao.produto;
+            document.getElementById('global_promo_cartao_ge').value = REGRAS_PADRAO.promocional.cartao.ge;
+            document.getElementById('global_promo_carne_prod').value = REGRAS_PADRAO.promocional.carne.produto;
+            document.getElementById('global_promo_carne_ge').value = REGRAS_PADRAO.promocional.carne.ge;
             
-            let vParcela = valorProduto + valorSeguro;
-            let vPrestamista = 0;
-            if (taxaPrestamista && tipoPag === 'carne') {
-                vPrestamista = vParcela * 0.06;
-                vParcela += vPrestamista;
-            }
-            
-            return { 
-                valorParcela: vParcela, 
-                valorParcelaProduto: valorProduto,
-                valorParcelaGE: valorSeguro,
-                valorTaxaPrestamista: vPrestamista,
-                totalParcelado: vParcela * numParcela, 
-                totalProduto: valorProduto * numParcela,
-                totalGE: valorSeguro * numParcela,
-                totalPrestamista: vPrestamista * numParcela,
-                totalServicos: (valorSeguro * numParcela) + (vPrestamista * numParcela),
-                isMostruarioIndicator: aplicaMostr 
-            };
+            document.getElementById('global_tab_cartao_prod').value = REGRAS_PADRAO.tabela.cartao.produto;
+            document.getElementById('global_tab_cartao_ge').value = REGRAS_PADRAO.tabela.cartao.ge;
+            document.getElementById('global_tab_carne_prod').value = REGRAS_PADRAO.tabela.carne.produto;
+            document.getElementById('global_tab_carne_ge').value = REGRAS_PADRAO.tabela.carne.ge;
         }
 
-        // Submeter Simulação e Gerar tabelas
+        // ==========================================
+        // MOTOR E FORMULÁRIO DE SIMULAÇÃO
+        // ==========================================
         document.getElementById('simulationForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            const valProdOg = currencyToNumber(document.getElementById('productValue').value);
-            const valGE = currencyToNumber(document.getElementById('geValue').value);
-            const valEntrada = currencyToNumber(document.getElementById('entryValue').value);
-            const isMostr = document.getElementById('isMostruario').checked;
-            const useSpecialDiscount = document.getElementById('useSpecialDiscount').checked;
+            const valProdOg = currencyToNumber(document.getElementById('productValue').value), valGE = currencyToNumber(document.getElementById('geValue').value), valEntrada = currencyToNumber(document.getElementById('entryValue').value);
+            const isMostr = document.getElementById('isMostruario').checked, useSpecial = document.getElementById('useSpecialDiscount').checked;
             const valProd = Math.max(0, valProdOg - valEntrada);
-            
-            const tipoPag = document.querySelector('input[name="paymentType"]:checked').value;
-            const usarFator = document.querySelector('input[name="useFactor"]:checked').value === 'sim';
-            const taxaPrestam = document.querySelector('input[name="applyTaxaPrestamista"]:checked').value === 'sim';
-            const limites = obterLimitesAtuais();
+            const tipoPag = document.querySelector('input[name="paymentType"]:checked').value, usarFator = document.querySelector('input[name="useFactor"]:checked').value === 'sim', taxaPrestam = document.querySelector('input[name="applyTaxaPrestamista"]:checked').value === 'sim';
+            const limites = { cartao: { prod: parseInt(document.getElementById('limitProdCartao').value)||0, ge: parseInt(document.getElementById('limitGECartao').value)||0 }, carne: { prod: parseInt(document.getElementById('limitProdCarne').value)||0, ge: parseInt(document.getElementById('limitGECarne').value)||0 } };
             const parcelasSel = getSelectedParcelas();
             
-            if (parcelasSel.length === 0 || valProdOg <= 0) return alert('Insira um valor e selecione pelo menos uma parcela.');
+            if (parcelasSel.length === 0 || valProdOg <= 0) return alert('Insira o valor do produto e selecione as parcelas.');
             
-            document.getElementById('resultSectionCarne').classList.add('hidden');
-            document.getElementById('resultSectionCartao').classList.add('hidden');
-            document.getElementById('resultTableBodyCarne').innerHTML = '';
-            document.getElementById('resultTableBodyCartao').innerHTML = '';
+            document.getElementById('resultSectionCarne').classList.add('hidden'); document.getElementById('resultSectionCartao').classList.add('hidden');
+            document.getElementById('resultTableBodyCarne').innerHTML = ''; document.getElementById('resultTableBodyCartao').innerHTML = '';
             
-            simulationResults.inputs = { valorProdutoOriginal: valProdOg, valorGE: valGE, valorEntrada: valEntrada };
-            simulationResults.results = { carne: [], cartao: [] };
+            simulationResults.inputs = { valorProdutoOriginal: valProdOg, valorGE: valGE, valorEntrada: valEntrada }; simulationResults.results = { carne: [], cartao: [] };
+
+            const calc = (vTot, vGE, np, tp, uFat, tPres, iMos, lim, uSpec) => {
+                let vP = 0, vS = 0; const idx = np - 1, aMos = (iMos && tp === 'carne');
+                let vBase = uSpec && tp === 'carne' ? vTot * 1.5 : vTot;
+
+                if (uFat) { vP = vBase * (aMos ? FATORES.cartao[idx] : FATORES[tp][idx]); vS = vGE * FATORES[tp][idx]; } 
+                else {
+                    const lP = lim[tp].prod, lG = lim[tp].ge;
+                    vP = (np <= lP && lP > 0) ? vBase / np : vBase * (aMos ? FATORES.cartao[idx] : FATORES[tp][idx]);
+                    vS = (np <= lG && lG > 0) ? vGE / np : vGE * FATORES[tp][idx];
+                }
+                let vParc = vP + vS, vPres = (tPres && tp === 'carne') ? vParc * 0.06 : 0; vParc += vPres;
+                return { valorParcela: vParc, totalParcelado: vParc * np, totalProduto: vP * np, totalGE: vS * np, totalPrestamista: vPres * np, isMostruarioIndicator: aMos };
+            };
 
             const processar = (tipo) => {
                 const tbody = document.getElementById(`resultTableBody${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
                 parcelasSel.forEach(n => {
-                    // Cálculo com Desconto (Valor real apresentado ao final)
-                    const resReal = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, false);
+                    const resR = calc(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, false);
+                    let resA = (useSpecial && tipo === 'carne') ? calc(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, true) : null;
                     
-                    // Cálculo sem Desconto (Ancoragem inflacionada) se aplicável
-                    let resAncoragem = null;
-                    if (useSpecialDiscount && tipo === 'carne') {
-                        resAncoragem = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, true);
-                    }
-                    
-                    simulationResults.results[tipo].push({ numParcela: n, ...resReal });
-                    
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-gray-50/50 transition-colors";
-                    
-                    // Se for âncora, apresenta o preço sem desconto riscado e o valor na promoção em destaque
-                    let precoVisualHTML = "";
-                    if (resAncoragem) {
-                        precoVisualHTML = `
-                            <div class="flex flex-col text-left">
-                                <span class="text-xs text-red-500 line-through font-medium">Sem Desconto: ${formatCurrency(resAncoragem.valorParcela)}</span>
-                                <span class="font-bold text-xl text-primary">Na Promoção: ${formatCurrency(resReal.valorParcela)}</span>
-                            </div>
-                        `;
-                    } else {
-                        precoVisualHTML = `<span class="font-bold text-xl text-primary">${formatCurrency(resReal.valorParcela)}</span>`;
-                    }
-                    
+                    simulationResults.results[tipo].push({ numParcela: n, ...resR });
+                    const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/50";
                     tr.innerHTML = `
-                        <td class="px-6 py-4 border-b border-gray-100">
-                            <span class="font-bold text-lg text-gray-800">${n}x</span> 
-                            ${resReal.isMostruarioIndicator?'<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded ml-2 font-bold">Produto FL</span>':''}
-                        </td>
-                        <td class="px-6 py-4 border-b border-gray-100">
-                            ${precoVisualHTML}
-                        </td>
-                        <td class="px-6 py-4 border-b border-gray-100 text-center">
-                            <button type="button" class="btn-toggle-detail text-gray-400 hover:text-primary p-2 focus:outline-none transition-colors" data-target="detail-${tipo}-${n}">
-                                <i class="fas fa-eye text-lg"></i>
-                            </button>
-                        </td>
+                        <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-lg text-gray-800">${n}x</span> ${resR.isMostruarioIndicator?'<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded ml-2 font-bold">Produto FL</span>':''}</td>
+                        <td class="px-6 py-4 border-b border-gray-100">${resA ? `<div class="flex flex-col text-left"><span class="text-xs text-red-500 line-through font-medium">Tabela: ${formatCurrency(resA.valorParcela)}</span><span class="font-bold text-xl text-primary">Na Promoção: ${formatCurrency(resR.valorParcela)}</span></div>` : `<span class="font-bold text-xl text-primary">${formatCurrency(resR.valorParcela)}</span>`}</td>
+                        <td class="px-6 py-4 border-b border-gray-100 text-center"><button type="button" class="btn-toggle-detail text-gray-400 hover:text-primary p-2 transition-colors" data-target="detail-${tipo}-${n}"><i class="fas fa-eye text-lg"></i></button></td>
                     `;
                     tbody.appendChild(tr);
 
-                    // Linha de Detalhes
-                    const trDetail = document.createElement('tr');
-                    trDetail.id = `detail-${tipo}-${n}`;
-                    trDetail.className = "hidden bg-gray-50/70";
-                    trDetail.innerHTML = `
-                        <td colspan="3" class="px-6 py-4 text-sm border-b border-gray-100">
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
-                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Compra</p><p class="font-bold text-gray-800">${formatCurrency(resReal.totalParcelado + valEntrada)}</p></div>
-                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total do Produto</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalProduto + valEntrada)}</p></div>
-                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Garantia</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalGE)}</p></div>
-                                ${tipo === 'carne' ? `<div><p class="text-xs text-gray-500 font-semibold uppercase">Prestamista</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalPrestamista)}</p></div>` : `<div><p class="text-xs text-gray-500 font-semibold uppercase">Serviços</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalGE)}</p></div>`}
-                            </div>
-                        </td>
-                    `;
-                    tbody.appendChild(trDetail);
+                    const trD = document.createElement('tr'); trD.id = `detail-${tipo}-${n}`; trD.className = "hidden bg-gray-50/70";
+                    trD.innerHTML = `<td colspan="3" class="px-6 py-4 text-sm border-b border-gray-100"><div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-2"><div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Compra</p><p class="font-bold text-gray-800">${formatCurrency(resR.totalParcelado + valEntrada)}</p></div><div><p class="text-xs text-gray-500 font-semibold uppercase">Total do Produto</p><p class="font-semibold text-gray-700">${formatCurrency(resR.totalProduto + valEntrada)}</p></div><div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Garantia</p><p class="font-semibold text-gray-700">${formatCurrency(resR.totalGE)}</p></div>${tipo === 'carne' ? `<div><p class="text-xs text-gray-500 font-semibold uppercase">Prestamista</p><p class="font-semibold text-gray-700">${formatCurrency(resR.totalPrestamista)}</p></div>` : `<div><p class="text-xs text-gray-500 font-semibold uppercase">Serviços</p><p class="font-semibold text-gray-700">${formatCurrency(resR.totalGE)}</p></div>`}</div></td>`;
+                    tbody.appendChild(trD);
                 });
                 document.getElementById(`resultSection${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.remove('hidden');
             };
 
             if (tipoPag === 'ambos') { processar('cartao'); processar('carne'); } else { processar(tipoPag); }
             
-            document.querySelectorAll('.btn-toggle-detail').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-target');
-                    const targetRow = document.getElementById(targetId);
-                    const isHidden = targetRow.classList.contains('hidden');
-                    
-                    targetRow.classList.toggle('hidden');
-                    const icon = this.querySelector('i');
-                    if(isHidden) {
-                        icon.className = "fas fa-eye-slash text-lg text-primary";
-                    } else {
-                        icon.className = "fas fa-eye text-lg text-gray-400";
-                    }
-                });
-            });
+            document.querySelectorAll('.btn-toggle-detail').forEach(btn => btn.addEventListener('click', function() {
+                const tr = document.getElementById(this.getAttribute('data-target')), ic = this.querySelector('i');
+                tr.classList.toggle('hidden'); ic.className = tr.classList.contains('hidden') ? "fas fa-eye text-lg text-gray-400" : "fas fa-eye-slash text-lg text-primary";
+            }));
 
             document.getElementById('wppButtonContainer').classList.remove('hidden');
             setTimeout(() => document.querySelector('#resultSectionCarne:not(.hidden), #resultSectionCartao:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
@@ -929,8 +840,7 @@
         function setupCurrencyInputs() {
             document.querySelectorAll('#productValue, #geValue, #entryValue').forEach(inp => {
                 inp.addEventListener('input', function() {
-                    let v = this.value.replace(/\D/g, '');
-                    v = (parseInt(v)||0)/100;
+                    let v = this.value.replace(/\D/g, ''); v = (parseInt(v)||0)/100;
                     this.value = v===0 ? '' : 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
                 });
             });
@@ -939,15 +849,17 @@
         function formatCurrency(v) { return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
 
         // ==========================================
-        // AUTH & NAVEGAÇÃO BÁSICA
+        // AUTH & INICIAÇÃO
         // ==========================================
         async function handleAuthStateChanged(user) {
-            document.getElementById('loadingScreen').style.opacity = '0';
-            setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 300);
-
+            document.getElementById('loadingScreen').style.opacity = '1';
+            document.getElementById('loadingScreen').style.display = 'flex';
+            
             if (user) {
                 currentUser = user;
                 try {
+                    await fetchGlobalRules(); 
+                    
                     const docSnap = await window.firebase.getDoc(window.firebase.doc(window.db, 'users', user.uid));
                     let uData = docSnap.exists() ? docSnap.data() : { status: 'pending', displayName: user.email };
                     currentUser.userData = uData;
@@ -964,8 +876,13 @@
                         }
                         document.getElementById('userRole').textContent = roleText;
                         
-                        // Aplicar permissões específicas do usuário
                         applyUserPermissions(uData);
+                        resetSimulator();
+                        
+                        // Garante que a tela exibida é o simulador sem simular um clique
+                        document.getElementById('simulatorSection').classList.remove('hidden');
+                        document.getElementById('usersSection').classList.add('hidden');
+                        document.getElementById('globalSettingsSection').classList.add('hidden');
 
                     } else {
                         document.getElementById('authSection').classList.add('hidden');
@@ -977,134 +894,68 @@
                 document.getElementById('appSection').classList.add('hidden');
                 document.getElementById('pendingApprovalSection').classList.add('hidden');
             }
+            
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 300);
+            }, 500);
         }
 
         function applyUserPermissions(uData) {
             if(currentUser.email === ADMIN_EMAIL) {
-                // Admin sempre tem todas as permissões liberadas
-                document.getElementById('containerProdutoFL').classList.remove('hidden');
-                document.getElementById('containerSpecialDiscount').classList.remove('hidden');
-                document.getElementById('containerCustomRules').classList.remove('hidden');
-                document.getElementById('openWppModalBtn').classList.remove('hidden');
+                document.getElementById('containerProdutoFL').classList.remove('hidden'); document.getElementById('containerSpecialDiscount').classList.remove('hidden');
+                document.getElementById('containerCustomRules').classList.remove('hidden'); document.getElementById('openWppModalBtn').classList.remove('hidden');
                 return;
             }
-
-            // Produto FL
-            if (uData.allowProdutoFL === false) {
-                document.getElementById('containerProdutoFL').classList.add('hidden');
-                document.getElementById('isMostruario').checked = false;
-            } else {
-                document.getElementById('containerProdutoFL').classList.remove('hidden');
-            }
-
-            // Ancoragem de Preço
-            if (uData.allowAncoragem === false) {
-                document.getElementById('containerSpecialDiscount').classList.add('hidden');
-                document.getElementById('useSpecialDiscount').checked = false;
-            } else {
-                document.getElementById('containerSpecialDiscount').classList.remove('hidden');
-            }
-
-            // Parcelamento Personalizado
-            if (uData.allowCustomRules === false) {
-                document.getElementById('containerCustomRules').classList.add('hidden');
-            } else {
-                document.getElementById('containerCustomRules').classList.remove('hidden');
-            }
-
-            // Envio p/ WhatsApp
-            if (uData.allowWhatsApp === false) {
-                document.getElementById('openWppModalBtn').classList.add('hidden');
-            } else {
-                document.getElementById('openWppModalBtn').classList.remove('hidden');
-            }
+            uData.allowProdutoFL === false ? (document.getElementById('containerProdutoFL').classList.add('hidden'), document.getElementById('isMostruario').checked = false) : document.getElementById('containerProdutoFL').classList.remove('hidden');
+            uData.allowAncoragem === false ? (document.getElementById('containerSpecialDiscount').classList.add('hidden'), document.getElementById('useSpecialDiscount').checked = false) : document.getElementById('containerSpecialDiscount').classList.remove('hidden');
+            uData.allowCustomRules === false ? document.getElementById('containerCustomRules').classList.add('hidden') : document.getElementById('containerCustomRules').classList.remove('hidden');
+            uData.allowWhatsApp === false ? document.getElementById('openWppModalBtn').classList.add('hidden') : document.getElementById('openWppModalBtn').classList.remove('hidden');
         }
 
         function setupAuthUI() {
-            // Máscara de telefone no formulário de cadastro
             const regPhone = document.getElementById('registerPhone');
-            regPhone.addEventListener('input', function(e) {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-            });
+            regPhone.addEventListener('input', function(e) { let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/); e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : ''); });
 
             document.getElementById('loginTabBtn').addEventListener('click', () => {
-                document.getElementById('loginForm').classList.remove('hidden');
-                document.getElementById('registerForm').classList.add('hidden');
-                document.getElementById('loginTabBtn').classList.add('border-primary','text-primary');
-                document.getElementById('loginTabBtn').classList.remove('border-transparent','text-gray-500');
-                document.getElementById('registerTabBtn').classList.remove('border-primary','text-primary');
-                document.getElementById('registerTabBtn').classList.add('border-transparent','text-gray-500');
+                document.querySelectorAll('#registerForm input').forEach(i => i.value = ''); // Limpa form oposto
+                document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginTabBtn').classList.add('border-primary','text-primary'); document.getElementById('loginTabBtn').classList.remove('border-transparent','text-gray-500');
+                document.getElementById('registerTabBtn').classList.remove('border-primary','text-primary'); document.getElementById('registerTabBtn').classList.add('border-transparent','text-gray-500');
             });
             document.getElementById('registerTabBtn').addEventListener('click', () => {
-                document.getElementById('registerForm').classList.remove('hidden');
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('registerTabBtn').classList.add('border-primary','text-primary');
-                document.getElementById('registerTabBtn').classList.remove('border-transparent','text-gray-500');
-                document.getElementById('loginTabBtn').classList.remove('border-primary','text-primary');
-                document.getElementById('loginTabBtn').classList.add('border-transparent','text-gray-500');
+                document.querySelectorAll('#loginForm input').forEach(i => i.value = ''); // Limpa form oposto
+                document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerTabBtn').classList.add('border-primary','text-primary'); document.getElementById('registerTabBtn').classList.remove('border-transparent','text-gray-500');
+                document.getElementById('loginTabBtn').classList.remove('border-primary','text-primary'); document.getElementById('loginTabBtn').classList.add('border-transparent','text-gray-500');
             });
 
-            // LOGIN
             document.getElementById('loginBtn').addEventListener('click', async () => {
                 const em = document.getElementById('loginEmail').value, pw = document.getElementById('loginPassword').value;
                 if(!em||!pw) return;
+                document.getElementById('loadingScreen').style.opacity = '1'; document.getElementById('loadingScreen').style.display = 'flex';
                 try { await window.firebase.signInWithEmailAndPassword(window.auth, em, pw); }
-                catch(e) { document.getElementById('loginError').textContent="Erro ao entrar. Verifique as credenciais."; document.getElementById('loginError').classList.remove('hidden'); }
+                catch(e) { document.getElementById('loginError').textContent="Verifique as credenciais."; document.getElementById('loginError').classList.remove('hidden'); document.getElementById('loadingScreen').style.opacity = '0'; setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 300); }
             });
 
-            // CADASTRO CORRIGIDO E ATIVADO
             document.getElementById('registerBtn').addEventListener('click', async () => {
-                const name = document.getElementById('registerName').value.trim();
-                const email = document.getElementById('registerEmail').value.trim();
-                const phone = regPhone.value.trim();
-                const branch = document.getElementById('registerBranch').value.trim();
-                const password = document.getElementById('registerPassword').value;
-
-                if (!name || !email || !phone || !branch || !password) {
-                    alert("Por favor, preencha todos os campos do formulário.");
-                    return;
-                }
-
+                const name = document.getElementById('registerName').value.trim(), email = document.getElementById('registerEmail').value.trim(), phone = regPhone.value.trim(), branch = document.getElementById('registerBranch').value.trim(), password = document.getElementById('registerPassword').value;
+                if (!name || !email || !phone || !branch || !password) return alert("Preencha todos os campos.");
+                
+                document.getElementById('loadingScreen').style.opacity = '1'; document.getElementById('loadingScreen').style.display = 'flex';
                 try {
                     const cred = await window.firebase.createUserWithEmailAndPassword(window.auth, email, password);
                     await window.firebase.updateProfile(cred.user, { displayName: name.toUpperCase() });
-
-                    // Cadastro no Firestore com as permissões padrões habilitadas para posterior edição pelo admin
-                    await window.firebase.setDoc(window.firebase.doc(window.db, 'users', cred.user.uid), {
-                        uid: cred.user.uid,
-                        displayName: name.toUpperCase(),
-                        email: email,
-                        phone: phone,
-                        branch: branch.toUpperCase(),
-                        status: 'pending',
-                        allowAncoragem: true,
-                        allowProdutoFL: true,
-                        allowCustomRules: true,
-                        allowWhatsApp: true
-                    });
-
-                    document.getElementById('registerSuccess').classList.remove('hidden');
-                    document.getElementById('registerError').classList.add('hidden');
-                } catch (e) {
-                    console.error("Erro ao registrar: ", e);
-                    document.getElementById('registerError').textContent = "Erro ao efetuar cadastro: " + e.message;
-                    document.getElementById('registerError').classList.remove('hidden');
-                }
+                    await window.firebase.setDoc(window.firebase.doc(window.db, 'users', cred.user.uid), { uid: cred.user.uid, displayName: name.toUpperCase(), email, phone, branch: branch.toUpperCase(), status: 'pending', allowAncoragem: true, allowProdutoFL: true, allowCustomRules: true, allowWhatsApp: true });
+                    document.getElementById('registerSuccess').classList.remove('hidden'); document.getElementById('registerError').classList.add('hidden');
+                    window.firebase.signOut(window.auth); // Desloga o cara para ele ir pra pendente visualmente limpo
+                } catch (e) { document.getElementById('registerError').textContent = "Erro: " + e.message; document.getElementById('registerError').classList.remove('hidden'); }
+                finally { document.getElementById('loadingScreen').style.opacity = '0'; setTimeout(() => document.getElementById('loadingScreen').style.display = 'none', 300); }
             });
 
-            document.getElementById('logoutBtn').addEventListener('click', () => window.firebase.signOut(window.auth));
-            document.getElementById('logoutBtnPending').addEventListener('click', () => window.firebase.signOut(window.auth));
-            
-            document.getElementById('clearSimulationBtn').addEventListener('click', () => {
-                document.getElementById('simulationForm').reset();
-                aplicarRegrasPadraoUI('promocional');
-                document.getElementById('deselectAllBtn').click();
-                document.getElementById('resultSectionCarne').classList.add('hidden');
-                document.getElementById('resultSectionCartao').classList.add('hidden');
-                document.getElementById('wppButtonContainer').classList.add('hidden');
-                window.scrollTo({top:0, behavior:'smooth'});
-            });
+            document.getElementById('logoutBtn').addEventListener('click', () => { resetSimulator(); window.firebase.signOut(window.auth); });
+            document.getElementById('logoutBtnPending').addEventListener('click', () => { resetSimulator(); window.firebase.signOut(window.auth); });
+            document.getElementById('clearSimulationBtn').addEventListener('click', resetSimulator);
         }
 
         function setupSidebar() {
@@ -1117,21 +968,30 @@
             document.getElementById('closeSidebar').addEventListener('click', toggle);
             document.getElementById('overlay').addEventListener('click', toggle);
             
-            document.getElementById('showSimulator').addEventListener('click', (e) => {
-                e.preventDefault(); toggle();
-                document.getElementById('simulatorSection').classList.remove('hidden');
+            const hideAllSections = () => {
+                document.getElementById('simulatorSection').classList.add('hidden');
                 document.getElementById('usersSection').classList.add('hidden');
+                document.getElementById('globalSettingsSection').classList.add('hidden');
+            }
+
+            document.getElementById('showSimulator').addEventListener('click', (e) => {
+                e.preventDefault(); toggle(); hideAllSections();
+                document.getElementById('simulatorSection').classList.remove('hidden');
             });
             document.getElementById('showUsers').addEventListener('click', (e) => {
-                e.preventDefault(); toggle();
-                document.getElementById('simulatorSection').classList.add('hidden');
+                e.preventDefault(); toggle(); hideAllSections();
                 document.getElementById('usersSection').classList.remove('hidden');
                 loadUsers();
+            });
+            document.getElementById('showGlobalSettings').addEventListener('click', (e) => {
+                e.preventDefault(); toggle(); hideAllSections();
+                document.getElementById('globalSettingsSection').classList.remove('hidden');
+                fillGlobalSettingsForm();
             });
         }
 
         // ==========================================
-        // GERENCIAMENTO DE USUÁRIOS E PERMISSÕES (ADMIN)
+        // GERENCIAMENTO DE USUÁRIOS (ADMIN)
         // ==========================================
         function setupAdminPanel() {
             const tabA = document.getElementById('tabApproved'), tabP = document.getElementById('tabPending');
@@ -1154,6 +1014,10 @@
             tabP.addEventListener('click', () => switchTab(false));
             document.getElementById('refreshUsersBtn').addEventListener('click', loadUsers);
             
+            document.getElementById('searchUsersInput').addEventListener('input', (e) => {
+                renderUserLists(e.target.value);
+            });
+
             window.checkEmptyState = () => {
                 const activeList = listA.classList.contains('hidden') ? listP : listA;
                 document.getElementById('emptyUsers').classList.toggle('hidden', activeList.children.length > 0);
@@ -1162,116 +1026,116 @@
 
         async function loadUsers() {
             document.getElementById('loadingUsers').classList.remove('hidden');
+            document.getElementById('approvedListContainer').innerHTML = ''; document.getElementById('pendingListContainer').innerHTML = '';
+
+            try {
+                const snap = await window.firebase.getDocs(window.firebase.collection(window.db, 'users'));
+                allUsersData = [];
+                snap.forEach(docSnap => allUsersData.push({id: docSnap.id, ...docSnap.data()}));
+                
+                // ORDEM ALFABÉTICA (A-Z)
+                allUsersData.sort((a, b) => (a.displayName || '').localeCompare(b.displayName || ''));
+                
+                renderUserLists(); 
+            } catch(e) { console.error(e); }
+
+            document.getElementById('loadingUsers').classList.add('hidden');
+            document.getElementById('tabApproved').click(); 
+        }
+
+        function renderUserLists(filterStr = '') {
             const listA = document.getElementById('approvedListContainer');
             const listP = document.getElementById('pendingListContainer');
             listA.innerHTML = ''; listP.innerHTML = '';
 
-            try {
-                const snap = await window.firebase.getDocs(window.firebase.collection(window.db, 'users'));
-                snap.forEach(docSnap => {
-                    const u = {id: docSnap.id, ...docSnap.data()};
-                    const card = createCardUsuario(u);
-                    if(u.status === 'approved') listA.appendChild(card);
-                    else listP.appendChild(card);
-                });
-            } catch(e) { console.error(e); }
+            const lowerFilter = filterStr.toLowerCase();
 
-            document.getElementById('loadingUsers').classList.add('hidden');
-            
-            // Renderiza aprovados imediatamente por padrão de forma limpa
-            const tabA = document.getElementById('tabApproved');
-            const tabP = document.getElementById('tabPending');
-            tabA.classList.add('border-primary','text-primary'); tabA.classList.remove('border-transparent','text-gray-500');
-            tabP.classList.remove('border-primary','text-primary'); tabP.classList.add('border-transparent','text-gray-500');
-            listA.classList.remove('hidden'); 
-            listP.classList.add('hidden');
-            
+            allUsersData.forEach(u => {
+                if (filterStr !== '') {
+                    const matchName = (u.displayName||'').toLowerCase().includes(lowerFilter);
+                    const matchEmail = (u.email||'').toLowerCase().includes(lowerFilter);
+                    const matchBranch = (u.branch||'').toLowerCase().includes(lowerFilter);
+                    if (!matchName && !matchEmail && !matchBranch) return;
+                }
+
+                const card = createCardUsuario(u);
+                if(u.status === 'approved') listA.appendChild(card);
+                else listP.appendChild(card);
+            });
             window.checkEmptyState();
         }
 
-        // Card com Painel de Switches de Permissão no Admin
+        window.toggleUserPermissions = (id) => {
+            const el = document.getElementById(`perms-${id}`);
+            el.classList.toggle('hidden');
+            const btnIcon = document.getElementById(`btn-icon-${id}`);
+            btnIcon.className = el.classList.contains('hidden') ? 'fas fa-chevron-down ml-1' : 'fas fa-chevron-up ml-1';
+        }
+
         function createCardUsuario(u) {
             const div = document.createElement('div');
             div.className = "p-5 border rounded-2xl shadow-sm bg-gray-50 flex flex-col gap-4 transition-all hover:bg-gray-100/40";
             const isP = u.status === 'pending';
             
-            // Estado padrão das permissões (para novos registros que ainda não tenham o campo)
-            const allowAncoragem = u.allowAncoragem !== false;
-            const allowProdutoFL = u.allowProdutoFL !== false;
-            const allowCustomRules = u.allowCustomRules !== false;
-            const allowWhatsApp = u.allowWhatsApp !== false;
+            const allowAncoragem = u.allowAncoragem !== false, allowProdutoFL = u.allowProdutoFL !== false, allowCustomRules = u.allowCustomRules !== false, allowWhatsApp = u.allowWhatsApp !== false;
 
             div.innerHTML = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-200 pb-3">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 ${!isP && u.email !== ADMIN_EMAIL ? 'border-b border-gray-200 pb-3' : ''}">
                     <div>
                         <p class="font-bold text-gray-900 text-lg">${u.displayName} ${u.email===ADMIN_EMAIL?'<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1 font-bold">Admin</span>':''}</p>
                         <p class="text-sm text-gray-500">${u.email} • Filial: <span class="font-bold text-primary">${u.branch || 'N/A'}</span></p>
                     </div>
-                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                    <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                        ${!isP && u.email !== ADMIN_EMAIL ? `<button class="bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-100 transition-colors" onclick="window.toggleUserPermissions('${u.id}')"><i class="fas fa-cog mr-1"></i> Permissões <i id="btn-icon-${u.id}" class="fas fa-chevron-down ml-1"></i></button>` : ''}
                         ${isP ? `
-                            <button class="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition-colors shadow-sm" onclick="window.approveUser('${u.id}')">Aprovar Consultor</button>
-                            <button class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors shadow-sm" onclick="window.deleteUser('${u.id}')">Rejeitar</button>
+                            <button class="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 shadow-sm" onclick="window.approveUser('${u.id}')">Aprovar Consultor</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 shadow-sm" onclick="window.deleteUser('${u.id}')">Rejeitar</button>
                         ` : `
-                            ${u.email !== ADMIN_EMAIL ? `<button class="bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors" onclick="window.deleteUser('${u.id}')"><i class="fas fa-trash-alt mr-1"></i> Remover</button>` : ''}
+                            ${u.email !== ADMIN_EMAIL ? `<button class="bg-red-50 text-red-600 border border-red-100 px-3 py-1.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors" onclick="window.deleteUser('${u.id}')"><i class="fas fa-trash-alt"></i></button>` : ''}
                         `}
                     </div>
                 </div>
                 
                 ${!isP && u.email !== ADMIN_EMAIL ? `
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-gray-100">
+                <div id="perms-${u.id}" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-gray-100 mt-2">
                     <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                        <span class="text-xs font-semibold text-gray-600">Ancoragem de Preço</span>
-                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowAncoragem" ${allowAncoragem ? 'checked' : ''}>
+                        <span class="text-xs font-semibold text-gray-600">Ancoragem Preço</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowAncoragem" ${allowAncoragem ? 'checked' : ''}>
                     </label>
                     <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                        <span class="text-xs font-semibold text-gray-600">Produto FL</span>
-                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowProdutoFL" ${allowProdutoFL ? 'checked' : ''}>
+                        <span class="text-xs font-semibold text-gray-600">Produto FL</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowProdutoFL" ${allowProdutoFL ? 'checked' : ''}>
                     </label>
                     <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                        <span class="text-xs font-semibold text-gray-600">Regras Sem Juros</span>
-                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowCustomRules" ${allowCustomRules ? 'checked' : ''}>
+                        <span class="text-xs font-semibold text-gray-600">Regras S/ Juros</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowCustomRules" ${allowCustomRules ? 'checked' : ''}>
                     </label>
                     <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                        <span class="text-xs font-semibold text-gray-600">Compartilhar WhatsApp</span>
-                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowWhatsApp" ${allowWhatsApp ? 'checked' : ''}>
+                        <span class="text-xs font-semibold text-gray-600">WhatsApp</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowWhatsApp" ${allowWhatsApp ? 'checked' : ''}>
                     </label>
                 </div>
                 ` : ''}
             `;
 
-            // Adiciona ouvinte dinâmico para os checkboxes de permissões
-            div.querySelectorAll('.toggle-perm').forEach(chk => {
-                chk.addEventListener('change', async function() {
-                    const userId = this.getAttribute('data-user');
-                    const permKey = this.getAttribute('data-perm');
-                    const isChecked = this.checked;
-
-                    try {
-                        await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', userId), {
-                            [permKey]: isChecked
-                        });
-                        showToast("Permissão atualizada com sucesso!");
-                    } catch (err) {
-                        console.error(err);
-                        showToast("Erro ao atualizar permissão", "error");
-                        this.checked = !isChecked; // Reverte se falhar
-                    }
-                });
-            });
+            div.querySelectorAll('.toggle-perm').forEach(chk => chk.addEventListener('change', async function() {
+                const uid = this.getAttribute('data-user'), pKey = this.getAttribute('data-perm'), checked = this.checked;
+                try {
+                    await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', uid), { [pKey]: checked });
+                    const usrObj = allUsersData.find(u => u.id === uid); if (usrObj) usrObj[pKey] = checked;
+                    showToast("Permissão atualizada!");
+                } catch (err) { showToast("Erro ao atualizar", "error"); this.checked = !checked; }
+            }));
 
             return div;
         }
 
         window.approveUser = async (id) => {
-            if(!confirm("Aprovar este consultor no sistema?")) return;
+            if(!confirm("Aprovar este consultor?")) return;
             await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', id), {status: 'approved'});
-            loadUsers();
+            loadUsers(); showToast("Consultor Aprovado!");
         };
 
         window.deleteUser = async (id) => {
-            if(!confirm("Tem certeza que deseja remover permanentemente este usuário?")) return;
+            if(!confirm("Remover este usuário permanentemente?")) return;
             await window.firebase.deleteDoc(window.firebase.doc(window.db, 'users', id));
-            loadUsers();
+            loadUsers(); showToast("Usuário Removido!");
         };
     </script>
 </body>
