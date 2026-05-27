@@ -37,7 +37,6 @@
             }
         }
         
-        // Detectar modo escuro
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
         }
@@ -122,20 +121,34 @@
             background: rgba(31, 41, 55, 0.7); border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        /* Custom checkbox style for parcelas dropdown */
-        .parcela-checkbox:checked + div {
-            background-color: #2E3192; color: white; border-color: #2E3192;
+        /* Custom scrollbar para o seletor de lista */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
         }
-        .dark .parcela-checkbox:checked + div {
-            background-color: #3b82f6; border-color: #3b82f6;
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
         }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen selection:bg-primary selection:text-white transition-colors duration-300 pb-10">
     
+    <!-- Toast Message Container -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-icon"><i id="toast-icon-class" class="fas"></i></div>
+        <div class="toast-message" id="toast-text">Mensagem</div>
+    </div>
+
     <!-- Tela de carregamento -->
     <div id="loadingScreen" class="fixed inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex flex-col items-center justify-center z-[100] transition-opacity duration-300">
-        <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mb-6 animate-pulse" alt="Zenir Móveis">
+        <img src="https://pfst.cf2.poecdn.net/base/image/bdf81d0d7ec65548bd0d482efd54aca859795574888538b493ecd3f8cc1c3d04" class="h-24 mb-6" alt="Zenir Móveis">
         <div class="flex flex-col items-center">
             <div class="loading-spinner mb-4 w-12 h-12"></div>
             <p class="text-primary dark:text-gray-300 text-lg font-medium tracking-wide">Iniciando sistema...</p>
@@ -173,11 +186,14 @@
                 </div>
 
                 <div id="registerForm" class="space-y-4 hidden">
-                    <input id="registerName" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Nome Completo">
-                    <input id="registerEmail" type="email" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="E-mail profissional">
-                    <input id="registerPhone" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="WhatsApp (00) 00000-0000">
-                    <input id="registerBranch" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Nome da Filial">
-                    <input id="registerPassword" type="password" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700" placeholder="Crie uma senha (mín 6 char)">
+                    <input id="registerName" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Nome Completo">
+                    <input id="registerEmail" type="email" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="E-mail profissional">
+                    <input id="registerPhone" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="WhatsApp (00) 00000-0000">
+                    <input id="registerBranch" type="text" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Nome da Filial">
+                    <div class="relative">
+                        <input id="registerPassword" type="password" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" placeholder="Crie uma senha (mín 6 char)">
+                        <button type="button" id="toggleRegisterPassword" class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400"><i class="fas fa-eye"></i></button>
+                    </div>
                     <button id="registerBtn" class="w-full py-3 px-4 rounded-xl shadow-md text-white bg-primary font-semibold text-lg transition-all mt-2">Solicitar Cadastro</button>
                     <div id="registerError" class="text-red-500 text-sm text-center hidden bg-red-50 p-2 rounded-lg"></div>
                     <div id="registerSuccess" class="text-emerald-600 text-sm text-center hidden bg-emerald-50 p-3 rounded-lg border border-emerald-200">
@@ -238,7 +254,7 @@
                     <ul class="space-y-1">
                         <li>
                             <a href="#" id="showUsers" class="flex items-center px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-100 font-medium">
-                                <i class="fas fa-users-cog w-6"></i> Usuários
+                                <i class="fas fa-users-cog w-6"></i> Usuários e Permissões
                             </a>
                         </li>
                     </ul>
@@ -278,21 +294,21 @@
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Produto (R$)</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-box text-primary/50"></i></div>
-                                    <input type="text" id="productValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
+                                    <input type="text" id="productValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl text-gray-900" placeholder="0,00">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Garantia (R$)</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-shield-alt text-primary/50"></i></div>
-                                    <input type="text" id="geValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
+                                    <input type="text" id="geValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl text-gray-900" placeholder="0,00">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Entrada (R$)</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-money-bill-wave text-green-500/60"></i></div>
-                                    <input type="text" id="entryValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl" placeholder="0,00">
+                                    <input type="text" id="entryValue" inputmode="numeric" class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 text-lg font-bold rounded-xl text-gray-900" placeholder="0,00">
                                 </div>
                             </div>
                         </div>
@@ -317,15 +333,18 @@
                                 </div>
 
                                 <div class="bg-gray-50 p-4 rounded-xl space-y-3 border border-gray-100">
-                                    <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
+                                    <!-- Produto FL (Permissão dinâmica) -->
+                                    <label id="containerProdutoFL" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
                                         <div class="relative">
                                             <input type="checkbox" id="isMostruario" class="sr-only peer">
                                             <div class="w-10 h-6 bg-gray-300 rounded-full peer peer-checked:bg-yellow-500 transition-colors"></div>
                                             <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
                                         </div>
-                                        <span class="ml-3 font-medium text-gray-700">Peça de Mostruário</span>
+                                        <span class="ml-3 font-medium text-gray-700">Produto FL</span>
                                     </label>
-                                    <label class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
+                                    
+                                    <!-- Ancoragem (Permissão dinâmica) -->
+                                    <label id="containerSpecialDiscount" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-white transition-colors">
                                         <div class="relative">
                                             <input type="checkbox" id="useSpecialDiscount" class="sr-only peer">
                                             <div class="w-10 h-6 bg-gray-300 rounded-full peer peer-checked:bg-secondary transition-colors"></div>
@@ -371,8 +390,8 @@
                             </div>
                         </div>
 
-                        <!-- Configurações Avançadas de Parcelamento -->
-                        <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl overflow-hidden">
+                        <!-- Configurações Avançadas de Parcelamento (Permissão dinâmica) -->
+                        <div id="containerCustomRules" class="border border-indigo-100 bg-indigo-50/30 rounded-xl overflow-hidden">
                             <button type="button" id="toggleAdvancedConfig" class="w-full px-5 py-4 flex justify-between items-center text-left hover:bg-indigo-50 transition-colors focus:outline-none">
                                 <div class="flex items-center">
                                     <i class="fas fa-sliders-h text-indigo-500 mr-3"></i>
@@ -391,27 +410,25 @@
                             </div>
                         </div>
                         
-                        <!-- Novo Seletor Modal de Parcelas e Botão Calcular -->
+                        <!-- Seletor de Parcelas em Formato Lista e Botão Calcular -->
                         <div class="flex flex-col sm:flex-row gap-6 items-end border-t border-gray-100 pt-6">
                             <div class="w-full sm:w-2/3 relative" id="parcelasContainer">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Quais parcelas exibir?</label>
                                 
-                                <!-- Botão que abre o dropdown -->
                                 <button type="button" id="btnToggleParcelas" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-left flex justify-between items-center hover:bg-gray-50 shadow-sm transition-colors">
-                                    <span class="text-gray-700 font-medium"><span id="parcelasCount" class="font-bold text-primary">12</span> parcelas selecionadas</span>
+                                    <span class="text-gray-700 font-medium"><span id="parcelasCount" class="font-bold text-primary">0</span> parcelas selecionadas</span>
                                     <i class="fas fa-chevron-down text-gray-400" id="parcelasDropdownIcon"></i>
                                 </button>
                                 
-                                <!-- Dropdown Grid -->
-                                <div id="parcelasDropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-20">
+                                <div id="parcelasDropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-20">
                                     <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
-                                        <span class="font-bold text-gray-700 text-sm">Selecione:</span>
+                                        <span class="font-bold text-gray-700 text-sm">Selecione as Parcelas:</span>
                                         <div class="space-x-2">
                                             <button type="button" id="selectAllBtn" class="text-xs font-semibold text-primary hover:text-secondary bg-blue-50 px-3 py-1.5 rounded-lg transition-colors">Todas</button>
                                             <button type="button" id="deselectAllBtn" class="text-xs font-semibold text-gray-600 hover:text-red-500 bg-gray-100 px-3 py-1.5 rounded-lg transition-colors">Nenhuma</button>
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-4 gap-2" id="parcelasGrid">
+                                    <div class="max-h-48 overflow-y-auto custom-scroll space-y-1 pr-1" id="parcelasGrid">
                                         <!-- Checkboxes dinâmicos gerados via JS -->
                                     </div>
                                 </div>
@@ -426,31 +443,44 @@
                     </form>
                 </div>
                 
-                <!-- Resultados -->
+                <!-- Resultados - Carnê -->
                 <div id="resultSectionCarne" class="hidden mb-8 fadeIn">
                     <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-file-invoice text-secondary mr-2"></i> Opções no Carnê</h2>
                     <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
                         <table class="min-w-full divide-y divide-gray-100">
-                            <thead class="bg-gray-50"><tr><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th><th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Total</th></tr></thead>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase w-20">Detalhes</th>
+                                </tr>
+                            </thead>
                             <tbody id="resultTableBodyCarne" class="divide-y divide-gray-100 bg-white"></tbody>
                         </table>
                     </div>
                 </div>
                 
+                <!-- Resultados - Cartão -->
                 <div id="resultSectionCartao" class="hidden mb-8 fadeIn">
                     <h2 class="text-xl font-bold mb-4 flex items-center text-primary"><i class="fas fa-credit-card text-blue-500 mr-2"></i> Opções no Cartão</h2>
                     <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-gray-100">
                         <table class="min-w-full divide-y divide-gray-100">
-                            <thead class="bg-gray-50"><tr><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th><th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th><th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase">Total</th></tr></thead>
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Parcelas</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Valor Mensal</th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase w-20">Detalhes</th>
+                                </tr>
+                            </thead>
                             <tbody id="resultTableBodyCartao" class="divide-y divide-gray-100 bg-white"></tbody>
                         </table>
                     </div>
                 </div>
                 
-                <!-- Ações WhatsApp Pós Simulação -->
+                <!-- Ações WhatsApp Pós Simulação (Permissão dinâmica) -->
                 <div id="wppButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
                     <button id="openWppModalBtn" type="button" class="bg-whatsapp hover:bg-green-600 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                        <i class="fab fa-whatsapp text-xl"></i> Enviar p/ WhatsApp
+                        <i class="fab fa-whatsapp text-xl"></i> Enviar Orçamento por WhatsApp
                     </button>
                     <button id="clearSimulationBtn" type="button" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
                         <i class="fas fa-undo"></i> Nova Simulação
@@ -464,25 +494,35 @@
                     <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
                         <i class="fab fa-whatsapp text-3xl text-whatsapp"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-center text-gray-900 mb-6">Enviar para o Cliente</h3>
+                    <h3 class="text-xl font-bold text-center text-gray-900 mb-6">Enviar Orçamento</h3>
                     
                     <div class="space-y-4">
-                        <input type="text" id="wppClientName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50" placeholder="Nome do Cliente">
-                        <input type="text" id="wppClientPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50" placeholder="Celular (00) 00000-0000" maxlength="15">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">NOME DO CLIENTE</label>
+                            <input type="text" id="wppClientName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Maria José">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">NOME DO PRODUTO</label>
+                            <input type="text" id="wppProductName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Guarda-Roupa Casal 6 Portas">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">CELULAR DO CLIENTE</label>
+                            <input type="text" id="wppClientPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white text-gray-800" placeholder="(00) 00000-0000" maxlength="15">
+                        </div>
                         
                         <div class="flex gap-3 pt-4">
                             <button type="button" id="cancelWppBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200">Cancelar</button>
-                            <button type="button" id="sendWppBtn" class="flex-1 py-3 bg-whatsapp text-white rounded-xl font-semibold shadow-md hover:bg-green-600">Enviar Agora</button>
+                            <button type="button" id="sendWppBtn" class="flex-1 py-3 bg-whatsapp text-white rounded-xl font-semibold shadow-md hover:bg-green-600">Enviar para WhatsApp</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- GERENCIAMENTO DE USUÁRIOS (ADMIN) -->
+            <!-- GERENCIAMENTO DE USUÁRIOS E PERMISSÕES (ADMIN) -->
             <div id="usersSection" class="hidden fadeIn">
                 <div class="bg-white rounded-2xl shadow-soft p-6 border border-gray-100">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-primary">Gerenciamento de Usuários</h2>
+                        <h2 class="text-2xl font-bold text-primary">Gerenciamento e Permissões</h2>
                         <button id="refreshUsersBtn" class="text-primary hover:text-secondary bg-blue-50 p-2 rounded-lg"><i class="fas fa-sync-alt"></i></button>
                     </div>
 
@@ -493,11 +533,11 @@
 
                     <div id="loadingUsers" class="flex justify-center py-8"><div class="loading-spinner"></div></div>
                     
-                    <!-- Listas -->
+                    <!-- Contêineres de Listagem -->
                     <div id="approvedListContainer" class="hidden space-y-4"></div>
                     <div id="pendingListContainer" class="hidden space-y-4"></div>
                     
-                    <!-- Vazio -->
+                    <!-- Estado Vazio -->
                     <div id="emptyUsers" class="hidden text-center py-10 text-gray-500">
                         <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i><p>Nenhum usuário encontrado nesta lista.</p>
                     </div>
@@ -525,34 +565,53 @@
             window.firebase.onAuthStateChanged(window.auth, handleAuthStateChanged);
             setupAuthUI();
             setupCurrencyInputs();
-            setupParcelasDropdown();
+            setupParcelasLista();
             setupSidebar();
             setupRulesCustomization();
             setupWhatsAppFlow();
             setupAdminPanel();
         });
 
+        // Toast de Notificações
+        function showToast(text, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon-class');
+            const textSpan = document.getElementById('toast-text');
+            
+            toast.className = `toast ${type}`;
+            textSpan.textContent = text;
+            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('show'), 50);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('hidden'), 400);
+            }, 3000);
+        }
+
         // ==========================================
-        // NOVO: SELECTOR DE PARCELAS DROPDOWN
+        // SELETOR DE PARCELAS EM FORMATO LISTA (NENHUMA CHECADA POR PADRÃO)
         // ==========================================
-        function setupParcelasDropdown() {
+        function setupParcelasLista() {
             const grid = document.getElementById('parcelasGrid');
             const btnToggle = document.getElementById('btnToggleParcelas');
             const dropdown = document.getElementById('parcelasDropdown');
             const icon = document.getElementById('parcelasDropdownIcon');
             const countLabel = document.getElementById('parcelasCount');
             
-            // Gerar checkboxes dinamicamente
             for (let i = 1; i <= 12; i++) {
-                const wrapper = document.createElement('label');
-                wrapper.className = "cursor-pointer relative block";
-                wrapper.innerHTML = `
-                    <input type="checkbox" class="sr-only parcela-checkbox" value="${i}" checked>
-                    <div class="px-2 py-2 border-2 border-gray-200 rounded-lg text-center font-bold text-gray-600 transition-colors hover:border-primary/50 select-none text-sm">
-                        ${i}x
+                const row = document.createElement('label');
+                row.className = "flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-100 transition-colors select-none";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary parcela-checkbox" value="${i}">
+                        <span class="font-bold text-gray-700 text-sm">${i} vezes</span>
                     </div>
+                    <span class="text-xs text-gray-400 font-medium">${i}x sem/com juros</span>
                 `;
-                grid.appendChild(wrapper);
+                grid.appendChild(row);
             }
 
             const updateCount = () => {
@@ -560,14 +619,12 @@
                 countLabel.textContent = checked;
             };
 
-            // Toggle Dropdown
             btnToggle.addEventListener('click', (e) => {
                 e.stopPropagation();
                 dropdown.classList.toggle('hidden');
                 icon.classList.toggle('rotate-180');
             });
 
-            // Fechar ao clicar fora
             document.addEventListener('click', (e) => {
                 if (!document.getElementById('parcelasContainer').contains(e.target)) {
                     dropdown.classList.add('hidden');
@@ -575,12 +632,10 @@
                 }
             });
 
-            // Updates ao clicar num checkbox
             document.querySelectorAll('.parcela-checkbox').forEach(chk => {
                 chk.addEventListener('change', updateCount);
             });
 
-            // Botoes Todas/Nenhuma
             document.getElementById('selectAllBtn').addEventListener('click', () => {
                 document.querySelectorAll('.parcela-checkbox').forEach(c => c.checked = true);
                 updateCount();
@@ -597,7 +652,7 @@
         }
 
         // ==========================================
-        // INTEGRAÇÃO WHATSAPP (Substitui Histórico/Salvar)
+        // FLUXO DO WHATSAPP OTIMIZADO
         // ==========================================
         function setupWhatsAppFlow() {
             const wppBtn = document.getElementById('openWppModalBtn');
@@ -606,7 +661,6 @@
             const sendBtn = document.getElementById('sendWppBtn');
             const phoneInput = document.getElementById('wppClientPhone');
 
-            // Máscara de telefone
             phoneInput.addEventListener('input', function(e) {
                 let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
                 e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
@@ -617,30 +671,34 @@
 
             sendBtn.addEventListener('click', () => {
                 const name = document.getElementById('wppClientName').value.trim();
+                const product = document.getElementById('wppProductName').value.trim();
                 const phone = phoneInput.value.replace(/\D/g, '');
 
+                if(!product) {
+                    alert("Por favor, preencha o nome do produto para enviar.");
+                    return;
+                }
                 if(!phone || phone.length < 10) {
                     alert("Informe um número de WhatsApp válido.");
                     return;
                 }
 
-                // Gerar Texto Orçamento
-                let msg = `*SIMULAÇÃO ZENIR MÓVEIS* 🔴🔵\n\n`;
-                if(name) msg += `Olá, *${name}*! Segue a sua simulação:\n\n`;
-                else msg += `Olá! Segue a sua simulação:\n\n`;
+                let msg = `*ORÇAMENTO ZENIR MÓVEIS* 🔴🔵\n\n`;
+                if(name) msg += `Olá, *${name}*! Segue a sua simulação de parcelamento:\n\n`;
+                else msg += `Olá! Segue a sua simulação de parcelamento:\n\n`;
                 
-                msg += `💰 *Valores do Orçamento:*\n`;
-                msg += `Produto: ${formatCurrency(simulationResults.inputs.valorProdutoOriginal)}\n`;
-                if(simulationResults.inputs.valorGE > 0) msg += `Garantia: ${formatCurrency(simulationResults.inputs.valorGE)}\n`;
-                if(simulationResults.inputs.valorEntrada > 0) msg += `Entrada: ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
+                msg += `📦 *Produto:* ${product.toUpperCase()}\n`;
+                if(simulationResults.inputs.valorEntrada > 0) {
+                    msg += `💰 *Entrada:* ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
+                }
                 msg += `\n`;
 
                 const addTable = (tipoStr, dataArr) => {
                     if(!dataArr || dataArr.length === 0) return "";
                     let t = `💳 *Opções no ${tipoStr}:*\n`;
                     dataArr.forEach(r => {
-                        let ind = r.isMostruarioIndicator ? " (Mostruário)" : "";
-                        t += `• ${r.numParcela}x de *${formatCurrency(r.valorParcela)}*${ind}\n`;
+                        let ind = r.isMostruarioIndicator ? " (Produto FL)" : "";
+                        t += `• *${r.numParcela}x de ${formatCurrency(r.valorParcela)}*${ind}\n`;
                     });
                     t += `\n`;
                     return t;
@@ -649,8 +707,8 @@
                 msg += addTable("Carnê", simulationResults.results.carne);
                 msg += addTable("Cartão", simulationResults.results.cartao);
 
-                msg += `_Lembrando que os valores estão sujeitos à análise de crédito e alterações._\n`;
-                msg += `Qualquer dúvida, estou à disposição!`;
+                msg += `_Condições sujeitas a análise de crédito e alterações._\n`;
+                msg += `Qualquer dúvida, fale comigo por aqui! 😊`;
 
                 const url = `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`;
                 window.open(url, '_blank');
@@ -659,7 +717,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE REGRAS DINÂMICAS
+        // CONFIGURAÇÕES AVANÇADAS & REGRAS
         // ==========================================
         function setupRulesCustomization() {
             const toggleBtn = document.getElementById('toggleAdvancedConfig');
@@ -693,35 +751,73 @@
         }
 
         // ==========================================
-        // MOTOR DE CÁLCULO DA SIMULAÇÃO
+        // MOTOR DE CÁLCULO
         // ==========================================
-        function calcularParcela(valorTotal, valorGE, numParcela, tipoPag, usarFator, taxaPrestamista, isMostruario, limites) {
+        function calcularParcela(valorTotal, valorGE, numParcela, tipoPag, usarFator, taxaPrestamista, isMostruario, limites, useSpecialDiscount) {
             let valorProduto = 0, valorSeguro = 0;
             const idx = numParcela - 1;
-            const isMostr = (isMostruario && tipoPag === 'carne' && numParcela === 12);
+            
+            // "Produto FL" (antiga peça de mostruário) agora é válida para TODAS as parcelas do carnê
+            const aplicaMostr = (isMostruario && tipoPag === 'carne');
+
+            // Correção Ancoragem de Preço (Produto + 50% de valor original)
+            let valorProdutoBase = valorTotal;
+            if (useSpecialDiscount && tipoPag === 'carne') {
+                valorProdutoBase = valorTotal * 1.5;
+            }
 
             if (usarFator) {
-                valorProduto = valorTotal * (isMostr ? FATORES.cartao[11] : FATORES[tipoPag][idx]);
+                // Se Produto FL estiver ativo, usa o fator do cartão correspondente àquela parcela no cálculo do produto
+                valorProduto = valorProdutoBase * (aplicaMostr ? FATORES.cartao[idx] : FATORES[tipoPag][idx]);
                 valorSeguro = valorGE * FATORES[tipoPag][idx];
             } else {
                 const lProd = limites[tipoPag].prod;
                 const lGe = limites[tipoPag].ge;
-                valorProduto = (numParcela <= lProd && lProd > 0) ? (valorTotal/numParcela) : (valorTotal * (isMostr ? FATORES.cartao[11] : FATORES[tipoPag][idx]));
-                valorSeguro = (numParcela <= lGe && lGe > 0) ? (valorGE/numParcela) : (valorGE * FATORES[tipoPag][idx]);
+                
+                // Cálculo Produto Sem/Com Juros
+                if (numParcela <= lProd && lProd > 0) {
+                    valorProduto = valorProdutoBase / numParcela;
+                } else {
+                    valorProduto = valorProdutoBase * (aplicaMostr ? FATORES.cartao[idx] : FATORES[tipoPag][idx]);
+                }
+
+                // Cálculo Seguro Sem/Com Juros
+                if (numParcela <= lGe && lGe > 0) {
+                    valorSeguro = valorGE / numParcela;
+                } else {
+                    valorSeguro = valorGE * FATORES[tipoPag][idx];
+                }
             }
             
             let vParcela = valorProduto + valorSeguro;
-            if (taxaPrestamista && tipoPag === 'carne') vParcela += (vParcela * 0.06);
+            let vPrestamista = 0;
+            if (taxaPrestamista && tipoPag === 'carne') {
+                vPrestamista = vParcela * 0.06;
+                vParcela += vPrestamista;
+            }
             
-            return { valorParcela: vParcela, totalParcelado: vParcela * numParcela, isMostruarioIndicator: isMostr };
+            return { 
+                valorParcela: vParcela, 
+                valorParcelaProduto: valorProduto,
+                valorParcelaGE: valorSeguro,
+                valorTaxaPrestamista: vPrestamista,
+                totalParcelado: vParcela * numParcela, 
+                totalProduto: valorProduto * numParcela,
+                totalGE: valorSeguro * numParcela,
+                totalPrestamista: vPrestamista * numParcela,
+                totalServicos: (valorSeguro * numParcela) + (vPrestamista * numParcela),
+                isMostruarioIndicator: aplicaMostr 
+            };
         }
 
+        // Submeter Simulação e Gerar tabelas
         document.getElementById('simulationForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const valProdOg = currencyToNumber(document.getElementById('productValue').value);
             const valGE = currencyToNumber(document.getElementById('geValue').value);
             const valEntrada = currencyToNumber(document.getElementById('entryValue').value);
             const isMostr = document.getElementById('isMostruario').checked;
+            const useSpecialDiscount = document.getElementById('useSpecialDiscount').checked;
             const valProd = Math.max(0, valProdOg - valEntrada);
             
             const tipoPag = document.querySelector('input[name="paymentType"]:checked').value;
@@ -730,7 +826,7 @@
             const limites = obterLimitesAtuais();
             const parcelasSel = getSelectedParcelas();
             
-            if (parcelasSel.length === 0 || valProdOg <= 0) return alert('Insira um valor e selecione parcelas.');
+            if (parcelasSel.length === 0 || valProdOg <= 0) return alert('Insira um valor e selecione pelo menos uma parcela.');
             
             document.getElementById('resultSectionCarne').classList.add('hidden');
             document.getElementById('resultSectionCartao').classList.add('hidden');
@@ -743,22 +839,86 @@
             const processar = (tipo) => {
                 const tbody = document.getElementById(`resultTableBody${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
                 parcelasSel.forEach(n => {
-                    const res = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites);
-                    simulationResults.results[tipo].push({ numParcela: n, ...res });
+                    // Cálculo com Desconto (Valor real apresentado ao final)
+                    const resReal = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, false);
+                    
+                    // Cálculo sem Desconto (Ancoragem inflacionada) se aplicável
+                    let resAncoragem = null;
+                    if (useSpecialDiscount && tipo === 'carne') {
+                        resAncoragem = calcularParcela(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, true);
+                    }
+                    
+                    simulationResults.results[tipo].push({ numParcela: n, ...resReal });
                     
                     const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50/50 transition-colors";
+                    
+                    // Se for âncora, apresenta o preço sem desconto riscado e o valor na promoção em destaque
+                    let precoVisualHTML = "";
+                    if (resAncoragem) {
+                        precoVisualHTML = `
+                            <div class="flex flex-col text-left">
+                                <span class="text-xs text-red-500 line-through font-medium">Sem Desconto: ${formatCurrency(resAncoragem.valorParcela)}</span>
+                                <span class="font-bold text-xl text-primary">Na Promoção: ${formatCurrency(resReal.valorParcela)}</span>
+                            </div>
+                        `;
+                    } else {
+                        precoVisualHTML = `<span class="font-bold text-xl text-primary">${formatCurrency(resReal.valorParcela)}</span>`;
+                    }
+                    
                     tr.innerHTML = `
-                        <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-lg text-gray-800">${n}x</span> ${res.isMostruarioIndicator?'<span class="text-xs bg-yellow-100 text-yellow-800 px-2 rounded">Mostruário</span>':''}</td>
-                        <td class="px-6 py-4 border-b border-gray-100"><span class="font-bold text-xl text-primary">${formatCurrency(res.valorParcela)}</span></td>
-                        <td class="px-6 py-4 border-b border-gray-100 text-right"><span class="text-sm text-gray-500 font-medium">${formatCurrency(res.totalParcelado + valEntrada)}</span></td>
+                        <td class="px-6 py-4 border-b border-gray-100">
+                            <span class="font-bold text-lg text-gray-800">${n}x</span> 
+                            ${resReal.isMostruarioIndicator?'<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded ml-2 font-bold">Produto FL</span>':''}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-100">
+                            ${precoVisualHTML}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-100 text-center">
+                            <button type="button" class="btn-toggle-detail text-gray-400 hover:text-primary p-2 focus:outline-none transition-colors" data-target="detail-${tipo}-${n}">
+                                <i class="fas fa-eye text-lg"></i>
+                            </button>
+                        </td>
                     `;
                     tbody.appendChild(tr);
+
+                    // Linha de Detalhes
+                    const trDetail = document.createElement('tr');
+                    trDetail.id = `detail-${tipo}-${n}`;
+                    trDetail.className = "hidden bg-gray-50/70";
+                    trDetail.innerHTML = `
+                        <td colspan="3" class="px-6 py-4 text-sm border-b border-gray-100">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-2">
+                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Compra</p><p class="font-bold text-gray-800">${formatCurrency(resReal.totalParcelado + valEntrada)}</p></div>
+                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total do Produto</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalProduto + valEntrada)}</p></div>
+                                <div><p class="text-xs text-gray-500 font-semibold uppercase">Total da Garantia</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalGE)}</p></div>
+                                ${tipo === 'carne' ? `<div><p class="text-xs text-gray-500 font-semibold uppercase">Prestamista</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalPrestamista)}</p></div>` : `<div><p class="text-xs text-gray-500 font-semibold uppercase">Serviços</p><p class="font-semibold text-gray-700">${formatCurrency(resReal.totalGE)}</p></div>`}
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(trDetail);
                 });
                 document.getElementById(`resultSection${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).classList.remove('hidden');
             };
 
             if (tipoPag === 'ambos') { processar('cartao'); processar('carne'); } else { processar(tipoPag); }
             
+            document.querySelectorAll('.btn-toggle-detail').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetRow = document.getElementById(targetId);
+                    const isHidden = targetRow.classList.contains('hidden');
+                    
+                    targetRow.classList.toggle('hidden');
+                    const icon = this.querySelector('i');
+                    if(isHidden) {
+                        icon.className = "fas fa-eye-slash text-lg text-primary";
+                    } else {
+                        icon.className = "fas fa-eye text-lg text-gray-400";
+                    }
+                });
+            });
+
             document.getElementById('wppButtonContainer').classList.remove('hidden');
             setTimeout(() => document.querySelector('#resultSectionCarne:not(.hidden), #resultSectionCartao:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         });
@@ -796,7 +956,17 @@
                         document.getElementById('authSection').classList.add('hidden');
                         document.getElementById('appSection').classList.remove('hidden');
                         document.getElementById('userDisplayName').textContent = uData.displayName || 'Usuário';
-                        if(user.email === ADMIN_EMAIL) document.getElementById('adminSection').classList.remove('hidden');
+                        
+                        let roleText = "Consultor";
+                        if(user.email === ADMIN_EMAIL) {
+                            roleText = "Administrador";
+                            document.getElementById('adminSection').classList.remove('hidden');
+                        }
+                        document.getElementById('userRole').textContent = roleText;
+                        
+                        // Aplicar permissões específicas do usuário
+                        applyUserPermissions(uData);
+
                     } else {
                         document.getElementById('authSection').classList.add('hidden');
                         document.getElementById('pendingApprovalSection').classList.remove('hidden');
@@ -809,7 +979,55 @@
             }
         }
 
+        function applyUserPermissions(uData) {
+            if(currentUser.email === ADMIN_EMAIL) {
+                // Admin sempre tem todas as permissões liberadas
+                document.getElementById('containerProdutoFL').classList.remove('hidden');
+                document.getElementById('containerSpecialDiscount').classList.remove('hidden');
+                document.getElementById('containerCustomRules').classList.remove('hidden');
+                document.getElementById('openWppModalBtn').classList.remove('hidden');
+                return;
+            }
+
+            // Produto FL
+            if (uData.allowProdutoFL === false) {
+                document.getElementById('containerProdutoFL').classList.add('hidden');
+                document.getElementById('isMostruario').checked = false;
+            } else {
+                document.getElementById('containerProdutoFL').classList.remove('hidden');
+            }
+
+            // Ancoragem de Preço
+            if (uData.allowAncoragem === false) {
+                document.getElementById('containerSpecialDiscount').classList.add('hidden');
+                document.getElementById('useSpecialDiscount').checked = false;
+            } else {
+                document.getElementById('containerSpecialDiscount').classList.remove('hidden');
+            }
+
+            // Parcelamento Personalizado
+            if (uData.allowCustomRules === false) {
+                document.getElementById('containerCustomRules').classList.add('hidden');
+            } else {
+                document.getElementById('containerCustomRules').classList.remove('hidden');
+            }
+
+            // Envio p/ WhatsApp
+            if (uData.allowWhatsApp === false) {
+                document.getElementById('openWppModalBtn').classList.add('hidden');
+            } else {
+                document.getElementById('openWppModalBtn').classList.remove('hidden');
+            }
+        }
+
         function setupAuthUI() {
+            // Máscara de telefone no formulário de cadastro
+            const regPhone = document.getElementById('registerPhone');
+            regPhone.addEventListener('input', function(e) {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            });
+
             document.getElementById('loginTabBtn').addEventListener('click', () => {
                 document.getElementById('loginForm').classList.remove('hidden');
                 document.getElementById('registerForm').classList.add('hidden');
@@ -827,11 +1045,52 @@
                 document.getElementById('loginTabBtn').classList.add('border-transparent','text-gray-500');
             });
 
+            // LOGIN
             document.getElementById('loginBtn').addEventListener('click', async () => {
                 const em = document.getElementById('loginEmail').value, pw = document.getElementById('loginPassword').value;
                 if(!em||!pw) return;
                 try { await window.firebase.signInWithEmailAndPassword(window.auth, em, pw); }
-                catch(e) { document.getElementById('loginError').textContent="Erro ao entrar. Verifique credenciais."; document.getElementById('loginError').classList.remove('hidden'); }
+                catch(e) { document.getElementById('loginError').textContent="Erro ao entrar. Verifique as credenciais."; document.getElementById('loginError').classList.remove('hidden'); }
+            });
+
+            // CADASTRO CORRIGIDO E ATIVADO
+            document.getElementById('registerBtn').addEventListener('click', async () => {
+                const name = document.getElementById('registerName').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const phone = regPhone.value.trim();
+                const branch = document.getElementById('registerBranch').value.trim();
+                const password = document.getElementById('registerPassword').value;
+
+                if (!name || !email || !phone || !branch || !password) {
+                    alert("Por favor, preencha todos os campos do formulário.");
+                    return;
+                }
+
+                try {
+                    const cred = await window.firebase.createUserWithEmailAndPassword(window.auth, email, password);
+                    await window.firebase.updateProfile(cred.user, { displayName: name.toUpperCase() });
+
+                    // Cadastro no Firestore com as permissões padrões habilitadas para posterior edição pelo admin
+                    await window.firebase.setDoc(window.firebase.doc(window.db, 'users', cred.user.uid), {
+                        uid: cred.user.uid,
+                        displayName: name.toUpperCase(),
+                        email: email,
+                        phone: phone,
+                        branch: branch.toUpperCase(),
+                        status: 'pending',
+                        allowAncoragem: true,
+                        allowProdutoFL: true,
+                        allowCustomRules: true,
+                        allowWhatsApp: true
+                    });
+
+                    document.getElementById('registerSuccess').classList.remove('hidden');
+                    document.getElementById('registerError').classList.add('hidden');
+                } catch (e) {
+                    console.error("Erro ao registrar: ", e);
+                    document.getElementById('registerError').textContent = "Erro ao efetuar cadastro: " + e.message;
+                    document.getElementById('registerError').classList.remove('hidden');
+                }
             });
 
             document.getElementById('logoutBtn').addEventListener('click', () => window.firebase.signOut(window.auth));
@@ -840,7 +1099,7 @@
             document.getElementById('clearSimulationBtn').addEventListener('click', () => {
                 document.getElementById('simulationForm').reset();
                 aplicarRegrasPadraoUI('promocional');
-                document.getElementById('deselectAllBtn').click(); // Limpa selects
+                document.getElementById('deselectAllBtn').click();
                 document.getElementById('resultSectionCarne').classList.add('hidden');
                 document.getElementById('resultSectionCartao').classList.add('hidden');
                 document.getElementById('wppButtonContainer').classList.add('hidden');
@@ -872,7 +1131,7 @@
         }
 
         // ==========================================
-        // GERENCIAMENTO DE USUÁRIOS (ADMIN)
+        // GERENCIAMENTO DE USUÁRIOS E PERMISSÕES (ADMIN)
         // ==========================================
         function setupAdminPanel() {
             const tabA = document.getElementById('tabApproved'), tabP = document.getElementById('tabPending');
@@ -909,8 +1168,8 @@
 
             try {
                 const snap = await window.firebase.getDocs(window.firebase.collection(window.db, 'users'));
-                snap.forEach(doc => {
-                    const u = {id: doc.id, ...doc.data()};
+                snap.forEach(docSnap => {
+                    const u = {id: docSnap.id, ...docSnap.data()};
                     const card = createCardUsuario(u);
                     if(u.status === 'approved') listA.appendChild(card);
                     else listP.appendChild(card);
@@ -918,39 +1177,99 @@
             } catch(e) { console.error(e); }
 
             document.getElementById('loadingUsers').classList.add('hidden');
+            
+            // Renderiza aprovados imediatamente por padrão de forma limpa
+            const tabA = document.getElementById('tabApproved');
+            const tabP = document.getElementById('tabPending');
+            tabA.classList.add('border-primary','text-primary'); tabA.classList.remove('border-transparent','text-gray-500');
+            tabP.classList.remove('border-primary','text-primary'); tabP.classList.add('border-transparent','text-gray-500');
+            listA.classList.remove('hidden'); 
+            listP.classList.add('hidden');
+            
             window.checkEmptyState();
         }
 
+        // Card com Painel de Switches de Permissão no Admin
         function createCardUsuario(u) {
             const div = document.createElement('div');
-            div.className = "p-4 border rounded-xl shadow-sm bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4";
+            div.className = "p-5 border rounded-2xl shadow-sm bg-gray-50 flex flex-col gap-4 transition-all hover:bg-gray-100/40";
             const isP = u.status === 'pending';
             
+            // Estado padrão das permissões (para novos registros que ainda não tenham o campo)
+            const allowAncoragem = u.allowAncoragem !== false;
+            const allowProdutoFL = u.allowProdutoFL !== false;
+            const allowCustomRules = u.allowCustomRules !== false;
+            const allowWhatsApp = u.allowWhatsApp !== false;
+
             div.innerHTML = `
-                <div>
-                    <p class="font-bold text-gray-900">${u.displayName} ${u.email===ADMIN_EMAIL?'<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1">Admin</span>':''}</p>
-                    <p class="text-sm text-gray-500">${u.email}</p>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-200 pb-3">
+                    <div>
+                        <p class="font-bold text-gray-900 text-lg">${u.displayName} ${u.email===ADMIN_EMAIL?'<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded ml-1 font-bold">Admin</span>':''}</p>
+                        <p class="text-sm text-gray-500">${u.email} • Filial: <span class="font-bold text-primary">${u.branch || 'N/A'}</span></p>
+                    </div>
+                    <div class="flex gap-2 w-full sm:w-auto justify-end">
+                        ${isP ? `
+                            <button class="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-green-600 transition-colors shadow-sm" onclick="window.approveUser('${u.id}')">Aprovar Consultor</button>
+                            <button class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors shadow-sm" onclick="window.deleteUser('${u.id}')">Rejeitar</button>
+                        ` : `
+                            ${u.email !== ADMIN_EMAIL ? `<button class="bg-red-50 text-red-600 border border-red-100 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-100 transition-colors" onclick="window.deleteUser('${u.id}')"><i class="fas fa-trash-alt mr-1"></i> Remover</button>` : ''}
+                        `}
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    ${isP ? `
-                        <button class="bg-green-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-600" onclick="window.approveUser('${u.id}')">Aprovar</button>
-                        <button class="bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-600" onclick="window.deleteUser('${u.id}')">Rejeitar</button>
-                    ` : `
-                        ${u.email !== ADMIN_EMAIL ? `<button class="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-100" onclick="window.deleteUser('${u.id}')">Excluir</button>` : ''}
-                    `}
+                
+                ${!isP && u.email !== ADMIN_EMAIL ? `
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-gray-100">
+                    <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                        <span class="text-xs font-semibold text-gray-600">Ancoragem de Preço</span>
+                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowAncoragem" ${allowAncoragem ? 'checked' : ''}>
+                    </label>
+                    <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                        <span class="text-xs font-semibold text-gray-600">Produto FL</span>
+                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowProdutoFL" ${allowProdutoFL ? 'checked' : ''}>
+                    </label>
+                    <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                        <span class="text-xs font-semibold text-gray-600">Regras Sem Juros</span>
+                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowCustomRules" ${allowCustomRules ? 'checked' : ''}>
+                    </label>
+                    <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                        <span class="text-xs font-semibold text-gray-600">Compartilhar WhatsApp</span>
+                        <input type="checkbox" class="w-4 h-4 rounded text-primary focus:ring-primary toggle-perm" data-user="${u.id}" data-perm="allowWhatsApp" ${allowWhatsApp ? 'checked' : ''}>
+                    </label>
                 </div>
+                ` : ''}
             `;
+
+            // Adiciona ouvinte dinâmico para os checkboxes de permissões
+            div.querySelectorAll('.toggle-perm').forEach(chk => {
+                chk.addEventListener('change', async function() {
+                    const userId = this.getAttribute('data-user');
+                    const permKey = this.getAttribute('data-perm');
+                    const isChecked = this.checked;
+
+                    try {
+                        await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', userId), {
+                            [permKey]: isChecked
+                        });
+                        showToast("Permissão atualizada com sucesso!");
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Erro ao atualizar permissão", "error");
+                        this.checked = !isChecked; // Reverte se falhar
+                    }
+                });
+            });
+
             return div;
         }
 
         window.approveUser = async (id) => {
-            if(!confirm("Aprovar este usuário?")) return;
+            if(!confirm("Aprovar este consultor no sistema?")) return;
             await window.firebase.updateDoc(window.firebase.doc(window.db, 'users', id), {status: 'approved'});
             loadUsers();
         };
 
         window.deleteUser = async (id) => {
-            if(!confirm("Tem certeza que deseja remover este usuário?")) return;
+            if(!confirm("Tem certeza que deseja remover permanentemente este usuário?")) return;
             await window.firebase.deleteDoc(window.firebase.doc(window.db, 'users', id));
             loadUsers();
         };
