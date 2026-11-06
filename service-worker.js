@@ -1,7 +1,7 @@
 // Determinar dinamicamente o caminho base
 const BASE_URL = self.location.href.replace('service-worker.js', '');
 
-const CACHE_NAME = 'zenir-simulador-v1';
+const CACHE_NAME = 'zenir-simulador-v2';
 
 const urlsToCache = [
   '',
@@ -32,6 +32,7 @@ self.addEventListener('install', (event) => {
         });
         return cache.addAll(cacheUrls);
       })
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -79,11 +80,12 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+          if (cacheName.startsWith('zenir-simulador-') && cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
+

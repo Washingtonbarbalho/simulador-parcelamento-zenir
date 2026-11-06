@@ -23,7 +23,6 @@
                         primary: '#2E3192',
                         secondary: '#ED1C24',
                         dark: '#231F20',
-                        whatsapp: '#25D366',
                     },
                     fontFamily: {
                         'sans': ['Poppins', 'sans-serif'],
@@ -467,10 +466,10 @@
                     </div>
                 </div>
                 
-                <!-- Ações WhatsApp Pós Simulação -->
-                <div id="wppButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
-                    <button id="openWppModalBtn" type="button" class="bg-whatsapp hover:bg-green-600 text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                        <i class="fab fa-whatsapp text-xl"></i> Enviar Orçamento por WhatsApp
+                <!-- Compartilhamento do orçamento por imagem -->
+                <div id="shareButtonContainer" class="hidden flex flex-col sm:flex-row justify-center gap-4 mt-8 mb-12">
+                    <button id="openShareModalBtn" type="button" class="bg-primary hover:bg-[#252875] text-white font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                        <i class="fas fa-share-nodes text-xl"></i> Compartilhar Orçamento
                     </button>
                     <button id="clearSimulationBtn" type="button" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold py-3.5 px-8 rounded-xl shadow-md transition-transform hover:-translate-y-1 flex justify-center items-center gap-2">
                         <i class="fas fa-undo"></i> Nova Simulação
@@ -478,33 +477,31 @@
                 </div>
             </div>
 
-            <!-- Modal WhatsApp -->
-            <div id="whatsappModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
-                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
-                    <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-4">
-                        <i class="fab fa-whatsapp text-3xl text-whatsapp"></i>
+            <!-- Modal de compartilhamento -->
+            <div id="shareModal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden transition-opacity">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 max-h-[90dvh] overflow-y-auto">
+                    <div class="flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mx-auto mb-4">
+                        <i class="fas fa-share-nodes text-3xl text-primary"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-center text-gray-900 mb-6">Enviar Orçamento</h3>
+                    <h3 id="shareModalTitle" class="text-xl font-bold text-center text-gray-900 mb-2">Compartilhar Orçamento</h3>
+                    <p class="text-sm text-center text-gray-500 mb-6">Informe o produto para compartilhar a imagem das parcelas selecionadas.</p>
                     
-                    <div class="space-y-4">
+                    <form id="shareQuotationForm" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">NOME DO CLIENTE</label>
-                            <input type="text" id="wppClientName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Maria José">
+                            <label for="shareProductName" class="block text-xs font-bold text-gray-500 mb-1">NOME DO PRODUTO</label>
+                            <input type="text" id="shareProductName" required maxlength="180" autocomplete="off" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white text-gray-800" placeholder="Ex: Guarda-Roupa Casal" aria-describedby="shareStatus">
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">NOME DO PRODUTO</label>
-                            <input type="text" id="wppProductName" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white uppercase text-gray-800" placeholder="Ex: Guarda-Roupa Casal">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">CELULAR DO CLIENTE</label>
-                            <input type="text" id="wppClientPhone" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white text-gray-800" placeholder="(00) 00000-0000" maxlength="15">
+                        <p id="shareStatus" role="status" aria-live="polite" class="text-sm text-gray-600 min-h-[1.5rem]"></p>
+                        <div id="shareImageFallback" class="hidden space-y-3">
+                            <img id="quotationPreview" alt="Orçamento com as parcelas selecionadas" class="w-full rounded-xl border border-gray-200">
+                            <a id="downloadQuotationLink" class="block text-center py-3 bg-blue-50 text-primary rounded-xl font-semibold" download>Baixar imagem</a>
                         </div>
                         
                         <div class="flex gap-3 pt-4">
-                            <button type="button" id="cancelWppBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200">Cancelar</button>
-                            <button type="button" id="sendWppBtn" class="flex-1 py-3 bg-whatsapp text-white rounded-xl font-semibold shadow-md hover:bg-green-600">Enviar para WhatsApp</button>
+                            <button type="button" id="cancelShareBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200">Cancelar</button>
+                            <button type="submit" id="shareQuotationBtn" disabled class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-md hover:bg-[#252875] disabled:opacity-50 disabled:cursor-wait">Compartilhar</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -597,7 +594,7 @@
             setupParcelasLista();
             setupSidebar();
             setupRulesCustomization(); 
-            setupWhatsAppFlow();
+            setupQuotationSharing();
             setupAdminPanel();
         });
 
@@ -656,11 +653,12 @@
             
             document.getElementById('resultSectionCarne').classList.add('hidden');
             document.getElementById('resultSectionCartao').classList.add('hidden');
-            document.getElementById('wppButtonContainer').classList.add('hidden');
+            document.getElementById('shareButtonContainer').classList.add('hidden');
             
-            document.getElementById('wppClientName').value = '';
-            document.getElementById('wppProductName').value = '';
-            document.getElementById('wppClientPhone').value = '';
+            document.getElementById('shareModal').classList.add('hidden');
+            document.getElementById('shareProductName').value = '';
+            document.getElementById('shareProductName').dispatchEvent(new Event('input'));
+            simulationResults = { inputs: {}, results: {} };
             
             document.getElementById('isMostruario').checked = false;
             document.getElementById('useSpecialDiscount').checked = false;
@@ -699,46 +697,215 @@
         function getSelectedParcelas() { return Array.from(document.querySelectorAll('.parcela-checkbox:checked')).map(c => parseInt(c.value)).sort((a, b) => a - b); }
 
         // ==========================================
-        // WHATSAPP
+        // ORÇAMENTO EM IMAGEM E COMPARTILHAMENTO NATIVO
         // ==========================================
-        function setupWhatsAppFlow() {
-            const wppBtn = document.getElementById('openWppModalBtn'), modal = document.getElementById('whatsappModal');
-            const cancelBtn = document.getElementById('cancelWppBtn'), sendBtn = document.getElementById('sendWppBtn');
-            const phoneInput = document.getElementById('wppClientPhone');
+        function createQuotationCanvas(product, results) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1080;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Não foi possível criar a imagem.');
 
-            phoneInput.addEventListener('input', function(e) {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+            // A imagem usa somente as parcelas calculadas, sem capturar os detalhes da tela.
+            const tables = [
+                { title: 'Carnê', color: '#ED1C24', rows: results.carne || [] },
+                { title: 'Cartão', color: '#2E3192', rows: results.cartao || [] }
+            ].filter(table => table.rows.length > 0);
+            if (!tables.length) throw new Error('Calcule as parcelas antes de compartilhar.');
+
+            ctx.font = '700 52px Arial, sans-serif';
+            const productLines = [];
+            let line = '';
+            for (const word of product.toLocaleUpperCase('pt-BR').split(/\s+/)) {
+                if (line && ctx.measureText(`${line} ${word}`).width > 952) {
+                    productLines.push(line);
+                    line = '';
+                }
+                for (const letter of (line ? ` ${word}` : word)) {
+                    if (ctx.measureText(line + letter).width > 952) {
+                        productLines.push(line);
+                        line = '';
+                    }
+                    line += letter;
+                }
+            }
+            if (line) productLines.push(line);
+
+            const headerHeight = 150 + productLines.length * 64;
+            const tableHeight = table => 124 + table.rows.length * 82;
+            canvas.height = headerHeight + tables.reduce((sum, table) => sum + tableHeight(table), 0) + (tables.length - 1) * 36 + 56;
+
+            const text = (value, x, y, { size = 32, weight = 600, color = '#231F20', align = 'left', maxWidth = 900 } = {}) => {
+                ctx.font = `${weight} ${size}px Arial, sans-serif`;
+                ctx.fillStyle = color;
+                ctx.textAlign = align;
+                ctx.textBaseline = 'middle';
+                ctx.fillText(value, x, y, maxWidth);
+            };
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#2E3192';
+            ctx.fillRect(0, 0, canvas.width, 12);
+            ctx.fillStyle = '#ED1C24';
+            ctx.fillRect(0, 12, canvas.width, 6);
+            text('ZENIR MÓVEIS', 64, 66, { size: 26, weight: 700, color: '#2E3192' });
+            productLines.forEach((name, index) => text(name, 64, 126 + index * 64, { size: 52, weight: 700, color: '#171A50', maxWidth: 952 }));
+
+            let y = headerHeight;
+            tables.forEach(table => {
+                const hasAnchor = table.title === 'Carnê' && table.rows.some(row => row.valorParcelaForaPromocao != null);
+                ctx.fillStyle = table.color;
+                ctx.fillRect(48, y, 984, 64);
+                text(table.title, 80, y + 32, { size: 32, weight: 700, color: '#FFFFFF' });
+                y += 64;
+                ctx.fillStyle = '#F1F3F8';
+                ctx.fillRect(48, y, 984, 60);
+                text('Parcelas', 80, y + 30, { size: 26, color: '#596174', maxWidth: 160 });
+                if (hasAnchor) {
+                    text('Fora da promoção', 464, y + 30, { size: 26, color: '#596174', align: 'center', maxWidth: 330 });
+                    text('Na promoção', 834, y + 30, { size: 26, color: '#168047', align: 'center', maxWidth: 330 });
+                } else {
+                    text('Valor da parcela', 1000, y + 30, { size: 26, color: '#596174', align: 'right', maxWidth: 690 });
+                }
+                y += 60;
+                table.rows.forEach((row, index) => {
+                    ctx.fillStyle = index % 2 === 0 ? '#FFFFFF' : '#F8F9FC';
+                    ctx.fillRect(48, y, 984, 82);
+                    text(`${row.numParcela}x`, 80, y + 41, { weight: 700, maxWidth: 160 });
+                    if (hasAnchor) {
+                        const outside = row.valorParcelaForaPromocao;
+                        const oldPrice = outside == null ? '—' : formatCurrency(outside);
+                        text(oldPrice, 464, y + 41, { color: '#A44B52', align: 'center', maxWidth: 330 });
+                        if (outside != null) {
+                            const width = Math.min(ctx.measureText(oldPrice).width, 330);
+                            ctx.strokeStyle = '#A44B52';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath(); ctx.moveTo(464 - width / 2, y + 41); ctx.lineTo(464 + width / 2, y + 41); ctx.stroke();
+                        }
+                        text(formatCurrency(row.valorParcela), 834, y + 41, { weight: 700, color: '#168047', align: 'center', maxWidth: 330 });
+                    } else {
+                        text(formatCurrency(row.valorParcela), 1000, y + 41, { weight: 700, color: '#2E3192', align: 'right', maxWidth: 690 });
+                    }
+                    ctx.fillStyle = '#E7EAF0';
+                    ctx.fillRect(48, y + 81, 984, 1);
+                    y += 82;
+                });
+                y += 36;
+            });
+            return canvas;
+        }
+
+        function setupQuotationSharing() {
+            const openBtn = document.getElementById('openShareModalBtn'), modal = document.getElementById('shareModal');
+            const form = document.getElementById('shareQuotationForm'), productInput = document.getElementById('shareProductName');
+            const cancelBtn = document.getElementById('cancelShareBtn'), shareBtn = document.getElementById('shareQuotationBtn');
+            const status = document.getElementById('shareStatus'), fallback = document.getElementById('shareImageFallback');
+            const preview = document.getElementById('quotationPreview'), downloadLink = document.getElementById('downloadQuotationLink');
+            let preparedFile = null, previewUrl = null, revision = 0, sharing = false;
+
+            const canShareFile = file => {
+                try { return typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] }); }
+                catch { return false; }
+            };
+            const clearPreview = () => {
+                preview.removeAttribute('src');
+                downloadLink.removeAttribute('href');
+                fallback.classList.add('hidden');
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            };
+            const closeModal = () => {
+                if (sharing) return;
+                modal.classList.add('hidden');
+                revision++;
+                preparedFile = null;
+                clearPreview();
+                openBtn.focus();
+            };
+            const prepareImage = () => {
+                const currentRevision = ++revision;
+                preparedFile = null;
+                clearPreview();
+                shareBtn.disabled = true;
+                shareBtn.textContent = 'Compartilhar';
+                const product = productInput.value.trim().replace(/\s+/g, ' ');
+                status.textContent = '';
+                if (!product) return;
+                status.textContent = 'Preparando imagem…';
+                shareBtn.textContent = 'Preparando…';
+
+                const imageError = () => {
+                    if (currentRevision !== revision) return;
+                    status.textContent = 'Não foi possível gerar a imagem. Tente abrir o compartilhamento novamente.';
+                    shareBtn.textContent = 'Compartilhar';
+                };
+                try {
+                    const canvas = createQuotationCanvas(product, simulationResults.results);
+                    canvas.toBlob(blob => {
+                        if (currentRevision !== revision) return;
+                        if (!blob) return imageError();
+                        const filename = product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 70) || 'produto';
+                        preparedFile = new File([blob], `orcamento-zenir-${filename}.png`, { type: 'image/png' });
+                        previewUrl = URL.createObjectURL(preparedFile);
+                        preview.src = previewUrl;
+                        downloadLink.href = previewUrl;
+                        downloadLink.download = preparedFile.name;
+                        const nativeShare = canShareFile(preparedFile);
+                        shareBtn.textContent = nativeShare ? 'Compartilhar' : 'Baixar imagem';
+                        status.textContent = nativeShare ? 'Imagem pronta para compartilhar.' : 'Este navegador não oferece compartilhamento de imagens. Baixe a imagem para enviá-la ao cliente.';
+                        fallback.classList.toggle('hidden', nativeShare);
+                        shareBtn.disabled = false;
+                    }, 'image/png');
+                } catch (error) { console.error(error); imageError(); }
+            };
+
+            productInput.addEventListener('input', prepareImage);
+            openBtn.addEventListener('click', () => {
+                if (!Object.values(simulationResults.results).some(rows => rows.length)) return showToast('Calcule as parcelas antes de compartilhar.', 'error');
+                modal.classList.remove('hidden');
+                prepareImage();
+                productInput.focus();
+            });
+            cancelBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
+            modal.addEventListener('keydown', event => {
+                if (event.key === 'Escape') closeModal();
+                if (event.key !== 'Tab') return;
+                const focusable = Array.from(modal.querySelectorAll('input, button, a[href]')).filter(element => !element.disabled && element.getClientRects().length);
+                const first = focusable[0], last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
             });
 
-            wppBtn.addEventListener('click', () => modal.classList.remove('hidden'));
-            cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
-
-            sendBtn.addEventListener('click', () => {
-                const name = document.getElementById('wppClientName').value.trim();
-                const product = document.getElementById('wppProductName').value.trim();
-                const phone = phoneInput.value.replace(/\D/g, '');
-
-                if(!product) return showToast("Por favor, preencha o nome do produto para enviar.", "error");
-                if(!phone || phone.length < 10) return showToast("Informe um número de WhatsApp válido.", "error");
-
-                let msg = `*ORÇAMENTO ZENIR MÓVEIS* 🔴🔵\n\n${name?`Olá, *${name}*! `:'Olá! '}Segue a sua simulação de parcelamento:\n\n📦 *Produto:* ${product.toUpperCase()}\n`;
-                if(simulationResults.inputs.valorEntrada > 0) msg += `💰 *Entrada:* ${formatCurrency(simulationResults.inputs.valorEntrada)}\n`;
-                msg += `\n`;
-
-                const addTbl = (tipo, arr) => {
-                    if(!arr || arr.length === 0) return "";
-                    let t = `💳 *Opções no ${tipo}:*\n`;
-                    arr.forEach(r => t += `• *${r.numParcela}x de ${formatCurrency(r.valorParcela)}*${r.isMostruarioIndicator?" (Produto FL)":""}\n`);
-                    return t + `\n`;
-                };
-
-                msg += addTbl("Carnê", simulationResults.results.carne);
-                msg += addTbl("Cartão", simulationResults.results.cartao);
-                msg += `_Condições sujeitas a análise de crédito e alterações._\nQualquer dúvida, fale comigo por aqui! 😊`;
-
-                window.open(`https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-                modal.classList.add('hidden');
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+                if (sharing || !preparedFile) return;
+                const file = preparedFile;
+                if (!canShareFile(file)) { downloadLink.click(); return; }
+                sharing = true;
+                shareBtn.disabled = true;
+                productInput.disabled = true;
+                cancelBtn.disabled = true;
+                status.textContent = 'Abrindo compartilhamento…';
+                try {
+                    // O PNG fica pronto antes do clique para preservar a ativação exigida no celular.
+                    await navigator.share({ files: [file] });
+                    sharing = false;
+                    closeModal();
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        status.textContent = 'Compartilhamento cancelado. Você pode tentar novamente.';
+                    } else {
+                        console.error(error);
+                        fallback.classList.remove('hidden');
+                        status.textContent = 'Não foi possível abrir o compartilhamento. Tente novamente ou baixe a imagem abaixo.';
+                    }
+                } finally {
+                    sharing = false;
+                    shareBtn.disabled = !preparedFile;
+                    productInput.disabled = false;
+                    cancelBtn.disabled = false;
+                }
             });
         }
 
@@ -853,7 +1020,7 @@
                     const resR = calc(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, false);
                     let resA = (useSpecial && tipo === 'carne') ? calc(valProd, valGE, n, tipo, usarFator, taxaPrestam, isMostr, limites, true) : null;
                     
-                    simulationResults.results[tipo].push({ numParcela: n, ...resR });
+                    simulationResults.results[tipo].push({ numParcela: n, ...resR, valorParcelaForaPromocao: resA ? resA.valorParcela : null });
                     const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 transition-colors";
                     
                     let precoVisualHTML = "";
@@ -904,7 +1071,7 @@
                 tr.classList.toggle('hidden'); ic.className = tr.classList.contains('hidden') ? "fas fa-eye text-lg text-gray-400" : "fas fa-eye-slash text-lg text-primary";
             }));
 
-            document.getElementById('wppButtonContainer').classList.remove('hidden');
+            document.getElementById('shareButtonContainer').classList.remove('hidden');
             setTimeout(() => document.querySelector('#resultSectionCarne:not(.hidden), #resultSectionCartao:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         });
 
@@ -1090,13 +1257,14 @@
         function applyUserPermissions(uData) {
             if(currentUser.email === ADMIN_EMAIL) {
                 document.getElementById('containerProdutoFL').classList.remove('hidden'); document.getElementById('containerSpecialDiscount').classList.remove('hidden');
-                document.getElementById('containerCustomRules').classList.remove('hidden'); document.getElementById('openWppModalBtn').classList.remove('hidden');
+                document.getElementById('containerCustomRules').classList.remove('hidden'); document.getElementById('openShareModalBtn').classList.remove('hidden');
                 return;
             }
             uData.allowProdutoFL === false ? (document.getElementById('containerProdutoFL').classList.add('hidden'), document.getElementById('isMostruario').checked = false) : document.getElementById('containerProdutoFL').classList.remove('hidden');
             uData.allowAncoragem === false ? (document.getElementById('containerSpecialDiscount').classList.add('hidden'), document.getElementById('useSpecialDiscount').checked = false) : document.getElementById('containerSpecialDiscount').classList.remove('hidden');
             uData.allowCustomRules === false ? document.getElementById('containerCustomRules').classList.add('hidden') : document.getElementById('containerCustomRules').classList.remove('hidden');
-            uData.allowWhatsApp === false ? document.getElementById('openWppModalBtn').classList.add('hidden') : document.getElementById('openWppModalBtn').classList.remove('hidden');
+            // Mantém a permissão já salva no Firestore para o antigo envio de orçamentos.
+            uData.allowWhatsApp === false ? document.getElementById('openShareModalBtn').classList.add('hidden') : document.getElementById('openShareModalBtn').classList.remove('hidden');
         }
 
         function setupSidebar() {
@@ -1247,7 +1415,7 @@
                         <span class="text-xs font-semibold text-gray-600">Regras S/ Juros</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowCustomRules" ${allowCustomRules ? 'checked' : ''}>
                     </label>
                     <label class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
-                        <span class="text-xs font-semibold text-gray-600">WhatsApp</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowWhatsApp" ${allowWhatsApp ? 'checked' : ''}>
+                        <span class="text-xs font-semibold text-gray-600">Compartilhar orçamento</span><input type="checkbox" class="w-4 h-4 text-primary toggle-perm" data-user="${u.id}" data-perm="allowWhatsApp" ${allowWhatsApp ? 'checked' : ''}>
                     </label>
                 </div>
                 ` : ''}
@@ -1281,3 +1449,4 @@
     </script>
 </body>
 </html>
+
