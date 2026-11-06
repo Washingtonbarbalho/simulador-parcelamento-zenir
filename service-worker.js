@@ -1,7 +1,7 @@
 // Determinar dinamicamente o caminho base
 const BASE_URL = self.location.href.replace('service-worker.js', '');
 
-const CACHE_NAME = 'zenir-simulador-v2';
+const CACHE_NAME = 'zenir-simulador-v3';
 
 const urlsToCache = [
   '',

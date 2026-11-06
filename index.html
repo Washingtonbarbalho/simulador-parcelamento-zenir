@@ -699,7 +699,7 @@
         // ==========================================
         // ORÇAMENTO EM IMAGEM E COMPARTILHAMENTO NATIVO
         // ==========================================
-        function createQuotationCanvas(product, results) {
+        function createQuotationCanvas(product, results, entryValue = 0) {
             const canvas = document.createElement('canvas');
             canvas.width = 1080;
             const ctx = canvas.getContext('2d');
@@ -730,7 +730,9 @@
             }
             if (line) productLines.push(line);
 
-            const headerHeight = 150 + productLines.length * 64;
+            const hasEntry = Number.isFinite(entryValue) && entryValue > 0;
+            const productHeaderHeight = 150 + productLines.length * 64;
+            const headerHeight = productHeaderHeight + (hasEntry ? 90 : 0);
             const tableHeight = table => 124 + table.rows.length * 82;
             canvas.height = headerHeight + tables.reduce((sum, table) => sum + tableHeight(table), 0) + (tables.length - 1) * 36 + 56;
 
@@ -750,6 +752,12 @@
             ctx.fillRect(0, 12, canvas.width, 6);
             text('ZENIR MÓVEIS', 64, 66, { size: 26, weight: 700, color: '#2E3192' });
             productLines.forEach((name, index) => text(name, 64, 126 + index * 64, { size: 52, weight: 700, color: '#171A50', maxWidth: 952 }));
+
+            if (hasEntry) {
+                ctx.fillStyle = '#F1F3F8';
+                ctx.fillRect(48, productHeaderHeight - 32, 984, 76);
+                text(`Com entrada de ${formatCurrency(entryValue)}`, 80, productHeaderHeight + 6, { weight: 700, color: '#2E3192', maxWidth: 920 });
+            }
 
             let y = headerHeight;
             tables.forEach(table => {
@@ -840,7 +848,7 @@
                     shareBtn.textContent = 'Compartilhar';
                 };
                 try {
-                    const canvas = createQuotationCanvas(product, simulationResults.results);
+                    const canvas = createQuotationCanvas(product, simulationResults.results, simulationResults.inputs.valorEntrada);
                     canvas.toBlob(blob => {
                         if (currentRevision !== revision) return;
                         if (!blob) return imageError();
