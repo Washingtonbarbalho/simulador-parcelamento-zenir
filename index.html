@@ -93,7 +93,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="tel"], select, textarea {
             transition: all 0.2s ease; border-radius: 10px !important;
         }
         input:focus, select:focus, textarea:focus {
@@ -483,23 +483,28 @@
                     <div class="flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mx-auto mb-4">
                         <i class="fas fa-share-nodes text-3xl text-primary"></i>
                     </div>
-                    <h3 id="shareModalTitle" class="text-xl font-bold text-center text-gray-900 mb-2">Compartilhar Orçamento</h3>
-                    <p class="text-sm text-center text-gray-500 mb-6">Informe o produto para compartilhar a imagem das parcelas selecionadas.</p>
+                    <h3 id="shareModalTitle" class="text-xl font-bold text-center text-gray-900 mb-6">Compartilhar Orçamento</h3>
                     
                     <form id="shareQuotationForm" class="space-y-4">
                         <div>
                             <label for="shareProductName" class="block text-xs font-bold text-gray-500 mb-1">NOME DO PRODUTO</label>
                             <input type="text" id="shareProductName" required maxlength="180" autocomplete="off" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white text-gray-800" placeholder="Ex: Guarda-Roupa Casal" aria-describedby="shareStatus">
                         </div>
-                        <p id="shareStatus" role="status" aria-live="polite" class="text-sm text-gray-600 min-h-[1.5rem]"></p>
+                        <div>
+                            <label for="shareClientPhone" class="block text-xs font-bold text-gray-500 mb-1">WHATSAPP DO CLIENTE <span class="font-normal normal-case">(opcional)</span></label>
+                            <input type="tel" id="shareClientPhone" inputmode="tel" autocomplete="off" class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:bg-white text-gray-800" placeholder="(88) 99999-9999" aria-describedby="sharePhoneHint">
+                            <p id="sharePhoneHint" class="mt-1.5 text-sm text-gray-600">Deixe em branco para escolher o aplicativo.</p>
+                        </div>
+                        <p id="shareStatus" role="status" aria-live="polite" class="text-sm text-gray-700 empty:hidden"></p>
                         <div id="shareImageFallback" class="hidden space-y-3">
-                            <img id="quotationPreview" alt="Orçamento com as parcelas selecionadas" class="w-full rounded-xl border border-gray-200">
+                            <img id="quotationPreview" alt="Orçamento com as parcelas selecionadas" class="w-full max-h-48 object-contain rounded-xl border border-gray-200">
                             <a id="downloadQuotationLink" class="block text-center py-3 bg-blue-50 text-primary rounded-xl font-semibold" download>Baixar imagem</a>
                         </div>
                         
                         <div class="flex gap-3 pt-4">
                             <button type="button" id="cancelShareBtn" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200">Cancelar</button>
-                            <button type="submit" id="shareQuotationBtn" disabled class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-md hover:bg-[#252875] disabled:opacity-50 disabled:cursor-wait">Compartilhar</button>
+                            <button type="submit" id="shareQuotationBtn" disabled class="flex-1 py-3 bg-primary text-white rounded-xl font-semibold shadow-md hover:bg-[#252875] disabled:opacity-50">Compartilhar</button>
+                            <a id="openClientChat" target="_blank" rel="noopener noreferrer" class="hidden flex-1 py-3 text-center bg-primary text-white rounded-xl font-semibold shadow-md hover:bg-[#252875]">Abrir conversa</a>
                         </div>
                     </form>
                 </div>
@@ -656,8 +661,7 @@
             document.getElementById('shareButtonContainer').classList.add('hidden');
             
             document.getElementById('shareModal').classList.add('hidden');
-            document.getElementById('shareProductName').value = '';
-            document.getElementById('shareProductName').dispatchEvent(new Event('input'));
+            document.getElementById('shareQuotationForm').reset();
             simulationResults = { inputs: {}, results: {} };
             
             document.getElementById('isMostruario').checked = false;
@@ -803,75 +807,125 @@
             return canvas;
         }
 
+        function normalizeWhatsAppPhone(value) {
+            if (!value.trim()) return '';
+            const compact = value.trim().replace(/[\s().-]/g, '');
+            if (!/^\+?\d+$/.test(compact)) return null;
+
+            const international = compact.startsWith('+') || compact.startsWith('00');
+            let digits = compact.replace(/^(?:\+|00)/, '');
+            if (!international && /^[1-9]\d{9,10}$/.test(digits)) digits = '55' + digits;
+            if (digits.startsWith('55')) return /^55[1-9]\d{9,10}$/.test(digits) ? digits : null;
+            return international && /^[1-9]\d{7,14}$/.test(digits) ? digits : null;
+        }
+
+        function createQuotationFile(product, calculation) {
+            const canvas = createQuotationCanvas(product, calculation.results, calculation.inputs.valorEntrada);
+            // Codificar no próprio clique mantém a ativação necessária para compartilhar o arquivo no celular.
+            const png = canvas.toDataURL('image/png');
+            const prefix = 'data:image/png;base64,';
+            if (!png.startsWith(prefix) || png.length === prefix.length) throw new Error('PNG indisponível.');
+            const binary = atob(png.slice(prefix.length));
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            const slug = product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 70) || 'produto';
+            return new File([bytes], 'orcamento-zenir-' + slug + '.png', { type: 'image/png' });
+        }
+
         function setupQuotationSharing() {
             const openBtn = document.getElementById('openShareModalBtn'), modal = document.getElementById('shareModal');
             const form = document.getElementById('shareQuotationForm'), productInput = document.getElementById('shareProductName');
+            const phoneInput = document.getElementById('shareClientPhone'), phoneHint = document.getElementById('sharePhoneHint');
             const cancelBtn = document.getElementById('cancelShareBtn'), shareBtn = document.getElementById('shareQuotationBtn');
             const status = document.getElementById('shareStatus'), fallback = document.getElementById('shareImageFallback');
             const preview = document.getElementById('quotationPreview'), downloadLink = document.getElementById('downloadQuotationLink');
-            let preparedFile = null, previewUrl = null, revision = 0, sharing = false;
+            const chatLink = document.getElementById('openClientChat');
+            let preparedFile = null, previewUrl = null, busy = false;
 
-            const canShareFile = file => {
-                try { return typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] }); }
-                catch { return false; }
-            };
-            const clearPreview = () => {
+            function setBusy(value) {
+                busy = value;
+                productInput.disabled = phoneInput.disabled = cancelBtn.disabled = value;
+                shareBtn.disabled = value || !productInput.value.trim();
+                form.setAttribute('aria-busy', String(value));
+            }
+
+            function updateFields() {
+                preparedFile = null;
                 preview.removeAttribute('src');
                 downloadLink.removeAttribute('href');
+                chatLink.removeAttribute('href');
+                chatLink.classList.add('hidden');
                 fallback.classList.add('hidden');
                 if (previewUrl) URL.revokeObjectURL(previewUrl);
                 previewUrl = null;
-            };
-            const closeModal = () => {
-                if (sharing) return;
-                modal.classList.add('hidden');
-                revision++;
-                preparedFile = null;
-                clearPreview();
-                openBtn.focus();
-            };
-            const prepareImage = () => {
-                const currentRevision = ++revision;
-                preparedFile = null;
-                clearPreview();
-                shareBtn.disabled = true;
-                shareBtn.textContent = 'Compartilhar';
-                const product = productInput.value.trim().replace(/\s+/g, ' ');
+                productInput.setCustomValidity('');
+                phoneInput.setCustomValidity('');
+                const hasPhone = Boolean(phoneInput.value.trim());
+                phoneHint.textContent = hasPhone
+                    ? 'Na conversa, cole a imagem ou anexe o arquivo baixado.'
+                    : 'Deixe em branco para escolher o aplicativo.';
+                shareBtn.textContent = hasPhone ? 'Abrir WhatsApp' : 'Compartilhar';
+                shareBtn.classList.remove('hidden');
+                cancelBtn.textContent = 'Cancelar';
                 status.textContent = '';
-                if (!product) return;
-                status.textContent = 'Preparando imagem…';
-                shareBtn.textContent = 'Preparando…';
+                setBusy(false);
+            }
 
-                const imageError = () => {
-                    if (currentRevision !== revision) return;
-                    status.textContent = 'Não foi possível gerar a imagem. Tente abrir o compartilhamento novamente.';
-                    shareBtn.textContent = 'Compartilhar';
-                };
-                try {
-                    const canvas = createQuotationCanvas(product, simulationResults.results, simulationResults.inputs.valorEntrada);
-                    canvas.toBlob(blob => {
-                        if (currentRevision !== revision) return;
-                        if (!blob) return imageError();
-                        const filename = product.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 70) || 'produto';
-                        preparedFile = new File([blob], `orcamento-zenir-${filename}.png`, { type: 'image/png' });
-                        previewUrl = URL.createObjectURL(preparedFile);
-                        preview.src = previewUrl;
-                        downloadLink.href = previewUrl;
-                        downloadLink.download = preparedFile.name;
-                        const nativeShare = canShareFile(preparedFile);
-                        shareBtn.textContent = nativeShare ? 'Compartilhar' : 'Baixar imagem';
-                        status.textContent = nativeShare ? 'Imagem pronta para compartilhar.' : 'Este navegador não oferece compartilhamento de imagens. Baixe a imagem para enviá-la ao cliente.';
-                        fallback.classList.toggle('hidden', nativeShare);
-                        shareBtn.disabled = false;
-                    }, 'image/png');
-                } catch (error) { console.error(error); imageError(); }
-            };
+            function showImage(file) {
+                if (!previewUrl) previewUrl = URL.createObjectURL(file);
+                preview.src = previewUrl;
+                downloadLink.href = previewUrl;
+                downloadLink.download = file.name;
+                fallback.classList.remove('hidden');
+            }
 
-            productInput.addEventListener('input', prepareImage);
+            function closeModal() {
+                if (busy) return;
+                modal.classList.add('hidden');
+                phoneInput.value = '';
+                updateFields();
+                openBtn.focus();
+            }
+
+            function canShareFile(file) {
+                try { return typeof navigator.share === 'function' && !!navigator.canShare?.({ files: [file] }); }
+                catch { return false; }
+            }
+
+            async function openWhatsApp(phone, file) {
+                // O link do contato aceita texto. O PNG segue pela área de transferência ou por download.
+                let copied = false;
+                if (navigator.clipboard?.write && typeof ClipboardItem === 'function') {
+                    try {
+                        await navigator.clipboard.write([new ClipboardItem({ 'image/png': file })]);
+                        copied = true;
+                    } catch { /* O download continua disponível se a cópia for recusada. */ }
+                }
+                if (preparedFile !== file) return;
+                showImage(file);
+                chatLink.href = 'https://wa.me/' + phone;
+                chatLink.classList.remove('hidden');
+                shareBtn.classList.add('hidden');
+                cancelBtn.textContent = 'Fechar';
+                status.textContent = copied
+                    ? 'Imagem copiada. Cole na conversa do cliente e toque em enviar.'
+                    : 'Anexe o PNG da pasta de downloads na conversa do cliente. Você também pode baixar a imagem abaixo.';
+                if (!copied) downloadLink.click();
+                // O link permanece visível se o navegador exigir outro toque para abrir o WhatsApp.
+                chatLink.click();
+            }
+
+            form.addEventListener('input', updateFields);
+            form.addEventListener('reset', () => {
+                preparedFile = null;
+                queueMicrotask(updateFields);
+            });
             openBtn.addEventListener('click', () => {
                 if (!Object.values(simulationResults.results).some(rows => rows.length)) return showToast('Calcule as parcelas antes de compartilhar.', 'error');
+                phoneInput.value = '';
+                updateFields();
                 modal.classList.remove('hidden');
-                prepareImage();
                 productInput.focus();
             });
             cancelBtn.addEventListener('click', closeModal);
@@ -887,32 +941,54 @@
 
             form.addEventListener('submit', async event => {
                 event.preventDefault();
-                if (sharing || !preparedFile) return;
-                const file = preparedFile;
-                if (!canShareFile(file)) { downloadLink.click(); return; }
-                sharing = true;
-                shareBtn.disabled = true;
-                productInput.disabled = true;
-                cancelBtn.disabled = true;
-                status.textContent = 'Abrindo compartilhamento…';
+                if (busy || shareBtn.classList.contains('hidden')) return;
+                const product = productInput.value.trim().replace(/\s+/g, ' ');
+                if (!product) {
+                    productInput.setCustomValidity('Informe o nome do produto.');
+                    productInput.reportValidity();
+                    return;
+                }
+                const phone = normalizeWhatsAppPhone(phoneInput.value);
+                if (phone === null) {
+                    phoneInput.setCustomValidity('Informe o número com DDD. Para outro país, use + e o código do país.');
+                    phoneInput.reportValidity();
+                    return;
+                }
+
                 try {
-                    // O PNG fica pronto antes do clique para preservar a ativação exigida no celular.
-                    await navigator.share({ files: [file] });
-                    sharing = false;
-                    closeModal();
+                    if (!preparedFile) preparedFile = createQuotationFile(product, simulationResults);
+                } catch {
+                    status.textContent = 'Não foi possível gerar a imagem. Toque no botão para tentar novamente.';
+                    return;
+                }
+                const file = preparedFile;
+                setBusy(true);
+                try {
+                    if (phone) {
+                        await openWhatsApp(phone, file);
+                    } else if (canShareFile(file)) {
+                        await navigator.share({ files: [file] });
+                        if (preparedFile === file) {
+                            setBusy(false);
+                            closeModal();
+                        }
+                    } else {
+                        showImage(file);
+                        shareBtn.classList.add('hidden');
+                        cancelBtn.textContent = 'Fechar';
+                        status.textContent = 'Use o PNG da pasta de downloads para compartilhar.';
+                        downloadLink.click();
+                    }
                 } catch (error) {
+                    if (preparedFile !== file) return;
                     if (error.name === 'AbortError') {
                         status.textContent = 'Compartilhamento cancelado. Você pode tentar novamente.';
                     } else {
-                        console.error(error);
-                        fallback.classList.remove('hidden');
-                        status.textContent = 'Não foi possível abrir o compartilhamento. Tente novamente ou baixe a imagem abaixo.';
+                        showImage(file);
+                        status.textContent = 'Não foi possível abrir o compartilhamento. Tente novamente ou baixe a imagem.';
                     }
                 } finally {
-                    sharing = false;
-                    shareBtn.disabled = !preparedFile;
-                    productInput.disabled = false;
-                    cancelBtn.disabled = false;
+                    if (preparedFile === file) setBusy(false);
                 }
             });
         }
